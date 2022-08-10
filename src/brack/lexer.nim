@@ -9,7 +9,7 @@ proc lex* (path: string): seq[string] =
   var
     token: string = ""
     index = 0
-    squaredBracketNestCount = 0
+    squareBracketNestCount = 0
     curlyBracketNestCount = 0
     searchingCommandName = false
 
@@ -17,15 +17,15 @@ proc lex* (path: string): seq[string] =
     let targetChar = brackSrc[index]
 
     if targetChar == '[':
-      squaredBracketNestCount += 1
+      squareBracketNestCount += 1
       if token != "":
         result.add token.strip
         token = ""
       result.add $targetChar
       index += 1
       searchingCommandName = true
-    elif targetChar == ']' and squaredBracketNestCount > 0:
-      squaredBracketNestCount -= 1
+    elif targetChar == ']' and squareBracketNestCount > 0:
+      squareBracketNestCount -= 1
       if token != "":
         result.add token.strip
         token = ""
@@ -46,7 +46,7 @@ proc lex* (path: string): seq[string] =
         token = ""
       result.add $targetChar
       index += 1
-    elif targetChar == ',' and (squaredBracketNestCount > 0 or curlyBracketNestCount > 0):
+    elif targetChar == ',' and (squareBracketNestCount > 0 or curlyBracketNestCount > 0):
       result.add [token.strip, $targetChar]
       token = ""
       index += 1

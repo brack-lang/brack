@@ -53,14 +53,14 @@ macro registerLibrary* (commands: static[seq[(string, int)]]): untyped =
             if argument != "":
               argument &= " & "
             if argNode.kind == bnkSquareBracket:
-              argument.add bracketGenerator(argNode, "squared_", false)
+              argument.add bracketGenerator(argNode, "square_", false)
             elif argNode.kind == bnkText:
               argument.add argNode.val
           `argumentsIdent`.add argument
       `commandBranchAST`
     
-    proc squaredBracketGenerator (ast: BrackNode, root = true): string =
-      result = bracketGenerator(ast, "squared_", root)
+    proc squareBracketGenerator (ast: BrackNode, root = true): string =
+      result = bracketGenerator(ast, "square_", root)
     
     proc curlyBracketGenerator (ast: BrackNode, root = true): string =
       result = bracketGenerator(ast, "curly_", root)
@@ -70,7 +70,7 @@ macro registerLibrary* (commands: static[seq[(string, int)]]): untyped =
         if node.kind == bnkText:
           result &= node.val
         elif node.kind == bnkSquareBracket:
-          result &= squaredBracketGenerator(node)
+          result &= squareBracketGenerator(node)
 
     proc `generateIdent`* (ast: BrackNode): string =
       for node in ast.children:
@@ -79,9 +79,9 @@ macro registerLibrary* (commands: static[seq[(string, int)]]): untyped =
         elif node.kind == bnkParagraph:
           result &= "<p>" & paragraphGenerator(node) & "</p>"
 
-macro squared* (name: static[string], body: untyped): untyped =
+macro square* (name: static[string], body: untyped): untyped =
   result = copy(body)
-  let procNameIdent = newIdentNode("squared_" & resolveProcedureName(name))
+  let procNameIdent = newIdentNode("square_" & resolveProcedureName(name))
   if result[0][1].kind == nnkAccQuoted:
     result[0][1][0] = procNameIdent
   elif result[0][1].kind == nnkIdent:
@@ -119,8 +119,8 @@ macro exportBrackModule* (libname, body: untyped): untyped =
         name = $statement[4][0][1]
         kind = $statement[4][0][0]
         numberOfArguments = getNumberOfArguments(statement[3])
-      if kind == "squared":
-        exportList.add ("squared_" & resolveProcedureName(name), numberOfArguments)
+      if kind == "square":
+        exportList.add ("square_" & resolveProcedureName(name), numberOfArguments)
       elif kind == "curly":
         exportList.add ("curly_" & resolveProcedureName(name), numberOfArguments)
   result = body

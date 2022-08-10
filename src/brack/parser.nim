@@ -38,13 +38,13 @@ proc `$`* (brackNode: BrackNode): string =
       result &= childrenToString(child.children, 2)
   result = result[0..^2]
 
-proc parseLeftSquaredBracket (tokens: seq[string], currentIndex: int): tuple[children: seq[BrackNode], index: int] =
+proc parseLeftSquareBracket (tokens: seq[string], currentIndex: int): tuple[children: seq[BrackNode], index: int] =
   var currentIndex = currentIndex
   while currentIndex < tokens.len:
     if tokens[currentIndex] == "{":
-      raise newException(Defect, "squaredBracket中にcurlyBracketが存在するのは許されない")
+      raise newException(Defect, "squareBracket中にcurlyBracketが存在するのは許されない")
     elif tokens[currentIndex] == "[":
-      let (children, newIndex) = parseLeftSquaredBracket(tokens, currentIndex + 1)
+      let (children, newIndex) = parseLeftSquareBracket(tokens, currentIndex + 1)
       if result.children.len == 1:
         result.children.add BrackNode(
           kind: bnkArgument
@@ -72,7 +72,7 @@ proc parseLeftSquaredBracket (tokens: seq[string], currentIndex: int): tuple[chi
           kind: bnkArgument
         )
       if tokens[currentIndex] == "\n":
-        raise newException(Defect, "syntax error (squaredBracket中に改行は許されない)")
+        raise newException(Defect, "syntax error (squareBracket中に改行は許されない)")
       result.children[^1].children.add BrackNode(
         kind: bnkText,
         val: tokens[currentIndex]
@@ -85,7 +85,7 @@ proc parseLeftCurlyBracket (tokens: seq[string], currentIndex: int): tuple[child
     if tokens[currentIndex] == "{":
       raise newException(Defect, "syntax error (curlyBracketの入れ子は許されない)")
     elif tokens[currentIndex] == "[":
-      let (children, newIndex) = parseLeftSquaredBracket(tokens, currentIndex + 1)
+      let (children, newIndex) = parseLeftSquareBracket(tokens, currentIndex + 1)
       if result.children.len == 1:
         result.children.add BrackNode(
           kind: bnkArgument
@@ -125,7 +125,7 @@ proc parse* (tokens: seq[string]): BrackNode =
   while index < tokens.len:
     if tokens[index] == "[":
       var node = BrackNode(kind: bnkSquareBracket)
-      (node.children, index) = parseLeftSquaredBracket(tokens, index+1)
+      (node.children, index) = parseLeftSquareBracket(tokens, index+1)
       result.children[^1].children.add node
     elif tokens[index] == "{":
       var node = BrackNode(kind: bnkCurlyBracket)
