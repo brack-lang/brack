@@ -1,4 +1,5 @@
-import std/[macros, strformat]
+import std/[macros, strformat, tables]
+import std/strutils
 import parser
 
 func resolveProcedureName* (command_name: string): string =
@@ -77,7 +78,7 @@ macro registerLibrary* (commands: static[seq[(string, int)]]): untyped =
         if node.kind == bnkCurlyBracket:
           result &= curlyBracketGenerator(node)
         elif node.kind == bnkParagraph:
-          result &= "<p>" & paragraphGenerator(node) & "</p>"
+          result &= "<p>" & paragraphGenerator(node).replace("\n", "<br />") & "</p>"
 
 macro square* (name: static[string], body: untyped): untyped =
   result = copy(body)
