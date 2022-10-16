@@ -7,7 +7,7 @@ proc lex* (path: string): seq[string] =
   brackSrcFile.close()
 
   var
-    token: string = ""
+    token = ""
     index = 0
     squareBracketNestCount = 0
     curlyBracketNestCount = 0
@@ -64,11 +64,11 @@ proc lex* (path: string): seq[string] =
         token = ""
         index += 1
       searchingCommandName = false
-    elif targetChar == '\n':
-      if token != "":
+    elif index > 0 and brackSrc[index-1] == '\n' and targetChar == '\n':
+      if token != "" and token.strip != "":
         result.add token.strip
         token = ""
-      result.add $targetChar
+      result.add "\n"
       index += 1
     else:
       token.add targetChar

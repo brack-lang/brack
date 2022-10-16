@@ -1,3 +1,5 @@
+import std/strutils
+
 type
   BrackNodeKind* = enum
     bnkRoot
@@ -15,6 +17,13 @@ type
     else:
       children*: seq[BrackNode]
 
+proc empty (node: BrackNode): bool =
+  case node.kind
+  of bnkText, bnkIdent:
+    result = node.val == ""
+  else:
+    result = node.children.len == 0
+
 proc childrenToString (brackNode: seq[BrackNode], indentCount: int): string =
   var indent = ""
   for _ in 1 .. indentCount:
@@ -23,7 +32,7 @@ proc childrenToString (brackNode: seq[BrackNode], indentCount: int): string =
     result &= indent & $child.kind & "\n"
     case child.kind
     of bnkText, bnkIdent:
-      result &= indent & "  " & child.val & "\n"
+      result &= indent & "  " & child.val.replace("\n", " \\n ") & "\n"
     else:
       result &= childrenToString(child.children, indentCount+1)
 
@@ -121,21 +130,26 @@ proc parseLeftCurlyBracket (tokens: seq[string], currentIndex: int): tuple[child
 
 proc parse* (tokens: seq[string]): BrackNode =
   result = BrackNode(kind: bnkRoot)
-  var index = 0
+  var
+    index = 0
+    targetNode: BrackNode
   while index < tokens.len:
     if tokens[index] == "[":
       var node = BrackNode(kind: bnkSquareBracket)
       (node.children, index) = parseLeftSquareBracket(tokens, index+1)
-      result.children[^1].children.add node
+      targetNode.children.add node
     elif tokens[index] == "{":
       var node = BrackNode(kind: bnkCurlyBracket)
       (node.children, index) = parseLeftCurlyBracket(tokens, index+1)
       result.children.add node
     elif tokens[index] == "\n":
-      var node = BrackNode(kind: bnkParagraph)
-      result.children.add node
+      if not targetNode.empty:
+        result.children.add targetNode
+      targetNode = BrackNode(kind: bnkParagraph)
     else: 
       var node = BrackNode(kind: bnkText, val: tokens[index])
-      result.children[^1].children.add node
+      targetNode.children.add node
 
     index += 1
+  if not targetNode.empty:
+    result.children.add targetNode
