@@ -12,11 +12,19 @@ proc lex* (path: string): seq[string] =
     squareBracketNestCount = 0
     curlyBracketNestCount = 0
     searchingCommandName = false
+    isEscaping = false
 
   while index < brackSrc.len:
     let targetChar = brackSrc[index]
 
-    if targetChar == '[':
+    if isEscaping:
+      isEscaping = false
+      index += 1
+      token.add targetChar
+    elif targetChar == '\\':
+      isEscaping = true
+      index += 1
+    elif targetChar == '[':
       squareBracketNestCount += 1
       if token != "":
         result.add token.strip
