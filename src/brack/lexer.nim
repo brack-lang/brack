@@ -11,6 +11,7 @@ proc lex* (path: string): seq[string] =
     index = 0
     squareBracketNestCount = 0
     curlyBracketNestCount = 0
+    angleBracketNestCount = 0
     searchingCommandName = false
     isEscaping = false
 
@@ -23,6 +24,21 @@ proc lex* (path: string): seq[string] =
       token.add targetChar
     elif targetChar == '\\':
       isEscaping = true
+      index += 1
+    elif targetChar == '<':
+      angleBracketNestCount += 1
+      if token != "":
+        result.add token.strip
+        token = ""
+      result.add $targetChar
+      index += 1
+      searchingCommandName = true
+    elif targetChar == '>' and angleBracketNestCount > 0:
+      angleBracketNestCount -= 1
+      if token != "":
+        result.add token.strip
+        token = ""
+      result.add $targetChar
       index += 1
     elif targetChar == '[':
       squareBracketNestCount += 1
@@ -54,7 +70,7 @@ proc lex* (path: string): seq[string] =
         token = ""
       result.add $targetChar
       index += 1
-    elif targetChar == ',' and (squareBracketNestCount > 0 or curlyBracketNestCount > 0):
+    elif targetChar == ',' and (squareBracketNestCount > 0 or curlyBracketNestCount > 0 or angleBracketNestCount > 0):
       result.add [token.strip, $targetChar]
       token = ""
       index += 1
