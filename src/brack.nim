@@ -1,6 +1,7 @@
 import brack/lexer
 import brack/parser
-import brack/generator
-import brack/modules
+import brack/initialize
 
-export lexer, parser, generator, modules
+initBrack()
+
+export lexer, parser
