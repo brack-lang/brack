@@ -1,5 +1,6 @@
 import std/macros
 import std/macrocache
+import std/strutils
 import api
 import parser
 
@@ -13,7 +14,7 @@ func getCommandBranch* (): NimNode =
   result = nnkIfStmt.newTree()
   for command in mcCommandSyms:
     var callAST = nnkCall.newTree(
-      command[4][0][1]
+      command[0][1]
     )
     for index in 0 ..< getNumberOfArguments(command[3]):
       callAST.add nnkBracketExpr.newTree(
@@ -24,7 +25,7 @@ func getCommandBranch* (): NimNode =
       nnkInfix.newTree(
         newIdentNode("=="),
         newIdentNode("procedureName"),
-        newLit(command[0])
+        newLit($command[0][1])
       ),
       nnkStmtList.newTree(
         nnkInfix.newTree(
@@ -37,11 +38,12 @@ func getCommandBranch* (): NimNode =
 
 macro initBrack* (): untyped =
   for macroSym in mcMacroSyms:
-    echo macroSym.astGenRepr
+    # echo macroSym.astGenRepr
+    discard
 
   let
     expander = newIdentNode("expander")
-    generator = newIdentNode("generator")
+    generate = newIdentNode("generate")
     procedureName = newIdentNode("procedureName")
     arguments = newIdentNode("arguments")
     commandBranchAST = getCommandBranch()
@@ -82,10 +84,9 @@ macro initBrack* (): untyped =
         elif node.kind == bnkSquareBracket:
           result &= squareBracketGenerator(node)
     
-    proc `generator`* (ast: BrackNode): BrackNode =
+    proc `generate`* (ast: BrackNode): string =
       for node in ast.children:
         if node.kind == bnkCurlyBracket:
           result &= curlyBracketGenerator(node)
         elif node.kind == bnkParagraph:
           result &= "<p>" & paragraphGenerator(node).replace("\n", "<br />") & "</p>"
-    

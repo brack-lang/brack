@@ -9,16 +9,19 @@ func resolveProcedureName* (command_name: string): string =
   for ch in command_name:
     result.add $int(ch)
 
-macro brackModule* (stmtlist: untyped): untyped =
+macro brackModule* (body: untyped): untyped =
+  var stmtlist = copy(body)
   for statement in stmtlist:
     if statement.kind == nnkProcDef:
       let kind = $statement[4][0][0]
+      var statement = statement
+      statement[0][1] = newIdentNode(kind & "_" & resolveProcedureName($statement[4][0][1]))
       case kind
       of "square", "curly":
         mcCommandSyms.add statement
       of "angle":
         mcMacroSyms.add statement
-  result = stmtlist
+  result = body
 
 macro square* (name: static[string], body: untyped): untyped =
   result = copy(body)
