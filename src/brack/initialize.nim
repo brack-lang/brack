@@ -1,6 +1,7 @@
 import std/macros
 import std/macrocache
 import std/strutils
+import std/oids
 import api
 import parser
 
@@ -10,7 +11,7 @@ func getNumberOfArguments* (formalParams: NimNode): int {.compileTime.} =
     if param.kind != nnkIdentDefs: continue
     result += param.len - 3
 
-func getCommandBranch* (): NimNode =
+func getCommandBranch*: NimNode =
   result = nnkIfStmt.newTree()
   for command in mcCommandSyms:
     var callAST = nnkCall.newTree(
@@ -36,23 +37,87 @@ func getCommandBranch* (): NimNode =
       )
     )
 
-macro initBrack* (): untyped =
-  for macroSym in mcMacroSyms:
-    # echo macroSym.astGenRepr
-    discard
+func getMacroBranch*: NimNode =
+  result = nnkIfStmt.newTree()
+  if mcMacroSyms.len == 0:
+    return newStmtList()
+  for m in mcMacroSyms:
+    var callAST = nnkCall.newTree(
+      m[0][1]
+    )
+    callAST.add newIdentNode("ast")
+    callAST.add newIdentNode("id")
+    result.add nnkElifBranch.newTree(
+      nnkInfix.newTree(
+        newIdentNode("=="),
+        newIdentNode("procedureName"),
+        newLit($m[0][1])
+      ),
+      nnkStmtList.newTree(
+        nnkInfix.newTree(
+          newIdentNode("="),
+          newIdentNode("result"),
+          callAST
+        )
+      )
+    )
 
+macro initBrack* (): untyped =
   let
     expander = newIdentNode("expander")
     generate = newIdentNode("generate")
     procedureName = newIdentNode("procedureName")
     arguments = newIdentNode("arguments")
+    ast = newIdentNode("ast")
+    id = newIdentNode("id")
     commandBranchAST = getCommandBranch()
+    macroBranchAST = getMacroBranch()
   result = quote do:
-    proc `expander`* (ast: BrackNode): BrackNode =
-      # マクロが0になるまで展開を繰り返す
-      discard
+    proc otherwiseMacroExpander (ast, node: BrackNode, id: Oid): BrackNode
+    
+    proc angleBracketMacroExpander (ast, node: BrackNode, id: Oid): BrackNode =
+      var
+        `procedureName` = ""
+        `ast` = ast
+        `id` = id
+      for childNode in node.children:
+        if childNode.kind == bnkIdent:
+          `procedureName` = "angle_" & resolveProcedureName(childNode.val)
+        elif childNode.kind == bnkArgument:
+          var argument = ""
+          for argNode in childNode.children:
+            case argNode.kind
+            of bnkAngleBracket:
+              var argNode = argNode
+              argNode = angleBracketMacroExpander(ast, argNode, argNode.id)
+            of bnkSquareBracket, bnkCurlyBracket:
+              var argNode = argNode
+              argNode = otherwiseMacroExpander(ast, argNode, argNode.id)
+            else: discard
+      `macroBranchAST`
+    
+    proc otherwiseMacroExpander (ast, node: BrackNode, id: Oid): BrackNode =
+      for childNode in node.children:
+        if childNode.kind == bnkArgument:
+          for argNode in childNode.children:
+            case argNode.kind
+            of bnkAngleBracket:
+              var argNode = argNode
+              argNode = angleBracketMacroExpander(ast, argNode, argNode.id)
+            of bnkSquareBracket, bnkCurlyBracket:
+              var argNode = argNode
+              argNode = otherwiseMacroExpander(ast, argNode, argNode.id) 
+            else: discard
 
-    proc commandGenerator (ast: BrackNode, prefix: string, root = true): string =
+    proc `expander`* (node: BrackNode): BrackNode =
+      # マクロが0になるまで展開を繰り返す
+      for childNode in node.children:
+        if childNode.kind == bnkAngleBracket:
+          result = angleBracketMacroExpander(node, childNode, childNode.id)
+        else:
+          result = otherwiseMacroExpander(node, childNode, childNode.id)
+
+    proc commandGenerator (ast: BrackNode, prefix: string): string =
       var
         `procedureName` = ""
         `arguments`: seq[string] = @[]
@@ -65,28 +130,28 @@ macro initBrack* (): untyped =
             if argument != "":
               argument &= " & "
             if argNode.kind == bnkSquareBracket:
-              argument.add commandGenerator(argNode, "square_", false)
+              argument.add commandGenerator(argNode, "square_")
             elif argNode.kind == bnkText:
               argument.add argNode.val
           `arguments`.add argument
       `commandBranchAST`
     
-    proc squareBracketGenerator (ast: BrackNode, root = true): string =
-      result = commandGenerator(ast, "square_", root)
+    proc squareBracketCommandGenerator (ast: BrackNode): string =
+      result = commandGenerator(ast, "square_")
     
-    proc curlyBracketGenerator (ast: BrackNode, root = true): string =
-      result = commandGenerator(ast, "curly_", root)
+    proc curlyBracketCommandGenerator (ast: BrackNode): string =
+      result = commandGenerator(ast, "curly_")
 
-    proc paragraphGenerator (ast: BrackNode): string =
+    proc paragraphCommandGenerator (ast: BrackNode): string =
       for node in ast.children:
         if node.kind == bnkText:
           result &= node.val
         elif node.kind == bnkSquareBracket:
-          result &= squareBracketGenerator(node)
+          result &= squareBracketCommandGenerator(node)
     
     proc `generate`* (ast: BrackNode): string =
       for node in ast.children:
         if node.kind == bnkCurlyBracket:
-          result &= curlyBracketGenerator(node)
+          result &= curlyBracketCommandGenerator(node)
         elif node.kind == bnkParagraph:
-          result &= "<p>" & paragraphGenerator(node).replace("\n", "<br />") & "</p>"
+          result &= "<p>" & paragraphCommandGenerator(node).replace("\n", "<br />") & "</p>"

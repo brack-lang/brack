@@ -1,4 +1,5 @@
 import std/strutils
+import std/oids
 
 type
   BrackNodeKind* = enum
@@ -12,6 +13,7 @@ type
     bnkText
   
   BrackNode* = object
+    id*: Oid
     case kind*: BrackNodeKind
     of bnkText, bnkIdent:
       val*: string
@@ -58,9 +60,11 @@ proc parseLeftAngleBracket (tokens: seq[string], currentIndex: int): tuple[child
       let (children, newIndex) = parseLeftAngleBracket(tokens, currentIndex + 1)
       if result.children.len == 1:
         result.children.add BrackNode(
+          id: genOid(),
           kind: bnkArgument
         )
       result.children[^1].children.add BrackNode(
+        id: genOid(),
         kind: bnkAngleBracket,
         children: children
       )
@@ -69,9 +73,11 @@ proc parseLeftAngleBracket (tokens: seq[string], currentIndex: int): tuple[child
       let (children, newIndex) = parseLeftCurlyBracket(tokens, currentIndex + 1)
       if result.children.len == 1:
         result.children.add BrackNode(
+          id: genOid(),
           kind: bnkArgument
         )
       result.children[^1].children.add BrackNode(
+        id: genOid(),
         kind: bnkCurlyBracket,
         children: children
       )
@@ -80,9 +86,11 @@ proc parseLeftAngleBracket (tokens: seq[string], currentIndex: int): tuple[child
       let (children, newIndex) = parseLeftSquareBracket(tokens, currentIndex + 1)
       if result.children.len == 1:
         result.children.add BrackNode(
+          id: genOid(),
           kind: bnkArgument
         )
       result.children[^1].children.add BrackNode(
+        id: genOid(),
         kind: bnkSquareBracket,
         children: children
       )
@@ -92,20 +100,24 @@ proc parseLeftAngleBracket (tokens: seq[string], currentIndex: int): tuple[child
       return
     elif tokens[currentIndex] == ",":
       result.children.add BrackNode(
+        id: genOid(),
         kind: bnkArgument
       )
     elif result.children.len == 0:
       result.children.add BrackNode(
+        id: genOid(),
         kind: bnkIdent,
         val: tokens[currentIndex]
       )
     else:
       if result.children.len == 1 and tokens[currentIndex] != "\n":
         result.children.add BrackNode(
+          id: genOid(),
           kind: bnkArgument
         )
       if tokens[currentIndex] != "\n" and tokens[currentIndex] != "":
         result.children[^1].children.add BrackNode(
+          id: genOid(),
           kind: bnkText,
           val: tokens[currentIndex]
         )
@@ -120,9 +132,11 @@ proc parseLeftSquareBracket (tokens: seq[string], currentIndex: int): tuple[chil
       let (children, newIndex) = parseLeftSquareBracket(tokens, currentIndex + 1)
       if result.children.len == 1:
         result.children.add BrackNode(
+          id: genOid(),
           kind: bnkArgument
         )
       result.children[^1].children.add BrackNode(
+        id: genOid(),
         kind: bnkSquareBracket,
         children: children
       )
@@ -132,21 +146,25 @@ proc parseLeftSquareBracket (tokens: seq[string], currentIndex: int): tuple[chil
       return
     elif tokens[currentIndex] == ",":
       result.children.add BrackNode(
+        id: genOid(),
         kind: bnkArgument
       )
     elif result.children.len == 0:
       result.children.add BrackNode(
+        id: genOid(),
         kind: bnkIdent,
         val: tokens[currentIndex]
       )
     else:
       if result.children.len == 1:
         result.children.add BrackNode(
+          id: genOid(),
           kind: bnkArgument
         )
       if tokens[currentIndex] == "\n":
         raise newException(Defect, "syntax error (squareBracket中に改行は許されない)")
       result.children[^1].children.add BrackNode(
+        id: genOid(),
         kind: bnkText,
         val: tokens[currentIndex]
       )
@@ -161,9 +179,11 @@ proc parseLeftCurlyBracket (tokens: seq[string], currentIndex: int): tuple[child
       let (children, newIndex) = parseLeftSquareBracket(tokens, currentIndex + 1)
       if result.children.len == 1:
         result.children.add BrackNode(
+          id: genOid(),
           kind: bnkArgument
         )
       result.children[^1].children.add BrackNode(
+        id: genOid(),
         kind: bnkSquareBracket,
         children: children
       )
@@ -173,49 +193,53 @@ proc parseLeftCurlyBracket (tokens: seq[string], currentIndex: int): tuple[child
       return
     elif tokens[currentIndex] == ",":
       result.children.add BrackNode(
+        id: genOid(),
         kind: bnkArgument
       )
     elif result.children.len == 0:
       result.children.add BrackNode(
+        id: genOid(),
         kind: bnkIdent,
         val: tokens[currentIndex]
       )
     else:
       if result.children.len == 1 and tokens[currentIndex] != "\n":
         result.children.add BrackNode(
+          id: genOid(),
           kind: bnkArgument
         )
       if tokens[currentIndex] != "\n" and tokens[currentIndex] != "":
         result.children[^1].children.add BrackNode(
+          id: genOid(),
           kind: bnkText,
           val: tokens[currentIndex]
         )
     currentIndex += 1
 
 proc parse* (tokens: seq[string]): BrackNode =
-  result = BrackNode(kind: bnkRoot)
+  result = BrackNode(id: genOid(), kind: bnkRoot)
   var
     index = 0
     targetNode: BrackNode
   while index < tokens.len:
     if tokens[index] == "<":
-      var node = BrackNode(kind: bnkAngleBracket)
+      var node = BrackNode(id: genOid(), kind: bnkAngleBracket)
       (node.children, index) = parseLeftAngleBracket(tokens, index+1)
       result.children.add node
     elif tokens[index] == "[":
-      var node = BrackNode(kind: bnkSquareBracket)
+      var node = BrackNode(id: genOid(), kind: bnkSquareBracket)
       (node.children, index) = parseLeftSquareBracket(tokens, index+1)
       targetNode.children.add node
     elif tokens[index] == "{":
-      var node = BrackNode(kind: bnkCurlyBracket)
+      var node = BrackNode(id: genOid(), kind: bnkCurlyBracket)
       (node.children, index) = parseLeftCurlyBracket(tokens, index+1)
       result.children.add node
     elif tokens[index] == "\n":
       if not targetNode.empty:
         result.children.add targetNode
-      targetNode = BrackNode(kind: bnkParagraph)
+      targetNode = BrackNode(id: genOid(), kind: bnkParagraph)
     else: 
-      var node = BrackNode(kind: bnkText, val: tokens[index])
+      var node = BrackNode(id: genOid(), kind: bnkText, val: tokens[index])
       targetNode.children.add node
 
     index += 1
