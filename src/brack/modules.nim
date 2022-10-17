@@ -6,11 +6,9 @@ const
   mcCommandSyms = CacheSeq"CommandSyms"
   mcMacroSyms = CacheSeq"MacroSyms"
 
-func getNumberOfArguments* (formalParams: NimNode): int {.compileTime.} =
-  result = formalParams.len - 1
-  for param in formalParams:
-    if param.kind != nnkIdentDefs: continue
-    result += param.len - 3
+func resolveProcedureName* (command_name: string): string =
+  for ch in command_name:
+    result.add $int(ch)
 
 macro brackModule* (body: untyped): untyped =
   if body.kind == nnkProcDef:
