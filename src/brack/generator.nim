@@ -98,9 +98,17 @@ macro square* (name: static[string], body: untyped): untyped =
   )
   result = newStmtList(result, privateProc)
 
-macro `curly`* (name: static[string], body: untyped): untyped =
+macro curly* (name: static[string], body: untyped): untyped =
   result = copy(body)
   let procNameIdent = newIdentNode("curly_" & resolveProcedureName(name))
+  if result[0][1].kind == nnkAccQuoted:
+    result[0][1][0] = procNameIdent
+  elif result[0][1].kind == nnkIdent:
+    result[0][1] = procNameIdent
+
+macro angle* (name: static[string], body: untyped): untyped =
+  result = copy(body)
+  let procNameIdent = newIdentNode("angle_" & resolveProcedureName(name))
   if result[0][1].kind == nnkAccQuoted:
     result[0][1][0] = procNameIdent
   elif result[0][1].kind == nnkIdent:
@@ -124,6 +132,8 @@ macro exportBrackModule* (libname, body: untyped): untyped =
         exportList.add ("square_" & resolveProcedureName(name), numberOfArguments)
       elif kind == "curly":
         exportList.add ("curly_" & resolveProcedureName(name), numberOfArguments)
+      elif kind == "angle":
+        exportList.add ("angle_" & resolveProcedureName(name), numberOfArguments)
   result = body
   var bracketAST = nnkBracket.newTree()
   for exportProc in exportList:
