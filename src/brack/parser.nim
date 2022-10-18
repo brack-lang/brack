@@ -3,6 +3,7 @@ import std/oids
 
 type
   BrackNodeKind* = enum
+    bnkInvalid
     bnkRoot
     bnkParagraph
     bnkSquareBracket
@@ -35,7 +36,7 @@ proc childrenToString (brackNode: seq[BrackNode], indentCount: int): string =
   for _ in 1 .. indentCount:
     indent &= "  "
   for child in brackNode:
-    result &= indent & $child.kind & "\n"
+    result &= indent & $child.kind & " (" & $child.id & ")\n"
     case child.kind
     of bnkText, bnkIdent:
       result &= indent & "  " & child.val.replace("\n", " \\n ") & "\n"
@@ -44,13 +45,11 @@ proc childrenToString (brackNode: seq[BrackNode], indentCount: int): string =
 
 proc `$`* (brackNode: BrackNode): string =
   result = $brackNode.kind & "\n"
-  for child in brackNode.children:
-    result &= "  " & $child.kind & "\n"
-    case child.kind
-    of bnkText, bnkIdent:
-      result &= "    " & child.val & "\n"
-    else:
-      result &= childrenToString(child.children, 2)
+  case brackNode.kind
+  of bnkText, bnkIdent:
+    result &= "    " & brackNode.val & "\n"
+  else:
+    result &= childrenToString(brackNode.children, 1)
   result = result[0..^2]
 
 proc parseLeftAngleBracket (tokens: seq[string], currentIndex: int): tuple[children: seq[BrackNode], index: int] =
@@ -220,12 +219,12 @@ proc parse* (tokens: seq[string]): BrackNode =
   result = BrackNode(id: genOid(), kind: bnkRoot)
   var
     index = 0
-    targetNode: BrackNode
+    targetNode = BrackNode(id: genOid(), kind: bnkParagraph)
   while index < tokens.len:
     if tokens[index] == "<":
       var node = BrackNode(id: genOid(), kind: bnkAngleBracket)
       (node.children, index) = parseLeftAngleBracket(tokens, index+1)
-      result.children.add node
+      targetNode.children.add node
     elif tokens[index] == "[":
       var node = BrackNode(id: genOid(), kind: bnkSquareBracket)
       (node.children, index) = parseLeftSquareBracket(tokens, index+1)

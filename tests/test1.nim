@@ -8,5 +8,8 @@
 import unittest
 
 import brack
-test "can add":
-  check add(5, 5) == 10
+
+initBrack()
+
+test "test":
+  echo lex("tests/index.[]").parse().expander()

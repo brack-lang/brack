@@ -76,6 +76,7 @@ macro initBrack* (): untyped =
     proc otherwiseMacroExpander (ast, node: BrackNode, id: Oid): BrackNode
     
     proc angleBracketMacroExpander (ast, node: BrackNode, id: Oid): BrackNode =
+      # TODO: ここでastがそのまま使われていて更新結果が反映されていない
       var
         `procedureName` = ""
         `ast` = ast
@@ -84,7 +85,6 @@ macro initBrack* (): untyped =
         if childNode.kind == bnkIdent:
           `procedureName` = "angle_" & resolveProcedureName(childNode.val)
         elif childNode.kind == bnkArgument:
-          var argument = ""
           for argNode in childNode.children:
             case argNode.kind
             of bnkAngleBracket:
@@ -97,8 +97,12 @@ macro initBrack* (): untyped =
       `macroBranchAST`
     
     proc otherwiseMacroExpander (ast, node: BrackNode, id: Oid): BrackNode =
+      # TODO: ここでastがそのまま使われていて更新結果が反映されていない
       for childNode in node.children:
-        if childNode.kind == bnkArgument:
+        if childNode.kind == bnkAngleBracket:
+          var childNode = childNode
+          childNode = angleBracketMacroExpander(ast, childNode, childNode.id)
+        elif childNode.kind == bnkArgument:
           for argNode in childNode.children:
             case argNode.kind
             of bnkAngleBracket:
@@ -108,14 +112,16 @@ macro initBrack* (): untyped =
               var argNode = argNode
               argNode = otherwiseMacroExpander(ast, argNode, argNode.id) 
             else: discard
+      result = ast
 
     proc `expander`* (node: BrackNode): BrackNode =
       # マクロが0になるまで展開を繰り返す
+      result = node
       for childNode in node.children:
         if childNode.kind == bnkAngleBracket:
-          result = angleBracketMacroExpander(node, childNode, childNode.id)
+          result = angleBracketMacroExpander(result, childNode, childNode.id)
         else:
-          result = otherwiseMacroExpander(node, childNode, childNode.id)
+          result = otherwiseMacroExpander(result, childNode, childNode.id)
 
     proc commandGenerator (ast: BrackNode, prefix: string): string =
       var
