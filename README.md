@@ -2,7 +2,6 @@
 
 ## 概要
 Brackはカッコ（Brackets）を基本単位に持つ軽量マークアップ言語です。
-Markdown、Scrapbox記法、Re:Viewなどから影響を受けています。
 
 Markdownは非常に有名でさまざまなユースケースで利用されます。
 たとえば静的サイトジェネレータによって生成される個人ブログの文書はMarkdownで記述されることが多いでしょう。
@@ -20,9 +19,6 @@ $ nimble install https://github.com/momeemt/brack
 ```
 
 ## 文法
-Brackは登録したライブラリに基づいてカッコを変換する機能を持ちますが、具体的な変換内容は一切実装されていません。
-しかし説明が難しいため[std](https://github.com/momeemt/brackStd)ライブラリが提供する、イタリック(`/`)コマンド、ボールド(`*`)コマンド、見出し(`*`)コマンドを例に説明します。
-
 ### Paragraph（段落）
 プレーンテキストはParagraphとして扱われます。改行（`\n`）は素直に改行として変換されるため注意が必要です。
 
@@ -80,6 +76,25 @@ SquareBracketは、SquareBracketやCurlyBracket内に入れ子構造を取るこ
 ### 見出し内で*入れ子*にしてOK
 ```
 
+### AngleBracket（マクロ）
+AngleBracket（`<>`）はマクロです。
+SquareBracket、CurlyBracketとは異なり、文書全体の抽象構文木（AST）とマクロのASTのIDを受け取り、文書全体のASTを返します。
+
+コマンドは文字列を単に変換しますが、マクロは文書全体の抽象構文木を参照できるため文書の別の位置に文字を挿入したり既にある文書を変更できます。
+たとえば、脚注を表現するために有効です。
+
+```brack
+こんにちは<^ この挨拶があなたに向けられているかどうかはわかりません>。
+```
+
+対応するMarkdown
+
+```md
+こんにちは[^1]。
+
+[^1]: この挨拶があなたに向けられているかどうかはわかりません
+```
+
 ## コマンド
 先述の通り、ボールド、イタリック、見出しなどのコマンドはBrack本体には実装されていません。
 標準ライブラリである`std`内で、これらのコマンドはNimプログラムによって実装されています。
@@ -116,14 +131,13 @@ proc anchorLink* (text, url: string): string {.square: "@".} =
 ```
 
 ### コマンドのエクスポート
-作成したコマンドは提供されている`exportBrackModule`マクロを使ってエクスポートします。
-マクロには、ライブラリ名を与えます（ここではMyLibrary）。
+作成したコマンドは提供されている`brackModule`マクロを使ってエクスポートします。
 
 ```nim
 from htmlgen import nil
 import brack
 
-exportBrackModule MyLibrary:
+brackModule:
   proc red* (text: string): string {.square: "!!!".} =
     const style = """
       color: red;
@@ -131,11 +145,9 @@ exportBrackModule MyLibrary:
     result = htmlgen.span(text, style=style)
 ```
 
-### ライブラリの登録
-自分や他の開発者によって作成されたライブラリは登録することによって利用できるようになります。
-ライブラリは（エクスポートで設定した）ライブラリ名を持っており、登録したいライブラリを結合して`registerLibrary`に渡すことで登録が完了します。
+### ライブラリの読み込み
 
-`lex`、`parse`、`generate`という3つのプロシージャを順に組み合わせてBrackをHTMLに変換できます。
+`lex`、`parse`、`expand`、`generate`という4つのプロシージャを順に組み合わせてBrackをHTMLに変換できます。
 
 ```nim
 import brack
@@ -147,7 +159,7 @@ registerLibrary(Library)
 
 var file = open("dist/hello_world.html", FileMode.fmWrite)
 file.write(
-  lex("hello_world.[]").parse().generate()
+  lex("hello_world.[]").parse().expand().generate()
 )
 outputFile.close()
 ```
