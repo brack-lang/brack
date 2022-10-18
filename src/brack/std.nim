@@ -52,6 +52,9 @@ brackModule:
       border: solid 1px #d6dde4;
     """
     result = htmlgen.code(text, style=style)
+  
+  proc id* (text, id: string): string {.square: "&".} =
+    result = htmlgen.span(text, id=id)
 
   proc footnoteSup* (text: string): string {.square: "footnoteSup".} =
     result = htmlgen.sup(text)
@@ -66,18 +69,18 @@ brackModule:
       text = ast.find(id).arguments[0].val
       n = ast.count(bnkSquareBracket, "footnoteSup")
       sup = bnkSquareBracket.newTree(
-        newIdentNode("@"),
+        newIdentNode("footnoteSup"),
         bnkArgument.newTree(
           bnkSquareBracket.newTree(
-            newIdentNode("footnoteSup"),
+            newIdentNode("@"),
             bnkArgument.newTree(
               newTextNode(&"[{$n}]")
+            ),
+            bnkArgument.newTree(
+              newTextNode(&"#{$n}")
             )
           )
         ),
-        bnkArgument.newTree(
-          newTextNode(&"#{$n}")
-        )
       )
   
     result = ast.insert(id, sup).delete(id)
@@ -86,7 +89,7 @@ brackModule:
         id: "footnote",
         kind: bnkParagraph,
         children: @[
-          newTextNode("脚注\n"),
+          newTextNode("脚注"),
           bnkSquareBracket.newTree(
             newIdentNode("footnoteFooter"),
             bnkArgument.newTree(
