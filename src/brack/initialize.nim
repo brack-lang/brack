@@ -1,7 +1,6 @@
 import std/macros
 import std/macrocache
 import std/strutils
-import std/oids
 import api
 import parser
 
@@ -45,7 +44,7 @@ func getMacroBranch*: NimNode =
     var callAST = nnkCall.newTree(
       m[0][1]
     )
-    callAST.add newIdentNode("ast")
+    callAST.add newIdentNode("result")
     callAST.add newIdentNode("id")
     result.add nnkElifBranch.newTree(
       nnkInfix.newTree(
@@ -64,22 +63,21 @@ func getMacroBranch*: NimNode =
 
 macro initBrack* (): untyped =
   let
-    expander = newIdentNode("expander")
+    expand = newIdentNode("expand")
     generate = newIdentNode("generate")
     procedureName = newIdentNode("procedureName")
     arguments = newIdentNode("arguments")
-    ast = newIdentNode("ast")
     id = newIdentNode("id")
     commandBranchAST = getCommandBranch()
     macroBranchAST = getMacroBranch()
   result = quote do:
-    proc otherwiseMacroExpander (ast, node: BrackNode, id: Oid): BrackNode
+    proc otherwiseMacroExpander (ast, node: BrackNode, id: string): BrackNode
     
-    proc angleBracketMacroExpander (ast, node: BrackNode, id: Oid): BrackNode =
+    proc angleBracketMacroExpander (ast, node: BrackNode, id: string): BrackNode =
       # TODO: ここでastがそのまま使われていて更新結果が反映されていない
+      result = ast
       var
         `procedureName` = ""
-        `ast` = ast
         `id` = id
       for childNode in node.children:
         if childNode.kind == bnkIdent:
@@ -88,33 +86,30 @@ macro initBrack* (): untyped =
           for argNode in childNode.children:
             case argNode.kind
             of bnkAngleBracket:
-              var argNode = argNode
-              argNode = angleBracketMacroExpander(ast, argNode, argNode.id)
+              result = angleBracketMacroExpander(result, argNode, argNode.id)
             of bnkSquareBracket, bnkCurlyBracket:
-              var argNode = argNode
-              argNode = otherwiseMacroExpander(ast, argNode, argNode.id)
+              result = otherwiseMacroExpander(result, argNode, argNode.id)
             else: discard
       `macroBranchAST`
     
-    proc otherwiseMacroExpander (ast, node: BrackNode, id: Oid): BrackNode =
+    proc otherwiseMacroExpander (ast, node: BrackNode, id: string): BrackNode =
       # TODO: ここでastがそのまま使われていて更新結果が反映されていない
+      # `node`は探索中のノード, otherwise... angle... は常に全体のASTを返す
+      # だから実は子要素への代入は必要ない
+      result = ast
       for childNode in node.children:
         if childNode.kind == bnkAngleBracket:
-          var childNode = childNode
-          childNode = angleBracketMacroExpander(ast, childNode, childNode.id)
+          result = angleBracketMacroExpander(result, childNode, childNode.id)
         elif childNode.kind == bnkArgument:
           for argNode in childNode.children:
             case argNode.kind
             of bnkAngleBracket:
-              var argNode = argNode
-              argNode = angleBracketMacroExpander(ast, argNode, argNode.id)
+              result = angleBracketMacroExpander(result, argNode, argNode.id)
             of bnkSquareBracket, bnkCurlyBracket:
-              var argNode = argNode
-              argNode = otherwiseMacroExpander(ast, argNode, argNode.id) 
+              result = otherwiseMacroExpander(result, argNode, argNode.id)
             else: discard
-      result = ast
 
-    proc `expander`* (node: BrackNode): BrackNode =
+    proc `expand`* (node: BrackNode): BrackNode =
       # マクロが0になるまで展開を繰り返す
       result = node
       for childNode in node.children:

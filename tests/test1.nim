@@ -12,4 +12,6 @@ import brack
 initBrack()
 
 test "test":
-  echo lex("tests/index.[]").parse().expander()
+  var f = open("tests/res.html", fmWrite)
+  f.write(lex("tests/index.[]").parse().expand().generate())
+  f.close()

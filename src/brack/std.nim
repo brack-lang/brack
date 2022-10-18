@@ -1,5 +1,6 @@
 from std/htmlgen import nil
 import std/oids
+import std/strformat
 import api
 import ast
 import parser
@@ -52,15 +53,57 @@ brackModule:
     """
     result = htmlgen.code(text, style=style)
 
-  proc footnote* (ast: BrackNode, id: Oid): BrackNode {.angle: "^".} =
-    var hint = bnkSquareBracket.newTree(
-      newIdentNode("^"),
-      bnkArgument.newTree(
-        newTextNode(ast.find(id).arguments[0].val)
+  proc footnoteSup* (text: string): string {.square: "footnoteSup".} =
+    result = htmlgen.sup(text)
+
+  proc footnoteFooter* (text: string): string {.square: "footnoteFooter".} =
+    result = htmlgen.div(
+      htmlgen.p(text)
+    )
+
+  proc footnote* (ast: BrackNode, id: string): BrackNode {.angle: "^".} =
+    let
+      text = ast.find(id).arguments[0].val
+      n = ast.count(bnkSquareBracket, "footnoteSup")
+      sup = bnkSquareBracket.newTree(
+        newIdentNode("@"),
+        bnkArgument.newTree(
+          bnkSquareBracket.newTree(
+            newIdentNode("footnoteSup"),
+            bnkArgument.newTree(
+              newTextNode(&"[{$n}]")
+            )
+          )
+        ),
+        bnkArgument.newTree(
+          newTextNode(&"#{$n}")
+        )
+      )
+  
+    result = ast.insert(id, sup).delete(id)
+    if not ast.exists("footnote"):
+      result.children.add BrackNode(
+        id: "footnote",
+        kind: bnkParagraph,
+        children: @[
+          newTextNode("脚注\n"),
+          bnkSquareBracket.newTree(
+            newIdentNode("footnoteFooter"),
+            bnkArgument.newTree(
+              newTextNode("")
+            )
+          )
+        ]
+      )
+    result["footnote"] = bnkParagraph.newTree(
+      newTextNode("脚注"),
+      bnkSquareBracket.newTree(
+        newIdentNode("footnoteFooter"),
+        bnkArgument.newTree(
+          newTextNode(result.find("footnote").children[1].children[1].children[0].val & "\n[" & $n & "]: " & text)
+        )
       )
     )
-    result = ast.insert(id, hint).delete(id)
-    echo ast.nth(id)
 
   proc image* (url, alt: string): string {.curly: "img".} =
     result = htmlgen.img(src=url, alt=alt)
