@@ -62,7 +62,7 @@ brackModule:
     for text in texts:
       footnoteList.add htmlgen.li(
         htmlgen.span(text),
-        id=(&"fn-{$text[1]}"),
+        id=(&"fn-{$text}"),
         class="footnote_ordered-list"
       )
     result = htmlgen.div(
