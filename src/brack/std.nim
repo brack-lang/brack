@@ -84,7 +84,7 @@ brackModule:
               newTextNode(&"[{$n}]")
             ),
             bnkArgument.newTree(
-              newTextNode(&"#fn-{$n}")
+              newTextNode(&"#fn-{text}")
             )
           )
         ),
