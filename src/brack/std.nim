@@ -1,9 +1,7 @@
 from std/htmlgen import nil
-import std/oids
 import std/strformat
 import api
 import ast
-import parser
 
 brackModule:
   proc h1* (text: string): string {.curly: "*".} =
@@ -53,20 +51,34 @@ brackModule:
     """
     result = htmlgen.code(text, style=style)
   
-  proc id* (text, id: string): string {.square: "&".} =
+  proc id* (text: string, id: string): string {.square: "&".} =
     result = htmlgen.span(text, id=id)
 
   proc footnoteSup* (text: string): string {.square: "footnoteSup".} =
     result = htmlgen.sup(text)
 
-  proc footnoteFooter* (text: string): string {.square: "footnoteFooter".} =
+  proc footnoteFooter* (texts: seq[string]): string {.square: "footnoteFooter".} =
+    var footnoteList = ""
+    for text in texts:
+      footnoteList.add htmlgen.li(
+        htmlgen.span(text),
+        htmlgen.style(""".footnoteFooter:target { background-color: #ddd; }""".fmt('<', '>')),
+        id=(&"fn-{$text[1]}"),
+        class="footnoteFooter"
+      )
+    const style = """
+      list-style: none;
+    """
     result = htmlgen.div(
-      htmlgen.p(text)
+      htmlgen.div("脚注", style="font-size: 18px; font-weight: bold;"),
+      htmlgen.ul(footnoteList, style=style)
     )
 
   proc footnote* (ast: BrackNode, id: string): BrackNode {.angle: "^".} =
+    result = ast
+    
     let
-      text = ast.find(id).arguments[0].val
+      text = ast[id][1][0].val
       n = ast.count(bnkSquareBracket, "footnoteSup")
       sup = bnkSquareBracket.newTree(
         newIdentNode("footnoteSup"),
@@ -77,35 +89,28 @@ brackModule:
               newTextNode(&"[{$n}]")
             ),
             bnkArgument.newTree(
-              newTextNode(&"#{$n}")
+              newTextNode(&"#fn-{$n}")
             )
           )
         ),
       )
   
-    result = ast.insert(id, sup).delete(id)
+    result.insert(id, sup)
+    result.delete(id)
+
     if not ast.exists("footnote"):
       result.children.add BrackNode(
         id: "footnote",
         kind: bnkParagraph,
         children: @[
-          newTextNode("脚注"),
           bnkSquareBracket.newTree(
             newIdentNode("footnoteFooter"),
-            bnkArgument.newTree(
-              newTextNode("")
-            )
           )
         ]
       )
-    result["footnote"] = bnkParagraph.newTree(
-      newTextNode("脚注"),
-      bnkSquareBracket.newTree(
-        newIdentNode("footnoteFooter"),
-        bnkArgument.newTree(
-          newTextNode(result.find("footnote").children[1].children[1].children[0].val & "\n[" & $n & "]: " & text)
-        )
-      )
+
+    result["footnote"][0].add bnkArgument.newTree(
+      newTextNode("[" & $n & "]: " & text)
     )
 
   proc image* (url, alt: string): string {.curly: "img".} =

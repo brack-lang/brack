@@ -1,43 +1,9 @@
 import std/strutils
 import std/oids
-
-type
-  BrackNodeKind* = enum
-    bnkInvalid
-    bnkRoot
-    bnkParagraph
-    bnkSquareBracket
-    bnkCurlyBracket
-    bnkAngleBracket
-    bnkArgument
-    bnkIdent
-    bnkText
-  
-  BrackNode* = object
-    id*: string
-    case kind*: BrackNodeKind
-    of bnkText, bnkIdent:
-      val*: string
-    else:
-      children*: seq[BrackNode]
+import ast
   
 proc parseLeftSquareBracket (tokens: seq[string], currentIndex: int): tuple[children: seq[BrackNode], index: int]
 proc parseLeftCurlyBracket (tokens: seq[string], currentIndex: int): tuple[children: seq[BrackNode], index: int]
-
-# proc initBrackNode* (kind: BrackNodeKind, children: seq[BrackNode] = @[]): BrackNode =
-#   if kind == bnkIdent or kind == bnkText:
-#     result = BrackNode(
-#       id: $genOid(),
-#       kind: kind,
-#       children: children
-#     )
-
-# proc initBrackNode* (kind: BrackNodeKind, val: string): BrackNode =
-#   result = BrackNode(
-#     id: $genOid(),
-#     kind: kind,
-#     val: val
-#   )
 
 proc empty (node: BrackNode): bool =
   case node.kind

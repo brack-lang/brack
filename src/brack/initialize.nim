@@ -2,13 +2,20 @@ import std/macros
 import std/macrocache
 import std/strutils
 import api
-import parser
+import ast except newIdentNode
 
-func getNumberOfArguments* (formalParams: NimNode): int {.compileTime.} =
-  result = formalParams.len - 1
-  for param in formalParams:
-    if param.kind != nnkIdentDefs: continue
-    result += param.len - 3
+func analyzeArguments* (formalParams: NimNode): seq[string] {.compileTime.} =
+  var params = formalParams.copy
+  params.del(0)
+  for param in params:
+    let types = if param[^2].kind == nnkIdent and param[^2].strVal == "string": "string"
+                elif param[^2].kind == nnkBracketExpr and param[^2][0].strVal == "seq" and param[^2][1].strVal == "string": "seq[string]"
+                else: raise newException(Defect, "非対応の型")
+    var param = param.copy
+    param.del(param.len - 1)
+    param.del(param.len - 1)
+    for i in 0 ..< param.len:
+      result.add types
 
 func getCommandBranch*: NimNode =
   result = nnkIfStmt.newTree()
@@ -16,11 +23,29 @@ func getCommandBranch*: NimNode =
     var callAST = nnkCall.newTree(
       command[0][1]
     )
-    for index in 0 ..< getNumberOfArguments(command[3]):
-      callAST.add nnkBracketExpr.newTree(
-        newIdentNode("arguments"),
-        newLit(index)
-      )
+    var defineRemainingArguments = newStmtList()
+    for index, types in analyzeArguments(command[3]):
+      if types == "string":
+        callAST.add nnkBracketExpr.newTree(
+          newIdentNode("arguments"),
+          newLit(index)
+        )
+      elif types == "seq[string]":
+        defineRemainingArguments = nnkVarSection.newTree(
+          nnkIdentDefs.newTree(
+            newIdentNode("remainingArguments"),
+            newEmptyNode(),
+            nnkBracketExpr.newTree(
+              newIdentNode("arguments"),
+              nnkInfix.newTree(
+                newIdentNode("..^"),
+                newLit(index),
+                newLit(1)
+              )
+            )
+          )
+        )
+        callAST.add newIdentNode("remainingArguments")
     result.add nnkElifBranch.newTree(
       nnkInfix.newTree(
         newIdentNode("=="),
@@ -28,6 +53,7 @@ func getCommandBranch*: NimNode =
         newLit($command[0][1])
       ),
       nnkStmtList.newTree(
+        defineRemainingArguments,
         nnkInfix.newTree(
           newIdentNode("&="),
           newIdentNode("result"),

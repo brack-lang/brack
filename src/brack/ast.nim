@@ -1,109 +1,208 @@
 import std/oids
-import parser
+import std/strformat
+import std/strutils
+
+{.experimental: "strictFuncs".}
 
 type
-  BrackNodeFindError = object of ValueError
+  BrackError* = object of CatchableError
+  BrackIndexError* = object of BrackError
+  BrackNoChildrenError* = object of BrackError
+  BrackNotFoundASTError* = object of BrackError
 
-func findHelper (ast: BrackNode, id: string): (bool, BrackNode) =
+  BrackNodeKind* = enum
+    bnkInvalid
+    bnkRoot
+    bnkParagraph
+    bnkSquareBracket
+    bnkCurlyBracket
+    bnkAngleBracket
+    bnkArgument
+    bnkIdent
+    bnkText
+  
+  BrackNodeObj* = object
+    id*: string
+    case kind*: BrackNodeKind
+    of bnkText, bnkIdent:
+      val*: string
+    else:
+      children*: seq[BrackNode]
+  
+  BrackNode* = ref BrackNodeObj
+
+func noChildrenErrorMsg (ast: BrackNode): string =
+  result = &"The brack node kind of {ast.id} is {ast.kind}. It doesn't have children."
+
+func indexErrorMsg (ast: BrackNode, index: int): string =
+  result = &"index must be less than the child element of ast. index: {index} >= ast.children.len: {ast.children.len}"
+
+func notFoundASTErrorMsg (ast: BrackNode, id: string): string =
+  result = &"ast({ast.id}) doesn't have the ast has id({id})."
+
+func hasChildren* (ast: BrackNode): bool =
+  result = not (ast.kind == bnkText or ast.kind == bnkIdent)
+
+func `or` (n1, n2: BrackNode): BrackNode =
+  if n1.isNil:
+    result = n2
+  else:
+    result = n1
+
+func find (ast: BrackNode, id: string): BrackNode =
   if ast.id == id:
-    return (true, ast)
-  if ast.kind == bnkText or ast.kind == bnkIdent:
-    return (false, BrackNode())
-  else:
-    for node in ast.children:
-      let (res, resNode) = findHelper(node, id)
-      if res:
-        return (res, resNode)
-
-func find* (ast: BrackNode, id: string): BrackNode =
-  let (res, resNode) = findHelper(ast, id)
-  if res:
-    return resNode
-  else:
-    raise newException(BrackNodeFindError, "faild to find ast, " & id)
-
-func arguments* (ast: BrackNode): seq[BrackNode] =
-  for child in ast.children:
-    if child.kind == bnkArgument:
-      return child.children
-
-func nthHelper (ast: BrackNode, id: string, kind: BrackNodeKind, finished: bool): tuple[n: int, finished: bool] =
-  if finished or ast.id == id:
-    return (0, true)
-  elif ast.kind == bnkText or ast.kind == bnkIdent:
-    return (int(ast.kind == kind), false)
-  else:
-    var
-      res = int(ast.kind == kind)
-      resN = 0
-      finished: bool
+    result = ast
+  elif ast.hasChildren:
+    var tmp: BrackNode = nil
     for child in ast.children:
-      (resN, finished) = nthHelper(child, id, kind, finished)
-      res += resN
-    return (res, finished)
+      tmp = tmp or child.find(id)
+    result = tmp
+  else:
+    result = nil
 
-func nth* (ast: BrackNode, id: string): int =
-  # TODO: 展開済みマクロがあるのでうまく動作しない
-  let kind = ast.find(id).kind
-  let res = nthHelper(ast, id, kind, false)
-  result = res.n
+func `[]`* (ast: BrackNode, id: string): BrackNode =
+  result = ast.find(id)
+  if result.isNil:
+    raise newException(BrackNotFoundASTError, notFoundASTErrorMsg(ast, id))
+
+func `[]`* (ast: BrackNode, index: int): BrackNode =
+  if ast.hasChildren:
+    if ast[].children.len <=  index:
+      raise newException(BrackIndexError, indexErrorMsg(ast, index))
+    result = ast.children[index]
+  else:
+    raise newException(BrackNoChildrenError, noChildrenErrorMsg(ast))
+
+proc set (ast: BrackNode, id: string, newAst: BrackNode) =
+  if ast.id == id:
+    ast[] = newAst[]
+  elif ast.hasChildren:
+    for child in ast.children:
+      child.set(id, newAst)
+
+proc `[]=`* (ast: BrackNode, id: string, newAst: BrackNode) =
+  ast.set(id, newAst)
+  if ast.isNil:
+    raise newException(BrackNotFoundASTError, notFoundASTErrorMsg(ast, id))
+
+proc `[]=`* (ast: BrackNode, index: int, newAst: BrackNode) =
+  if ast.hasChildren:
+    if ast[].children.len <= index:
+      raise newException(BrackIndexError, indexErrorMsg(ast, index))
+    ast[].children[index] = newAst
+  else:
+    raise newException(BrackNoChildrenError, noChildrenErrorMsg(ast))
+
+func addIndent (s: string): string =
+  for line in s.split('\n'):
+    if line == "": continue
+    result.add &"  {line}\n"
+
+func `$`* (ast: BrackNode): string =
+  result = &"{$ast.kind} ({$ast.id})\n"
+  if ast.hasChildren:
+    for child in ast.children:
+      result &= addIndent($child)
+  else:
+    result.add ast.val.replace("\n", " \\n ").addIndent
+
+# func nthHelper (ast: BrackNode, id: string, kind: BrackNodeKind, finished: bool): tuple[n: int, finished: bool] =
+#   if finished or ast.id == id:
+#     return (0, true)
+#   elif ast.kind == bnkText or ast.kind == bnkIdent:
+#     return (int(ast.kind == kind), false)
+#   else:
+#     var
+#       res = int(ast.kind == kind)
+#       resN = 0
+#       finished: bool
+#     for child in ast.children:
+#       (resN, finished) = nthHelper(child, id, kind, finished)
+#       res += resN
+#     return (res, finished)
+
+# func nth* (ast: BrackNode, id: string): int =
+#   # TODO: 展開済みマクロがあるのでうまく動作しない
+#   let kind = ast.find(id).kind
+#   let res = nthHelper(ast, id, kind, false)
+#   result = res.n
 
 func count* (ast: BrackNode, kind: BrackNodeKind, name: string, parentKind = bnkInvalid): int =
   if ast.kind == bnkIdent and kind == parentKind and ast.val == name:
     return 1
-  elif not (ast.kind == bnkIdent or ast.kind == bnkText):
+  elif ast.hasChildren:
     for child in ast.children:
       result += count(child, kind, name, ast.kind)
     if ast.kind == bnkRoot:
       result += 1
 
-func walk (ast: BrackNode): BrackNode =
-  if ast.kind == bnkText or ast.kind == bnkIdent:
-    return ast
-  else:
-    var parent = BrackNode(kind: ast.kind, id: ast.id)
-    for child in ast.children:
-      parent.children.add walk(child)
-    return parent
+# func walk (ast: BrackNode): BrackNode =
+#   if ast.kind == bnkText or ast.kind == bnkIdent:
+#     return ast
+#   else:
+#     var parent = BrackNode(kind: ast.kind, id: ast.id)
+#     for child in ast.children:
+#       parent.children.add walk(child)
+#     return parent
 
-func deleteHelper (ast: BrackNode, id: string): BrackNode =
-  if ast.kind == bnkText or ast.kind == bnkIdent:
-    if ast.id != id:
-      return ast
-  else:
-    var parent = BrackNode(kind: ast.kind, id: ast.id)
-    for child in ast.children:
-      let res = child.deleteHelper(id)
-      if res.kind != bnkInvalid:
-        parent.children.add res
-    if parent.id != id:
-      return parent
+# func deleteHelper (ast: BrackNode, id: string): BrackNode =
+#   if ast.kind == bnkText or ast.kind == bnkIdent:
+#     if ast.id != id:
+#       return ast
+#   else:
+#     var parent = BrackNode(kind: ast.kind, id: ast.id)
+#     for child in ast.children:
+#       let res = child.deleteHelper(id)
+#       if res.kind != bnkInvalid:
+#         parent.children.add res
+#     if parent.id != id:
+#       return parent
 
-func delete* (ast: BrackNode, id: string): BrackNode =
-  result = ast.deleteHelper(id)
-
-func insertHelper* (ast: BrackNode, id: string, insertAst: BrackNode): BrackNode =
-  if ast.kind == bnkText or ast.kind == bnkIdent:
-    return ast
-  else:
-    var
-      finded = false
-      res = BrackNode(kind: ast.kind, id: ast.id)
+proc deleteHelper (ast: BrackNode, id: string) =
+  if ast.hasChildren:
+    var newAst = BrackNode(id: ast.id, kind: ast.kind, children: @[])
     for child in ast.children:
-      res.children.add child
+      deleteHelper(child, id)
+      if child.id != ast.id:
+        newAst.children.add child
+
+proc delete* (ast: BrackNode, id: string) =
+  if ast.hasChildren:
+    deleteHelper(ast, id)
+  else:
+    raise newException(BrackNoChildrenError, noChildrenErrorMsg(ast))
+
+proc delete* (ast: BrackNode, index: int) =
+  if ast.hasChildren:
+    var newAst = BrackNode(id: ast.id, kind: ast.kind)
+    for i, child in ast.children:
+      if i != index:
+        newAst.children.add child
+    ast[].children = newAst[].children
+  else:
+    raise newException(BrackNoChildrenError, noChildrenErrorMsg(ast))
+
+proc insertHelper (ast: BrackNode, id: string, insertAst: BrackNode) =
+  if ast.hasChildren:
+    var newAst = BrackNode(id: ast.id, kind: ast.kind, children: @[])
+    for child in ast.children:
+      child.insertHelper(id, insertAst)
+      newAst.children.add child
       if child.id == id:
-        finded = true
-        res.children.add insertAst
-    if finded:
-      return res
-    else:
-      res = BrackNode(kind: ast.kind, id: ast.id)
-      for child in ast.children:
-        res.children.add insertHelper(child, id, insertAst)
-      return res
+        newAst.children.add insertAst
+    ast[].children = newAst[].children
 
-func insert* (ast: BrackNode, id: string, insertAst: BrackNode): BrackNode =
-  result = insertHelper(ast, id, insertAst)
+proc insert* (ast: BrackNode, id: string, insertAst: BrackNode) =
+  if ast.hasChildren:
+    insertHelper(ast, id, insertAst)
+  else:
+    raise newException(BrackNoChildrenError, noChildrenErrorMsg(ast))
+
+proc add* (ast, insertAst: BrackNode) =
+  if ast.hasChildren:
+    ast[].children.add insertAst
+  else:
+    raise newException(BrackNoChildrenError, noChildrenErrorMsg(ast))
 
 proc newTree* (kind: BrackNodeKind, children: varargs[BrackNode]): BrackNode =
   result = BrackNode(
@@ -136,28 +235,50 @@ func exists* (ast: BrackNode, id: string): bool =
       res = res or exists(child, id)
     return res
 
-proc assignHelper (ast: BrackNode, id: string, node: BrackNode): BrackNode =
-  if ast.id == id:
-    var node = node
-    node.id = id
-    return node
-  elif ast.kind == bnkText or ast.kind == bnkIdent:
-    return ast
-  else:
-    var parent = BrackNode(kind: ast.kind, id: ast.id)
-    for child in ast.children:
-      parent.children.add assignHelper(child, id, node)
-    return parent
+# proc assignHelper (ast: BrackNode, id: string, node: BrackNode): BrackNode =
+#   if ast.id == id:
+#     var node = node
+#     node.id = id
+#     return node
+#   elif ast.kind == bnkText or ast.kind == bnkIdent:
+#     return ast
+#   else:
+#     var parent = BrackNode(kind: ast.kind, id: ast.id)
+#     for child in ast.children:
+#       parent.children.add assignHelper(child, id, node)
+#     return parent
 
-proc `[]=`* (ast: var BrackNode, id: string, node: BrackNode) =
-  ast = assignHelper(ast, id, node)
+# type
+#   DontHaveChildrenError* = object of ValueError
+#   DontHaveValError* = object of ValueError
 
-import std/macros
+# proc `[]`* (ast: BrackNode, index: int): var BrackNode =
+#   if ast.hasChildren:
+#     result = ast.children[index]
+#   else:
+#     raise newException(DontHaveChildrenError, &"{ast.id} doesn't have children")
 
-macro quote* (body: untyped): untyped =
-  echo body.astGenRepr
-  result = nnkStmtList.newTree(
-    nnkCall.newTree(
-      macros.newIdentNode("BrackNode")
-    )
-  )
+# proc val* (ast: BrackNode): string =
+#   if ast.hasChildren:
+#     raise newException(DontHaveValError, &"{ast.id} doesn't have val")
+#   else:
+#     result = ast.val
+
+# proc `val=`* (ast: var BrackNode, val: string) =
+#   if ast.hasChildren:
+#     raise newException(DontHaveValError, &"{ast.id} doesn't have val")
+#   else:
+#     ast.val = val
+
+# proc `[]=`* (ast: var BrackNode, id: string, node: BrackNode) =
+#   ast = assignHelper(ast, id, node)
+
+# import std/macros
+
+# macro quote* (body: untyped): untyped =
+#   echo body.astGenRepr
+#   result = nnkStmtList.newTree(
+#     nnkCall.newTree(
+#       macros.newIdentNode("BrackNode")
+#     )
+#   )
