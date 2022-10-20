@@ -62,21 +62,16 @@ brackModule:
     for text in texts:
       footnoteList.add htmlgen.li(
         htmlgen.span(text),
-        htmlgen.style(""".footnoteFooter:target { background-color: #ddd; }""".fmt('<', '>')),
         id=(&"fn-{$text[1]}"),
-        class="footnoteFooter"
+        class="footnote_ordered-list"
       )
-    const style = """
-      list-style: none;
-    """
     result = htmlgen.div(
-      htmlgen.div("脚注", style="font-size: 18px; font-weight: bold;"),
-      htmlgen.ul(footnoteList, style=style)
+      htmlgen.div("脚注", class="footnote_header"),
+      htmlgen.ol(footnoteList, class="footnote_ordered-list")
     )
 
   proc footnote* (ast: BrackNode, id: string): BrackNode {.angle: "^".} =
     result = ast
-    
     let
       text = ast[id][1][0].val
       n = ast.count(bnkSquareBracket, "footnoteSup")
@@ -94,10 +89,8 @@ brackModule:
           )
         ),
       )
-  
     result.insert(id, sup)
     result.delete(id)
-
     if not ast.exists("footnote"):
       result.children.add BrackNode(
         id: "footnote",
@@ -108,7 +101,6 @@ brackModule:
           )
         ]
       )
-
     result["footnote"][0].add bnkArgument.newTree(
       newTextNode("[" & $n & "]: " & text)
     )
