@@ -102,7 +102,7 @@ brackModule:
         ]
       )
     result["footnote"][0].add bnkArgument.newTree(
-      newTextNode("[" & $n & "]: " & text)
+      newTextNode(text)
     )
 
   proc image* (url, alt: string): string {.curly: "img".} =
