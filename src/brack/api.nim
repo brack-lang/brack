@@ -1,5 +1,6 @@
 import std/macros
 import std/macrocache
+import std/strutils
 
 const
   mcCommandSyms* = CacheSeq"CommandSyms"
@@ -56,3 +57,11 @@ macro angle* (name: static[string], body: untyped): untyped =
     result[0][1][0] = procNameIdent
   elif result[0][1].kind == nnkIdent:
     result[0][1] = procNameIdent
+
+func style* (str: string): string =
+  var str = str
+  str = str.strip
+  if str[^1] == '\n':
+    str.delete(result.high..result.high)
+  for line in str.split('\n'):
+    result.add line.strip
