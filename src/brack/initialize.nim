@@ -154,9 +154,9 @@ macro initBrack* (): untyped =
         elif node.kind == bnkArgument:
           var argument = ""
           for argNode in node.children:
-            if argument != "":
-              argument &= " & "
-            if argNode.kind == bnkSquareBracket:
+            if argNode.kind == bnkCurlyBracket:
+              argument.add commandGenerator(argNode, "curly_")
+            elif argNode.kind == bnkSquareBracket:
               argument.add commandGenerator(argNode, "square_")
             elif argNode.kind == bnkText:
               argument.add argNode.val
