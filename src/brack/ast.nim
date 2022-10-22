@@ -43,6 +43,13 @@ func notFoundASTErrorMsg (ast: BrackNode, id: string): string =
 func hasChildren* (ast: BrackNode): bool =
   result = not (ast.kind == bnkText or ast.kind == bnkIdent)
 
+func empty* (node: BrackNode): bool =
+  case node.kind
+  of bnkText, bnkIdent:
+    result = node.val == ""
+  else:
+    result = node.children.len == 0
+
 func `or` (n1, n2: BrackNode): BrackNode =
   if n1.isNil:
     result = n2
