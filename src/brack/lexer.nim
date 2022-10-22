@@ -80,7 +80,7 @@ proc lex* (path: string): seq[string] =
         token = ""
         index += 1
       searchingCommandName = false
-    elif index > 0 and brackSrc[index-1] == '\n' and targetChar == '\n':
+    elif targetChar == '\n':
       if token != "" and token.strip != "":
         result.add token.strip
         token = ""

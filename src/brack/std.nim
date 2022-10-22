@@ -1,5 +1,6 @@
 from std/htmlgen import nil
 import std/strformat
+import std/strutils
 import api
 import ast
 
@@ -14,13 +15,13 @@ brackModule:
     result = htmlgen.h3(text)
 
   proc bold* (text: string): string {.square: "*".} =
-    const style = """
+    const style = style"""
       font-weight: bold;
     """
     result = htmlgen.span(text, style=style)
 
   proc italic* (text: string): string {.square: "/".} =
-    const style = """
+    const style = style"""
       font-style: italic;
     """
     result = htmlgen.span(text, style=style)
@@ -29,21 +30,25 @@ brackModule:
     result = htmlgen.a(text, href=url)
 
   proc strikeoutline* (text: string): string {.square: "~".} =
-    const style = """
+    const style = style"""
       text-decoration: line-through;
     """
     result = htmlgen.span(text, style=style)
 
   proc underline* (text: string): string {.square: "_".} =
-    const style = """
+    const style = style"""
       text-decoration: underline;
     """
     result = htmlgen.span(text, style=style)
+  
+  proc quote* (text: string): string {.square: ">".} =
+    result = htmlgen.blockquote(text)
 
   proc inlineCode* (text: string): string {.square: "#".} =
-    const style = """
+    const style = style"""
       display: inline-block;
-      padding: 0.1em 0.25em;
+      padding: 0.05em 0.20em;
+      margin: 0 10px;
       color: #444;
       background-color: #e7edf3;
       border-radius: 3px;
@@ -104,6 +109,12 @@ brackModule:
     result["footnote"][0].add bnkArgument.newTree(
       newTextNode(text)
     )
+  
+  proc list* (texts: seq[string]): string {.curly: "list".} =
+    for text in texts:
+      result.add htmlgen.li(text.strip)
+    result = htmlgen.ul(result)
 
   proc image* (url, alt: string): string {.curly: "img".} =
     result = htmlgen.img(src=url, alt=alt)
+
