@@ -1,6 +1,6 @@
 import std/strutils
 
-proc lex* (path: string): seq[string] =
+proc tokenize* (path: string): seq[string] =
   let
     brackSrcFile = open(path)
     brackSrc = brackSrcFile.readAll
