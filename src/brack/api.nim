@@ -6,7 +6,7 @@ const
   mcCommandSyms* = CacheSeq"CommandSyms"
   mcMacroSyms* = CacheSeq"MacroSyms"
 
-func resolveProcedureName* (command_name: string): string =
+func resolveProcedureName* (commandName: string): string =
   for ch in command_name:
     result.add $int(ch)
 

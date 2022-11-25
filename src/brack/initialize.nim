@@ -1,6 +1,5 @@
 import std/macros
 import std/macrocache
-import std/strutils
 import api
 import ast except newIdentNode
 
