@@ -5,6 +5,9 @@ import api
 import ast
 
 brackModule:
+  proc paragraph* (text: string): string {.curly: "paragraph".} =
+    result = htmlgen.p(text.replace("\n", "<br />"))
+
   proc h1* (text: string): string {.curly: "*".} =
     result = htmlgen.h1(text)
 
@@ -99,8 +102,9 @@ brackModule:
     if not ast.exists("footnote"):
       result.children.add BrackNode(
         id: "footnote",
-        kind: bnkParagraph,
+        kind: bnkCurlyBracket,
         children: @[
+          newIdentNode("paragraph"),
           bnkSquareBracket.newTree(
             newIdentNode("footnoteFooter"),
           )

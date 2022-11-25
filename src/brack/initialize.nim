@@ -87,27 +87,49 @@ func getMacroBranch*: NimNode =
       )
     )
 
+macro initGenerator* (name: static[string], T: typedesc, body: untyped): untyped =
+  let
+    commandBranchAST = getCommandBranch()
+  result = quote do:
+    proc commandGenerator (ast: BrackNode, prefix: string): T =
+      var
+        procedureName {.inject.} = ""
+        arguments {.inject.} : seq[string] = @[]
+      for node in ast.children:
+        if node.kind == bnkIdent:
+          procedureName = prefix & resolveProcedureName(node.val)
+        elif node.kind == bnkArgument:
+          var argument = ""
+          for argNode in node.children:
+            if argNode.kind == bnkCurlyBracket:
+              argument.add commandGenerator(argNode, &"curly_{`name`}_")
+            elif argNode.kind == bnkSquareBracket:
+              argument.add commandGenerator(argNode, &"square_{`name`}_")
+            elif argNode.kind == bnkText:
+              argument.add argNode.val
+          arguments.add argument
+      `commandBranchAST`
+    
+    proc generate* (ast: BrackNode): T {.inject.} =
+      for node in ast.children:
+        result &= commandGenerator(node, &"curly_{`name`}_")
+
 macro initBrack* (): untyped =
   let
-    expand = newIdentNode("expand")
-    generate = newIdentNode("generate")
-    procedureName = newIdentNode("procedureName")
-    arguments = newIdentNode("arguments")
-    id = newIdentNode("id")
     commandBranchAST = getCommandBranch()
     macroBranchAST = getMacroBranch()
+
   result = quote do:
     proc otherwiseMacroExpander (ast, node: BrackNode, id: string): BrackNode
-    
     proc angleBracketMacroExpander (ast, node: BrackNode, id: string): BrackNode =
       # TODO: ここでastがそのまま使われていて更新結果が反映されていない
       result = ast
       var
-        `procedureName` = ""
-        `id` = id
+        procedureName {.inject.} = ""
+        id {.inject.} = id
       for childNode in node.children:
         if childNode.kind == bnkIdent:
-          `procedureName` = "angle_" & resolveProcedureName(childNode.val)
+          procedureName = "angle_" & resolveProcedureName(childNode.val)
         elif childNode.kind == bnkArgument:
           for argNode in childNode.children:
             case argNode.kind
@@ -119,9 +141,6 @@ macro initBrack* (): untyped =
       `macroBranchAST`
     
     proc otherwiseMacroExpander (ast, node: BrackNode, id: string): BrackNode =
-      # TODO: ここでastがそのまま使われていて更新結果が反映されていない
-      # `node`は探索中のノード, otherwise... angle... は常に全体のASTを返す
-      # だから実は子要素への代入は必要ない
       result = ast
       for childNode in node.children:
         if childNode.kind == bnkAngleBracket:
@@ -135,8 +154,8 @@ macro initBrack* (): untyped =
               result = otherwiseMacroExpander(result, argNode, argNode.id)
             else: discard
 
-    proc `expand`* (node: BrackNode): BrackNode =
-      # マクロが0になるまで展開を繰り返す
+    proc expand* (node: BrackNode): BrackNode {.inject.} =
+      # TODO: マクロが0になるまで展開を繰り返す
       result = node
       for childNode in node.children:
         if childNode.kind == bnkAngleBracket:
@@ -146,11 +165,11 @@ macro initBrack* (): untyped =
 
     proc commandGenerator (ast: BrackNode, prefix: string): string =
       var
-        `procedureName` = ""
-        `arguments`: seq[string] = @[]
+        procedureName {.inject.} = ""
+        arguments {.inject.} : seq[string] = @[]
       for node in ast.children:
         if node.kind == bnkIdent:
-          `procedureName` = prefix & resolveProcedureName(node.val)
+          procedureName = prefix & resolveProcedureName(node.val)
         elif node.kind == bnkArgument:
           var argument = ""
           for argNode in node.children:
@@ -160,25 +179,9 @@ macro initBrack* (): untyped =
               argument.add commandGenerator(argNode, "square_")
             elif argNode.kind == bnkText:
               argument.add argNode.val
-          `arguments`.add argument
+          arguments.add argument
       `commandBranchAST`
     
-    proc squareBracketCommandGenerator (ast: BrackNode): string =
-      result = commandGenerator(ast, "square_")
-    
-    proc curlyBracketCommandGenerator (ast: BrackNode): string =
-      result = commandGenerator(ast, "curly_")
-
-    proc paragraphCommandGenerator (ast: BrackNode): string =
+    proc generate* (ast: BrackNode): string {.inject.} =
       for node in ast.children:
-        if node.kind == bnkText:
-          result &= node.val
-        elif node.kind == bnkSquareBracket:
-          result &= squareBracketCommandGenerator(node)
-    
-    proc `generate`* (ast: BrackNode): string =
-      for node in ast.children:
-        if node.kind == bnkCurlyBracket:
-          result &= curlyBracketCommandGenerator(node)
-        elif node.kind == bnkParagraph:
-          result &= "<p>" & paragraphCommandGenerator(node).replace("\n", "<br />") & "</p>"
+        result &= commandGenerator(node, "curly_")

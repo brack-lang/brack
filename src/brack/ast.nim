@@ -13,7 +13,6 @@ type
   BrackNodeKind* = enum
     bnkInvalid
     bnkRoot
-    bnkParagraph
     bnkSquareBracket
     bnkCurlyBracket
     bnkAngleBracket
@@ -225,6 +224,11 @@ proc newIdentNode* (val: string): BrackNode =
     kind: bnkIdent,
     val: val
   )
+
+proc newParagraph* (): BrackNode =
+  result = bnkCurlyBracket.newTree()
+  result.children.add newIdentNode("paragraph")
+  result.children.add bnkArgument.newTree()
 
 proc newTextNode* (val: string): BrackNode =
   result = BrackNode(
