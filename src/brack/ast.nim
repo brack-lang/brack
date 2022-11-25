@@ -20,13 +20,13 @@ type
     bnkIdent
     bnkText
   
-  BrackNodeObj* = object
-    id*: string
-    case kind*: BrackNodeKind
+  BrackNodeObj = object
+    id: string
+    case kind: BrackNodeKind
     of bnkText, bnkIdent:
-      val*: string
+      val: string
     else:
-      children*: seq[BrackNode]
+      children: seq[BrackNode]
   
   BrackNode* = ref BrackNodeObj
 
@@ -38,6 +38,42 @@ func indexErrorMsg (ast: BrackNode, index: int): string =
 
 func notFoundASTErrorMsg (ast: BrackNode, id: string): string =
   result = &"ast({ast.id}) doesn't have the ast has id({id})."
+
+proc newTree* (kind: BrackNodeKind, id: string, children: varargs[BrackNode]): BrackNode =
+  result = BrackNode(
+    id: id,
+    kind: kind,
+  )
+  for child in children:
+    result.children.add child
+
+proc newTree* (kind: BrackNodeKind, children: varargs[BrackNode]): BrackNode =
+  result = kind.newTree($genOid(), children)
+
+proc newIdentNode* (id: string, val: string): BrackNode =
+  result = BrackNode(
+    id: id,
+    kind: bnkIdent,
+    val: val
+  )
+
+proc newIdentNode* (val: string): BrackNode =
+  result = newIdentNode($genOid(), val)
+
+proc newParagraph* (id: string = $genOid()): BrackNode =
+  result = bnkCurlyBracket.newTree()
+  result.children.add newIdentNode(id, "paragraph")
+  result.children.add bnkArgument.newTree()
+
+proc newTextNode* (id: string, val: string): BrackNode =
+  result = BrackNode(
+    id: id,
+    kind: bnkText,
+    val: val
+  )
+
+proc newTextNode* (val: string): BrackNode =
+  result = newTextNode($genOid(), val)
 
 func hasChildren* (ast: BrackNode): bool =
   result = not (ast.kind == bnkText or ast.kind == bnkIdent)
@@ -142,31 +178,9 @@ func count* (ast: BrackNode, kind: BrackNodeKind, name: string, parentKind = bnk
     if ast.kind == bnkRoot:
       result += 1
 
-# func walk (ast: BrackNode): BrackNode =
-#   if ast.kind == bnkText or ast.kind == bnkIdent:
-#     return ast
-#   else:
-#     var parent = BrackNode(kind: ast.kind, id: ast.id)
-#     for child in ast.children:
-#       parent.children.add walk(child)
-#     return parent
-
-# func deleteHelper (ast: BrackNode, id: string): BrackNode =
-#   if ast.kind == bnkText or ast.kind == bnkIdent:
-#     if ast.id != id:
-#       return ast
-#   else:
-#     var parent = BrackNode(kind: ast.kind, id: ast.id)
-#     for child in ast.children:
-#       let res = child.deleteHelper(id)
-#       if res.kind != bnkInvalid:
-#         parent.children.add res
-#     if parent.id != id:
-#       return parent
-
 proc deleteHelper (ast: BrackNode, id: string) =
   if ast.hasChildren:
-    var newAst = BrackNode(id: ast.id, kind: ast.kind, children: @[])
+    var newAst = ast.kind.newTree(ast.id, @[])
     for child in ast.children:
       deleteHelper(child, id)
       if child.id != ast.id:
@@ -180,7 +194,7 @@ proc delete* (ast: BrackNode, id: string) =
 
 proc delete* (ast: BrackNode, index: int) =
   if ast.hasChildren:
-    var newAst = BrackNode(id: ast.id, kind: ast.kind)
+    var newAst = ast.kind.newTree(ast.id)
     for i, child in ast.children:
       if i != index:
         newAst.children.add child
@@ -190,7 +204,7 @@ proc delete* (ast: BrackNode, index: int) =
 
 proc insertHelper (ast: BrackNode, id: string, insertAst: BrackNode) =
   if ast.hasChildren:
-    var newAst = BrackNode(id: ast.id, kind: ast.kind, children: @[])
+    var newAst = ast.kind.newTree(ast.id, @[])
     for child in ast.children:
       child.insertHelper(id, insertAst)
       newAst.children.add child
@@ -209,33 +223,6 @@ proc add* (ast, insertAst: BrackNode) =
     ast[].children.add insertAst
   else:
     raise newException(BrackNoChildrenError, noChildrenErrorMsg(ast))
-
-proc newTree* (kind: BrackNodeKind, children: varargs[BrackNode]): BrackNode =
-  result = BrackNode(
-    id: $genOid(),
-    kind: kind,
-  )
-  for child in children:
-    result.children.add child
-
-proc newIdentNode* (val: string): BrackNode =
-  result = BrackNode(
-    id: $genOid(),
-    kind: bnkIdent,
-    val: val
-  )
-
-proc newParagraph* (): BrackNode =
-  result = bnkCurlyBracket.newTree()
-  result.children.add newIdentNode("paragraph")
-  result.children.add bnkArgument.newTree()
-
-proc newTextNode* (val: string): BrackNode =
-  result = BrackNode(
-    id: $genOid(),
-    kind: bnkText,
-    val: val
-  )
 
 func exists* (ast: BrackNode, id: string): bool =
   if ast.kind == bnkText or ast.kind == bnkIdent:
@@ -269,11 +256,29 @@ func exists* (ast: BrackNode, id: string): bool =
 #   else:
 #     raise newException(DontHaveChildrenError, &"{ast.id} doesn't have children")
 
-# proc val* (ast: BrackNode): string =
-#   if ast.hasChildren:
-#     raise newException(DontHaveValError, &"{ast.id} doesn't have val")
-#   else:
-#     result = ast.val
+func id* (ast: BrackNode): string =
+  result = ast.id
+
+func kind* (ast: BrackNode): BrackNodeKind =
+  result = ast.kind
+
+func val* (ast: BrackNode): string =
+  if ast.hasChildren:
+    raise newException(Defect, &"{ast.id} doesn't have val")
+  else:
+    result = ast.val
+
+func children* (ast: BrackNode): seq[BrackNode] =
+  if ast.hasChildren:
+    result = ast.children
+  else:
+    raise newException(Defect, &"{ast.id} doesn't have children")
+
+proc `children=`* (ast: BrackNode, children: seq[BrackNode]) =
+  if ast.hasChildren:
+    ast[].children = children
+  else:
+    raise newException(Defect, &"{ast.id} doesn't have children")
 
 # proc `val=`* (ast: var BrackNode, val: string) =
 #   if ast.hasChildren:

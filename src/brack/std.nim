@@ -100,16 +100,12 @@ brackModule:
     result.insert(id, sup)
     result.delete(id)
     if not ast.exists("footnote"):
-      result.children.add BrackNode(
-        id: "footnote",
-        kind: bnkCurlyBracket,
-        children: @[
-          newIdentNode("paragraph"),
-          bnkSquareBracket.newTree(
-            newIdentNode("footnoteFooter"),
-          )
-        ]
-      )
+      result.add bnkCurlyBracket.newTree("footnote", @[
+        newParagraph(),
+        bnkSquareBracket.newTree(
+          newIdentNode("footnoteFooter")
+        )
+      ])
     result["footnote"][0].add bnkArgument.newTree(
       newTextNode(text)
     )
