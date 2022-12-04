@@ -4,7 +4,10 @@ import std/strutils
 import api
 import ast
 
-brackModule:
+brackModule(Html):
+  proc root* (text: string): string {.curly: "root".} =
+    result = text
+  
   proc paragraph* (text: string): string {.curly: "paragraph".} =
     result = htmlgen.p(text.replace("\n", "<br />"))
 

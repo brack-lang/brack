@@ -7,7 +7,7 @@ func analyzeArguments* (formalParams: NimNode): seq[string] {.compileTime.} =
   var params = formalParams.copy
   params.del(0)
   for param in params:
-    let types = if param[^2].kind == nnkIdent and param[^2].strVal == "string": "string"
+    let types = if param[^2].kind == nnkSym and param[^2].strVal == "string": "string"
                 elif param[^2].kind == nnkBracketExpr and param[^2][0].strVal == "seq" and param[^2][1].strVal == "string": "seq[string]"
                 else: raise newException(Defect, "非対応の型")
     var param = param.copy
@@ -20,7 +20,7 @@ func getCommandBranch*: NimNode =
   result = nnkIfStmt.newTree()
   for command in mcCommandSyms:
     var callAST = nnkCall.newTree(
-      command[0][1]
+      ident(command[0].strVal)
     )
     var defineRemainingArguments = newStmtList()
     for index, types in analyzeArguments(command[3]):
@@ -49,7 +49,7 @@ func getCommandBranch*: NimNode =
       nnkInfix.newTree(
         newIdentNode("=="),
         newIdentNode("procedureName"),
-        newLit($command[0][1])
+        newLit(command[0].strVal)
       ),
       nnkStmtList.newTree(
         defineRemainingArguments,
@@ -67,7 +67,7 @@ func getMacroBranch*: NimNode =
     return newStmtList()
   for m in mcMacroSyms:
     var callAST = nnkCall.newTree(
-      m[0][1]
+      ident(m[0].strVal)
     )
     callAST.add newIdentNode("result")
     callAST.add newIdentNode("id")
@@ -75,7 +75,7 @@ func getMacroBranch*: NimNode =
       nnkInfix.newTree(
         newIdentNode("=="),
         newIdentNode("procedureName"),
-        newLit($m[0][1])
+        newLit(m[0].strVal)
       ),
       nnkStmtList.newTree(
         nnkInfix.newTree(
@@ -86,38 +86,10 @@ func getMacroBranch*: NimNode =
       )
     )
 
-macro initGenerator* (name: static[string], T: typedesc, body: untyped): untyped =
+macro initExpander* (backend: static[BackendLanguage]): untyped =
   let
-    commandBranchAST = getCommandBranch()
-  result = quote do:
-    proc commandGenerator (ast: BrackNode, prefix: string): T =
-      var
-        procedureName {.inject.} = ""
-        arguments {.inject.} : seq[string] = @[]
-      for node in ast.children:
-        if node.kind == bnkIdent:
-          procedureName = prefix & resolveProcedureName(node.val)
-        elif node.kind == bnkArgument:
-          var argument = ""
-          for argNode in node.children:
-            if argNode.kind == bnkCurlyBracket:
-              argument.add commandGenerator(argNode, &"curly_{`name`}_")
-            elif argNode.kind == bnkSquareBracket:
-              argument.add commandGenerator(argNode, &"square_{`name`}_")
-            elif argNode.kind == bnkText:
-              argument.add argNode.val
-          arguments.add argument
-      `commandBranchAST`
-    
-    proc generate* (ast: BrackNode): T {.inject.} =
-      for node in ast.children:
-        result &= commandGenerator(node, &"curly_{`name`}_")
-
-macro initBrack* (): untyped =
-  let
-    commandBranchAST = getCommandBranch()
     macroBranchAST = getMacroBranch()
-
+    backend = $backend
   result = quote do:
     proc otherwiseMacroExpander (ast, node: BrackNode, id: string): BrackNode
     proc angleBracketMacroExpander (ast, node: BrackNode, id: string): BrackNode =
@@ -128,7 +100,7 @@ macro initBrack* (): untyped =
         id {.inject.} = id
       for childNode in node.children:
         if childNode.kind == bnkIdent:
-          procedureName = "angle_" & resolveProcedureName(childNode.val)
+          procedureName = "angle_" & `backend` & "_" & resolveProcedureName(childNode.val)
         elif childNode.kind == bnkArgument:
           for argNode in childNode.children:
             case argNode.kind
@@ -162,6 +134,11 @@ macro initBrack* (): untyped =
         else:
           result = otherwiseMacroExpander(result, childNode, childNode.id)
 
+macro initGenerator* (backend: static[BackendLanguage]): untyped =
+  let
+    commandBranchAST = getCommandBranch()
+    backend = $backend
+  result = quote do:
     proc commandGenerator (ast: BrackNode, prefix: string): string =
       var
         procedureName {.inject.} = ""
@@ -173,9 +150,9 @@ macro initBrack* (): untyped =
           var argument = ""
           for argNode in node.children:
             if argNode.kind == bnkCurlyBracket:
-              argument.add commandGenerator(argNode, "curly_")
+              argument.add commandGenerator(argNode, "curly_" & `backend` & "_")
             elif argNode.kind == bnkSquareBracket:
-              argument.add commandGenerator(argNode, "square_")
+              argument.add commandGenerator(argNode, "square_" & `backend` & "_")
             elif argNode.kind == bnkText:
               argument.add argNode.val
           arguments.add argument
@@ -183,4 +160,4 @@ macro initBrack* (): untyped =
     
     proc generate* (ast: BrackNode): string {.inject.} =
       for node in ast.children:
-        result &= commandGenerator(node, "curly_")
+        result &= commandGenerator(node, "curly_" & `backend` & "_")
