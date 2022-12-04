@@ -134,30 +134,56 @@ macro initExpander* (backend: static[BackendLanguage]): untyped =
         else:
           result = otherwiseMacroExpander(result, childNode, childNode.id)
 
-macro initGenerator* (backend: static[BackendLanguage]): untyped =
+import std/json
+
+proc generateJson* (ast: BrackNode): JsonNode =
+  case ast.kind
+  of bnkText, bnkIdent:
+    result = %* {
+      "type": newJString($ast.kind),
+      "val": newJString(ast.val)
+    }
+  else:
+    result = %* { "type": newJString($ast.kind), "children": [] } 
+    for child in ast.children:
+      result["children"].add generateJson(child)
+
+macro initGenerator* (backendKind: static[BackendLanguage]): untyped =
   let
     commandBranchAST = getCommandBranch()
-    backend = $backend
+    backend = $backendKind
+  
+  case backendKind
+  of Html:
+    result = quote do:
+      proc commandGenerator (ast: BrackNode, prefix: string): string =
+        var
+          procedureName {.inject.} = ""
+          arguments {.inject.} : seq[string] = @[]
+        for node in ast.children:
+          if node.kind == bnkIdent:
+            procedureName = prefix & resolveProcedureName(node.val)
+          elif node.kind == bnkArgument:
+            var argument = ""
+            for argNode in node.children:
+              if argNode.kind == bnkCurlyBracket:
+                argument.add commandGenerator(argNode, "curly_" & `backend` & "_")
+              elif argNode.kind == bnkSquareBracket:
+                argument.add commandGenerator(argNode, "square_" & `backend` & "_")
+              elif argNode.kind == bnkText:
+                argument.add argNode.val
+            arguments.add argument
+        `commandBranchAST`
+      
+      proc generate* (ast: BrackNode): string {.inject.} =
+        for node in ast.children:
+          result &= commandGenerator(node, "curly_" & `backend` & "_")
+  of Json:
+    result = quote do:
+      proc generate* (ast: BrackNode): JsonNode {.inject.} =
+        result = generateJson(ast)
+
+macro initBrack* (backend: static[BackendLanguage]): untyped =
   result = quote do:
-    proc commandGenerator (ast: BrackNode, prefix: string): string =
-      var
-        procedureName {.inject.} = ""
-        arguments {.inject.} : seq[string] = @[]
-      for node in ast.children:
-        if node.kind == bnkIdent:
-          procedureName = prefix & resolveProcedureName(node.val)
-        elif node.kind == bnkArgument:
-          var argument = ""
-          for argNode in node.children:
-            if argNode.kind == bnkCurlyBracket:
-              argument.add commandGenerator(argNode, "curly_" & `backend` & "_")
-            elif argNode.kind == bnkSquareBracket:
-              argument.add commandGenerator(argNode, "square_" & `backend` & "_")
-            elif argNode.kind == bnkText:
-              argument.add argNode.val
-          arguments.add argument
-      `commandBranchAST`
-    
-    proc generate* (ast: BrackNode): string {.inject.} =
-      for node in ast.children:
-        result &= commandGenerator(node, "curly_" & `backend` & "_")
+    initExpander(`backend`)
+    initGenerator(`backend`)
