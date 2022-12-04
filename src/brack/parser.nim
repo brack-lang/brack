@@ -11,19 +11,19 @@ proc parseLeftAngleBracket (tokens: seq[string], currentIndex: int): tuple[child
       let (children, newIndex) = parseLeftAngleBracket(tokens, currentIndex + 1)
       if result.children.len == 1:
         result.children.add bnkArgument.newTree()
-      result.children[^1].add bnkAngleBracket.newTree(children)
+      result.children[^1].children.add bnkAngleBracket.newTree(children)
       currentIndex = newIndex
     elif token == "{":
       let (children, newIndex) = parseLeftCurlyBracket(tokens, currentIndex + 1)
       if result.children.len == 1:
         result.children.add bnkArgument.newTree()
-      result.children[^1].add bnkCurlyBracket.newTree(children)
+      result.children[^1].children.add bnkCurlyBracket.newTree(children)
       currentIndex = newIndex
     elif token == "[":
       let (children, newIndex) = parseLeftSquareBracket(tokens, currentIndex + 1)
       if result.children.len == 1:
         result.children.add bnkArgument.newTree()
-      result.children[^1].add bnkSquareBracket.newTree(children)
+      result.children[^1].children.add bnkSquareBracket.newTree(children)
       currentIndex = newIndex
     elif token == ">":
       result.index = currentIndex
@@ -36,7 +36,7 @@ proc parseLeftAngleBracket (tokens: seq[string], currentIndex: int): tuple[child
       if result.children.len == 1 and token != "\n":
         result.children.add bnkArgument.newTree()
       if token != "\n" and token != "":
-        result.children[^1].add newTextNode(token)
+        result.children[^1].children.add newTextNode(token)
     currentIndex += 1
 
 proc parseLeftSquareBracket (tokens: seq[string], currentIndex: int): tuple[children: seq[BrackNode], index: int] =
@@ -49,7 +49,7 @@ proc parseLeftSquareBracket (tokens: seq[string], currentIndex: int): tuple[chil
       let (children, newIndex) = parseLeftSquareBracket(tokens, currentIndex + 1)
       if result.children.len == 1:
         result.children.add bnkArgument.newTree()
-      result.children[^1].add bnkSquareBracket.newTree(children)
+      result.children[^1].children.add bnkSquareBracket.newTree(children)
       currentIndex = newIndex
     elif token == "]":
       result.index = currentIndex
@@ -63,7 +63,7 @@ proc parseLeftSquareBracket (tokens: seq[string], currentIndex: int): tuple[chil
         result.children.add bnkArgument.newTree()
       if token == "\n":
         raise newException(Defect, "syntax error (squareBracket中に改行は許されない)")
-      result.children[^1].add newTextNode(token)
+      result.children[^1].children.add newTextNode(token)
     currentIndex += 1
 
 proc parseLeftCurlyBracket (tokens: seq[string], currentIndex: int): tuple[children: seq[BrackNode], index: int] =
@@ -74,13 +74,13 @@ proc parseLeftCurlyBracket (tokens: seq[string], currentIndex: int): tuple[child
       let (children, newIndex) = parseLeftCurlyBracket(tokens, currentIndex + 1)
       if result.children.len == 1:
         result.children.add bnkArgument.newTree()
-      result.children[^1].add bnkCurlyBracket.newTree(children)
+      result.children[^1].children.add bnkCurlyBracket.newTree(children)
       currentIndex = newIndex
     elif token == "[":
       let (children, newIndex) = parseLeftSquareBracket(tokens, currentIndex + 1)
       if result.children.len == 1:
         result.children.add bnkArgument.newTree()
-      result.children[^1].add bnkSquareBracket.newTree(children)
+      result.children[^1].children.add bnkSquareBracket.newTree(children)
       currentIndex = newIndex
     elif token == "}":
       result.index = currentIndex
@@ -93,7 +93,7 @@ proc parseLeftCurlyBracket (tokens: seq[string], currentIndex: int): tuple[child
       if result.children.len == 1 and token != "\n":
         result.children.add bnkArgument.newTree()
       if token != "\n" and token != "":
-        result.children[^1].add newTextNode(token)
+        result.children[^1].children.add newTextNode(token)
     currentIndex += 1
 
 proc parse* (tokens: seq[string]): BrackNode =
@@ -114,12 +114,13 @@ proc parse* (tokens: seq[string]): BrackNode =
     elif token == "{":
       var node = bnkCurlyBracket.newTree()
       (node.children, index) = parseLeftCurlyBracket(tokens, index+1)
-      result.add node
+      result.children.add node
     elif index > 0 and tokens[index-1] == "\n" and token == "\n":
       if not targetNode.empty:
         var targetNode = targetNode
-        targetNode.children[^1].children = targetNode.children[^1].children[0..^2]
-        result.add targetNode
+        if targetNode.children.len > 0 and targetNode.children[^1].children.len > 0:
+          targetNode.children[^1].children = targetNode.children[^1].children[0..^2]
+        result.children.add targetNode
       targetNode = newParagraph()
     elif not(targetNode.children[^1].children.len == 0 and token == "\n"):
       var node = newTextNode(token)
@@ -127,4 +128,4 @@ proc parse* (tokens: seq[string]): BrackNode =
 
     index += 1
   if not targetNode.empty:
-    result.add targetNode
+    result.children.add targetNode

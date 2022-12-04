@@ -26,7 +26,7 @@ type
     of bnkText, bnkIdent:
       val: string
     else:
-      children: seq[BrackNode]
+      children*: seq[BrackNode]
   
   BrackNode* = ref BrackNodeObj
 
