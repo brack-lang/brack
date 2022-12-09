@@ -21,10 +21,10 @@ type
     bnkText
   
   BrackNodeObj = object
-    id: string
-    case kind: BrackNodeKind
+    id*: string
+    case kind*: BrackNodeKind
     of bnkText, bnkIdent:
-      val: string
+      val*: string
     else:
       children*: seq[BrackNode]
   
