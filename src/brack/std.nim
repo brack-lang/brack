@@ -100,13 +100,13 @@ brackModule(Html):
     result.insert(id, sup)
     result.delete(id)
     if not ast.exists("footnote"):
-      result.add bnkCurlyBracket.newTree("footnote", @[
-        newParagraph(),
+      result.add newParagraph("footnote")
+      result.children[^1].children[^1] = bnkArgument.newTree(
         bnkSquareBracket.newTree(
           newIdentNode("footnoteFooter")
         )
-      ])
-    result["footnote"][0].add bnkArgument.newTree(
+      )
+    result["footnote"][1].add bnkArgument.newTree(
       newTextNode(text)
     )
   

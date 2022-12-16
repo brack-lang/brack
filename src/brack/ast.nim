@@ -62,7 +62,8 @@ proc newIdentNode* (val: string): BrackNode =
 
 proc newParagraph* (id: string = $genOid()): BrackNode =
   result = bnkCurlyBracket.newTree()
-  result.children.add newIdentNode(id, "paragraph")
+  result.id = id
+  result.children.add newIdentNode("paragraph")
   result.children.add bnkArgument.newTree()
 
 proc newTextNode* (id: string, val: string): BrackNode =
