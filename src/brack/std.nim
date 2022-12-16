@@ -79,6 +79,7 @@ brackModule(Html):
     )
 
   proc footnote* (ast: BrackNode, id: string): BrackNode {.angle: "^".} =
+    echo "footnote"
     result = ast
     let
       text = ast[id][1][0].val
@@ -106,7 +107,7 @@ brackModule(Html):
           newIdentNode("footnoteFooter")
         )
       )
-    result["footnote"][1].add bnkArgument.newTree(
+    result["footnote"][1][0].add bnkArgument.newTree(
       newTextNode(text)
     )
   
