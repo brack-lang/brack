@@ -79,7 +79,6 @@ brackModule(Html):
     )
 
   proc footnote* (ast: BrackNode, id: string): BrackNode {.angle: "^".} =
-    echo "footnote"
     result = ast
     let
       text = ast[id][1][0].val
