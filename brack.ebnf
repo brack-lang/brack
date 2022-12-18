@@ -1,0 +1,10 @@
+document  = stmt*
+stmt      = (curly | expr)* "\n"
+expr      = macroexpr | squared
+macroexpr = character | angle
+angle     = "<" call ">"
+curly     = "{" call "}"
+squared   = "[" call "]"
+call      = macroexpr (" " arguments)?
+arguments = expr ("," expr)*
+character = LETTER
