@@ -32,6 +32,9 @@ brackModule(Html):
   proc anchorLink* (text, url: string): string {.square: "@".} =
     result = htmlgen.a(text, href=url, target="_blank", rel="noopener noreferrer")
 
+  proc innerAnchorLink* (text, url: string): string {.square: "@@".} =
+    result = htmlgen.a(text, href=url)
+
   proc strikeoutline* (text: string): string {.square: "~".} =
     const style = style"""
       text-decoration: line-through;
@@ -87,7 +90,7 @@ brackModule(Html):
         newIdentNode("footnoteSup"),
         bnkArgument.newTree(
           bnkSquareBracket.newTree(
-            newIdentNode("@"),
+            newIdentNode("@@"),
             bnkArgument.newTree(
               newTextNode(&"[{$n}]")
             ),
