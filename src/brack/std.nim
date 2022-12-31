@@ -27,7 +27,7 @@ brackModule:
     result = htmlgen.span(text, style=style)
 
   proc anchorLink* (text, url: string): string {.square: "@".} =
-    result = htmlgen.a(text, href=url)
+    result = htmlgen.a(text, href=url, target="_blank", rel="noopener noreferrer")
 
   proc strikeoutline* (text: string): string {.square: "~".} =
     const style = style"""
