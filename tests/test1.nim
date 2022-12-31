@@ -8,10 +8,13 @@
 import unittest
 
 import brack
+import brack/ast
 
 initBrack()
 
 test "test":
   var f = open("tests/res.html", fmWrite)
-  f.write(lex("tests/index.[]").parse().expand().generate())
+  let tokens = tokenize("tests/index.[]")
+  let ast = tokens.parse()
+  f.write(ast.expand().generate())
   f.close()

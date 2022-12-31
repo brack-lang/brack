@@ -100,17 +100,17 @@ proc parse* (tokens: seq[string]): BrackNode =
   result = bnkRoot.newTree()
   var
     index = 0
-    targetNode = bnkParagraph.newTree()
+    targetNode = newParagraph()
   while index < tokens.len:
     let token = tokens[index]
     if token == "<":
       var node = bnkAngleBracket.newTree()
       (node.children, index) = parseLeftAngleBracket(tokens, index+1)
-      targetNode.children.add node
+      targetNode.children[^1].add node
     elif token == "[":
       var node = bnkSquareBracket.newTree()
       (node.children, index) = parseLeftSquareBracket(tokens, index+1)
-      targetNode.children.add node
+      targetNode.children[^1].add node
     elif token == "{":
       var node = bnkCurlyBracket.newTree()
       (node.children, index) = parseLeftCurlyBracket(tokens, index+1)
@@ -118,12 +118,13 @@ proc parse* (tokens: seq[string]): BrackNode =
     elif index > 0 and tokens[index-1] == "\n" and token == "\n":
       if not targetNode.empty:
         var targetNode = targetNode
-        targetNode.children = targetNode.children[0..^2]
+        if targetNode.children.len > 0 and targetNode.children[^1].children.len > 0:
+          targetNode.children[^1].children = targetNode.children[^1].children[0..^2]
         result.children.add targetNode
-      targetNode = bnkParagraph.newTree()
-    elif not(targetNode.children.len == 0 and token == "\n"):
+      targetNode = newParagraph()
+    elif not(targetNode.children[^1].children.len == 0 and token == "\n"):
       var node = newTextNode(token)
-      targetNode.children.add node
+      targetNode.children[^1].add node
 
     index += 1
   if not targetNode.empty:

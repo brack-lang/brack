@@ -1,6 +1,6 @@
-import brack/lexer
+import brack/tokenizer
 import brack/parser
 import brack/initialize
 import brack/std
 
-export lexer, parser, initialize, std
+export tokenizer, parser, initialize, std
