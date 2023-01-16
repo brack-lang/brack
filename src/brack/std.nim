@@ -110,10 +110,18 @@ brackModule(Html):
       newTextNode(text)
     )
   
-  proc list* (texts: seq[string]): string {.curly: "list".} =
+  proc unorderedList* (texts: seq[string]): string {.curly: "ul".} =
     for text in texts:
-      result.add htmlgen.li(text.strip)
+      result.add text.strip
     result = htmlgen.ul(result)
+  
+  proc orderedList* (texts: seq[string]): string {.curly: "ol".} =
+    for text in texts:
+      result.add text.strip
+    result = htmlgen.ol(result)
+  
+  proc list* (text: string): string {.square: "li".} =
+    result = htmlgen.li(text)
 
   proc image* (url, alt: string): string {.curly: "img".} =
     result = htmlgen.img(src=url, alt=alt)
