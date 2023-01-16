@@ -1,7 +1,7 @@
 document  = stmt*
-stmt      = (curly | expr)* "\n"
+stmt      = curly | expr* "\n"
 expr      = macroexpr | squared
-macroexpr = character | angle
+macroexpr = character* | angle
 angle     = "<" call ">"
 curly     = "{" call "}"
 squared   = "[" call "]"
