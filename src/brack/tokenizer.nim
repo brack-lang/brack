@@ -1,94 +1,195 @@
 import std/strutils
 
-proc tokenize* (path: string): seq[string] =
-  let
-    brackSrcFile = open(path)
-    brackSrc = brackSrcFile.readAll
-  brackSrcFile.close()
+type
+  Tokenizer* = object
+    rules: seq[TokenizeRule]
+    nextChar: char
+    escaped: bool
+    squareBracketNestCount: int
+    curlyBracketNestCount: int
+    angleBracketNestCount: int
+    searchingCommandName: bool
+    token: string
+    tokens: seq[string]
 
+  TokenizeRule* = object
+    match: proc (tokenizer: Tokenizer): bool
+    apply: proc (tokenizer: var Tokenizer)
+
+func addRule (tokenizer: Tokenizer, rule: TokenizeRule): Tokenizer =
+  var tokenizer = tokenizer
+  tokenizer.rules.add rule
+  result = tokenizer
+
+proc tokenize* (tokenizer: Tokenizer, document: string): seq[string] =
   var
-    token = ""
+    tokenizer = tokenizer
     index = 0
-    squareBracketNestCount = 0
-    curlyBracketNestCount = 0
-    angleBracketNestCount = 0
-    searchingCommandName = false
-    isEscaping = false
+  while index < document.len:
+    tokenizer.nextChar = document[index]
+    for rule in tokenizer.rules:
+      if rule.match(tokenizer):
+        rule.apply(tokenizer)
+        break
+    index += 1
+  if tokenizer.token != "":
+    tokenizer.tokens.add tokenizer.token
+  result = tokenizer.tokens
 
-  while index < brackSrc.len:
-    let targetChar = brackSrc[index]
+proc escapedRule: TokenizeRule =
+  proc escapedMatcher (tokenizer: Tokenizer): bool =
+    result = tokenizer.escaped
 
-    if isEscaping:
-      isEscaping = false
-      index += 1
-      token.add targetChar
-    elif targetChar == '\\':
-      isEscaping = true
-      index += 1
-    elif targetChar == '<':
-      angleBracketNestCount += 1
-      if token != "":
-        result.add token.strip
-        token = ""
-      result.add $targetChar
-      index += 1
-      searchingCommandName = true
-    elif targetChar == '>' and angleBracketNestCount > 0:
-      angleBracketNestCount -= 1
-      if token != "":
-        result.add token.strip
-        token = ""
-      result.add $targetChar
-      index += 1
-    elif targetChar == '[':
-      squareBracketNestCount += 1
-      if token != "":
-        result.add token.strip
-        token = ""
-      result.add $targetChar
-      index += 1
-      searchingCommandName = true
-    elif targetChar == ']' and squareBracketNestCount > 0:
-      squareBracketNestCount -= 1
-      if token != "":
-        result.add token.strip
-        token = ""
-      result.add $targetChar
-      index += 1
-    elif targetChar == '{':
-      curlyBracketNestCount += 1
-      if token != "":
-        result.add token.strip
-        token = ""
-      result.add $targetChar
-      index += 1
-      searchingCommandName = true
-    elif targetChar == '}' and curlyBracketNestCount > 0:
-      curlyBracketNestCount -= 1
-      if token != "":
-        result.add token
-        token = ""
-      result.add $targetChar
-      index += 1
-    elif targetChar == ',' and (squareBracketNestCount > 0 or curlyBracketNestCount > 0 or angleBracketNestCount > 0):
-      result.add [token.strip, $targetChar]
-      token = ""
-      index += 1
-    elif targetChar == ' ' and searchingCommandName:
-      if token != "":
-        result.add token.strip
-        token = ""
-        index += 1
-      searchingCommandName = false
-    elif targetChar == '\n':
-      if token != "" and token.strip != "":
-        result.add token.strip
-        token = ""
-      result.add "\n"
-      index += 1
-    else:
-      token.add targetChar
-      index += 1
+  proc escapedApplier (tokenizer: var Tokenizer) =
+    tokenizer.token.add tokenizer.nextChar
+    tokenizer.escaped = false
+  
+  result = TokenizeRule(match: escapedMatcher, apply: escapedApplier)
 
-  if token != "":
-    result.add token.strip
+proc backslashRule: TokenizeRule =
+  proc backslashMatcher (tokenizer: Tokenizer): bool =
+    result = tokenizer.nextChar == '\\'
+
+  proc backslashApplier (tokenizer: var Tokenizer) =
+    tokenizer.escaped = true
+
+  result = TokenizeRule(match: backslashMatcher, apply: backslashApplier)
+
+proc openAngleBracketRule: TokenizeRule =
+  proc openAngleBracketMatcher (tokenizer: Tokenizer): bool =
+    result = tokenizer.nextChar == '<'
+
+  proc openAngleBracketApplier (tokenizer: var Tokenizer) =
+    tokenizer.angleBracketNestCount += 1
+    if tokenizer.token != "":
+      tokenizer.tokens.add tokenizer.token
+      tokenizer.token = ""
+    tokenizer.tokens.add $tokenizer.nextChar
+    tokenizer.searchingCommandName = true
+
+  result = TokenizeRule(match: openAngleBracketMatcher, apply: openAngleBracketApplier)
+
+proc closeAngleBracketRule: TokenizeRule =
+  proc closeAngleBracketMatcher (tokenizer: Tokenizer): bool =
+    result = tokenizer.nextChar == '>' and tokenizer.angleBracketNestCount > 0
+
+  proc closeAngleBracketApplier (tokenizer: var Tokenizer) =
+    tokenizer.angleBracketNestCount -= 1
+    if tokenizer.token != "":
+      tokenizer.tokens.add tokenizer.token
+      tokenizer.token = ""
+    tokenizer.tokens.add $tokenizer.nextChar
+
+  result = TokenizeRule(match: closeAngleBracketMatcher, apply: closeAngleBracketApplier)
+
+proc openSquareBracketRule: TokenizeRule =
+  proc openSquareBracketMatcher (tokenizer: Tokenizer): bool =
+    result = tokenizer.nextChar == '['
+
+  proc openSquareBracketApplier (tokenizer: var Tokenizer) =
+    tokenizer.squareBracketNestCount += 1
+    if tokenizer.token != "":
+      tokenizer.tokens.add tokenizer.token
+      tokenizer.token = ""
+    tokenizer.tokens.add $tokenizer.nextChar
+    tokenizer.searchingCommandName = true
+
+  result = TokenizeRule(match: openSquareBracketMatcher, apply: openSquareBracketApplier)
+
+proc closeSquareBracketRule: TokenizeRule =
+  proc closeSquareBracketMatcher (tokenizer: Tokenizer): bool =
+    result = tokenizer.nextChar == ']' and tokenizer.squareBracketNestCount > 0
+
+  proc closeSquareBracketApplier (tokenizer: var Tokenizer) =
+    tokenizer.squareBracketNestCount -= 1
+    if tokenizer.token != "":
+      tokenizer.tokens.add tokenizer.token.strip
+      tokenizer.token = ""
+    tokenizer.tokens.add $tokenizer.nextChar
+
+  result = TokenizeRule(match: closeSquareBracketMatcher, apply: closeSquareBracketApplier)
+
+proc openCurlyBracketRule: TokenizeRule =
+  proc openCurlyBracketMatcher (tokenizer: Tokenizer): bool =
+    result = tokenizer.nextChar == '{'
+
+  proc openCurlyBracketApplier (tokenizer: var Tokenizer) =
+    tokenizer.curlyBracketNestCount += 1
+    if tokenizer.token != "":
+      tokenizer.tokens.add tokenizer.token
+      tokenizer.token = ""
+    tokenizer.tokens.add $tokenizer.nextChar
+    tokenizer.searchingCommandName = true
+
+  result = TokenizeRule(match: openCurlyBracketMatcher, apply: openCurlyBracketApplier)
+
+proc closeCurlyBracketRule: TokenizeRule =
+  proc closeCurlyBracketMatcher (tokenizer: Tokenizer): bool =
+    result = tokenizer.nextChar == '}' and tokenizer.curlyBracketNestCount > 0
+
+  proc closeCurlyBracketApplier (tokenizer: var Tokenizer) =
+    tokenizer.curlyBracketNestCount -= 1
+    if tokenizer.token != "":
+      tokenizer.tokens.add tokenizer.token
+      tokenizer.token = ""
+    tokenizer.tokens.add $tokenizer.nextChar
+
+  result = TokenizeRule(match: closeCurlyBracketMatcher, apply: closeCurlyBracketApplier)
+
+proc argumentsRule: TokenizeRule =
+  proc argumentsMatcher (tokenizer: Tokenizer): bool =
+    result = tokenizer.nextChar == ',' and (tokenizer.squareBracketNestCount > 0 or tokenizer.curlyBracketNestCount > 0 or tokenizer.angleBracketNestCount > 0)
+
+  proc argumentsApplier (tokenizer: var Tokenizer) =
+    tokenizer.tokens.add tokenizer.token.strip
+    tokenizer.token = ""
+    tokenizer.tokens.add $tokenizer.nextChar
+
+  result = TokenizeRule(match: argumentsMatcher, apply: argumentsApplier)
+
+proc commandNameRule: TokenizeRule =
+  proc commandNameMatcher (tokenizer: Tokenizer): bool =
+    result = tokenizer.nextChar == ' ' and tokenizer.searchingCommandName
+
+  proc commandNameApplier (tokenizer: var Tokenizer) =
+    if tokenizer.token != "":
+      tokenizer.tokens.add tokenizer.token
+      tokenizer.token = ""
+    tokenizer.searchingCommandName = false
+
+  result = TokenizeRule(match: commandNameMatcher, apply: commandNameApplier)
+
+proc newLinesRule: TokenizeRule =
+  proc newLinesMatcher (tokenizer: Tokenizer): bool =
+    result = tokenizer.nextChar == '\n'
+
+  proc newLinesApplier (tokenizer: var Tokenizer) =
+    tokenizer.tokens.add tokenizer.token
+    tokenizer.token = ""
+    tokenizer.tokens.add $tokenizer.nextChar
+
+  result = TokenizeRule(match: newLinesMatcher, apply: newLinesApplier)
+
+proc otherwiseRule: TokenizeRule =
+  proc otherwiseMatcher (tokenizer: Tokenizer): bool =
+    result = true
+
+  proc otherwiseApplier (tokenizer: var Tokenizer) =
+    tokenizer.token.add tokenizer.nextChar
+
+  result = TokenizeRule(match: otherwiseMatcher, apply: otherwiseApplier)
+
+func newTokenizer* (): Tokenizer =
+  result = Tokenizer()
+    .addRule(escapedRule())
+    .addRule(backslashRule())
+    .addRule(openAngleBracketRule())
+    .addRule(closeAngleBracketRule())
+    .addRule(openSquareBracketRule())
+    .addRule(closeSquareBracketRule())
+    .addRule(openCurlyBracketRule())
+    .addRule(closeCurlyBracketRule())
+    .addRule(argumentsRule())
+    .addRule(commandNameRule())
+    .addRule(newLinesRule())
+    .addRule(otherwiseRule())
