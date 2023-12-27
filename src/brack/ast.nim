@@ -1,6 +1,7 @@
 import std/oids
 import std/strformat
 import std/strutils
+import std/random
 
 {.experimental: "strictFuncs".}
 
@@ -18,6 +19,16 @@ type
     bnkAngleBracket
     bnkArgument
     bnkIdent
+
+    bnkDocument
+    bnkStmt
+    bnkExprSeq
+    bnkExpr
+    bnkMacroCommand
+    bnkBlockCommand
+    bnkInlineCommand
+    bnkCommandSpec
+    bnkArguments
     bnkText
   
   BrackNodeObj = object
@@ -299,3 +310,13 @@ proc `children=`* (ast: BrackNode, children: seq[BrackNode]) =
 #       macros.newIdentNode("BrackNode")
 #     )
 #   )
+
+func `~=`* (left: BrackNode, right: BrackNode): bool =
+    result = left.kind == right.kind
+    case left.kind
+    of bnkText:
+        result = result and (left.val == right.val)
+    else:
+        result = result and (left.children.len == right.children.len)
+        for i in 0 ..< left.children.len:
+            result = result and (left.children[i] ~= right.children[i])

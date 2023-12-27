@@ -4,6 +4,9 @@ import std/strutils
 import api
 import ast
 
+proc foo* (text: string): string {.curly: "^", brack: "json".} =
+  discard
+
 brackModule(Html):
   proc paragraph* (text: string): string {.curly: "paragraph".} =
     result = htmlgen.p(text.replace("\n", "<br />"))
