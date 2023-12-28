@@ -6,3 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.77"
+extism = "^1.0.0-rc3"
+serde = "1.0.193"
+serde_json = "1.0.108"
