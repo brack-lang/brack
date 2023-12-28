@@ -1,6 +1,6 @@
-use crate::tokens::{Tokenizer, Token};
+use crate::tokens::{Token, Tokenizer};
 
-fn separate (s: &str) -> (char, String) {
+fn separate(s: &str) -> (char, String) {
     if s == "" {
         return ('\0', String::new());
     }
@@ -10,14 +10,14 @@ fn separate (s: &str) -> (char, String) {
     return (s.chars().next().unwrap(), s[1..].to_string());
 }
 
-fn update_tokens (t: &Tokenizer, strip: bool) -> Vec<Token> {
+fn update_tokens(t: &Tokenizer, strip: bool) -> Vec<Token> {
     let mut tokens = t.tokens.clone().unwrap_or_default();
     let pool = t.pool.clone().unwrap_or_default();
 
     if &pool == "" {
         return tokens;
     }
-    
+
     if strip {
         tokens.push(Token::Text(pool.trim().to_string()));
         return tokens;
@@ -27,7 +27,7 @@ fn update_tokens (t: &Tokenizer, strip: bool) -> Vec<Token> {
     tokens
 }
 
-fn tokenize_escape (t: &Tokenizer) -> Vec<Token> {
+fn tokenize_escape(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
     let pool = t.pool.clone().unwrap_or_default();
 
@@ -41,7 +41,7 @@ fn tokenize_escape (t: &Tokenizer) -> Vec<Token> {
     inner_tokenize(&t.merge(&t2))
 }
 
-fn tokenize_back_slash (t: &Tokenizer) -> Vec<Token> {
+fn tokenize_back_slash(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
 
     let (_, tail) = separate(&s);
@@ -53,13 +53,13 @@ fn tokenize_back_slash (t: &Tokenizer) -> Vec<Token> {
     inner_tokenize(&t.merge(&t2))
 }
 
-fn tokenize_angle_bracket_open (t: &Tokenizer) -> Vec<Token> {
+fn tokenize_angle_bracket_open(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
-    
+
     let (_, tail) = separate(&s);
     let mut new_tokens = update_tokens(t, false);
     new_tokens.push(Token::AngleBracketOpen);
-    
+
     let t2 = Tokenizer {
         untreated: Some(tail),
         pool: Some(String::new()),
@@ -71,13 +71,13 @@ fn tokenize_angle_bracket_open (t: &Tokenizer) -> Vec<Token> {
     inner_tokenize(&t.merge(&t2))
 }
 
-fn tokenize_angle_bracket_close (t: &Tokenizer) -> Vec<Token> {
+fn tokenize_angle_bracket_close(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
     let (_, tail) = separate(&s);
-    
+
     let mut new_tokens = update_tokens(t, true);
     new_tokens.push(Token::AngleBracketClose);
-    
+
     let mut t2 = Tokenizer {
         untreated: Some(tail),
         pool: Some(String::new()),
@@ -91,13 +91,13 @@ fn tokenize_angle_bracket_close (t: &Tokenizer) -> Vec<Token> {
     inner_tokenize(&t.merge(&t2))
 }
 
-fn tokenize_curly_bracket_open (t: &Tokenizer) -> Vec<Token> {
+fn tokenize_curly_bracket_open(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
-    
+
     let (_, tail) = separate(&s);
     let mut new_tokens = update_tokens(t, false);
     new_tokens.push(Token::CurlyBracketOpen);
-    
+
     let t2 = Tokenizer {
         untreated: Some(tail),
         pool: Some(String::new()),
@@ -109,13 +109,13 @@ fn tokenize_curly_bracket_open (t: &Tokenizer) -> Vec<Token> {
     inner_tokenize(&t.merge(&t2))
 }
 
-fn tokenize_curly_bracket_close (t: &Tokenizer) -> Vec<Token> {
+fn tokenize_curly_bracket_close(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
     let (_, tail) = separate(&s);
-    
+
     let mut new_tokens = update_tokens(t, true);
     new_tokens.push(Token::CurlyBracketClose);
-    
+
     let mut t2 = Tokenizer {
         untreated: Some(tail),
         pool: Some(String::new()),
@@ -129,13 +129,13 @@ fn tokenize_curly_bracket_close (t: &Tokenizer) -> Vec<Token> {
     inner_tokenize(&t.merge(&t2))
 }
 
-fn tokenize_square_bracket_open (t: &Tokenizer) -> Vec<Token> {
+fn tokenize_square_bracket_open(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
-    
+
     let (_, tail) = separate(&s);
     let mut new_tokens = update_tokens(t, false);
     new_tokens.push(Token::SquareBracketOpen);
-    
+
     let t2 = Tokenizer {
         untreated: Some(tail),
         pool: Some(String::new()),
@@ -147,13 +147,13 @@ fn tokenize_square_bracket_open (t: &Tokenizer) -> Vec<Token> {
     inner_tokenize(&t.merge(&t2))
 }
 
-fn tokenize_square_bracket_close (t: &Tokenizer) -> Vec<Token> {
+fn tokenize_square_bracket_close(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
     let (_, tail) = separate(&s);
-    
+
     let mut new_tokens = update_tokens(t, true);
     new_tokens.push(Token::SquareBracketClose);
-    
+
     let mut t2 = Tokenizer {
         untreated: Some(tail),
         pool: Some(String::new()),
@@ -167,7 +167,7 @@ fn tokenize_square_bracket_close (t: &Tokenizer) -> Vec<Token> {
     inner_tokenize(&t.merge(&t2))
 }
 
-fn tokenize_arguments (t: &Tokenizer) -> Vec<Token> {
+fn tokenize_arguments(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
     let (_, tail) = separate(&s);
     let mut new_tokens = update_tokens(t, true);
@@ -181,7 +181,7 @@ fn tokenize_arguments (t: &Tokenizer) -> Vec<Token> {
     inner_tokenize(&t.merge(&t2))
 }
 
-fn tokenize_identifier (t: &Tokenizer) -> Vec<Token> {
+fn tokenize_identifier(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
     let (_, tail) = separate(&s);
     let mut new_tokens = t.tokens.clone().unwrap_or_default();
@@ -196,7 +196,7 @@ fn tokenize_identifier (t: &Tokenizer) -> Vec<Token> {
     inner_tokenize(&t.merge(&t2))
 }
 
-fn tokenize_newline (t: &Tokenizer) -> Vec<Token> {
+fn tokenize_newline(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
     let (_, tail) = separate(&s);
     let pool = t.pool.clone().unwrap_or_default();
@@ -214,21 +214,21 @@ fn tokenize_newline (t: &Tokenizer) -> Vec<Token> {
         tokens: Some(new_tokens),
         ..Default::default()
     };
-    inner_tokenize(&t.merge(&t2)) 
+    inner_tokenize(&t.merge(&t2))
 }
 
-fn inner_tokenize (t: &Tokenizer) -> Vec<Token> {
+fn inner_tokenize(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
-    let pool = t.pool.clone().unwrap_or_default(); 
-    
+    let pool = t.pool.clone().unwrap_or_default();
+
     let (head, tail) = separate(&s);
 
     if head == '\0' {
-        return update_tokens(t, false)
+        return update_tokens(t, false);
     }
 
     if t.escaped.unwrap_or_default() {
-        return tokenize_escape(t)
+        return tokenize_escape(t);
     }
 
     let angle_c = t.angle_nest_count.unwrap_or_default();
@@ -254,11 +254,11 @@ fn inner_tokenize (t: &Tokenizer) -> Vec<Token> {
             };
 
             inner_tokenize(&t.merge(&t2))
-        },
+        }
     }
 }
 
-pub fn tokenize (s: &str) -> Vec<Token> {
+pub fn tokenize(s: &str) -> Vec<Token> {
     let t = Tokenizer {
         untreated: Some(s.to_string()),
         ..Default::default()
@@ -275,101 +275,119 @@ mod tests {
     #[test]
     fn test_split_no_commands() {
         let tokens = tokenize("Hello, World!");
-        assert_eq!(tokens, vec![
-            Token::Text("Hello, World!".to_string()),
-        ]);
+        assert_eq!(tokens, vec![Token::Text("Hello, World!".to_string()),]);
     }
 
     #[test]
     fn test_split_commands_with_an_argument_includes_square_brackets() {
         let tokens = tokenize("Hello, [* World!]");
-        assert_eq!(tokens, vec![
-            Token::Text("Hello, ".to_string()),
-            Token::SquareBracketOpen,
-            Token::Ident("*".to_string()),
-            Token::Text("World!".to_string()),
-            Token::SquareBracketClose,
-        ]);
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text("Hello, ".to_string()),
+                Token::SquareBracketOpen,
+                Token::Ident("*".to_string()),
+                Token::Text("World!".to_string()),
+                Token::SquareBracketClose,
+            ]
+        );
     }
 
     #[test]
     fn test_split_commands_with_an_argument_includes_curly_brackets() {
         let tokens = tokenize("Hello, {* World!}");
-        assert_eq!(tokens, vec![
-            Token::Text("Hello, ".to_string()),
-            Token::CurlyBracketOpen,
-            Token::Ident("*".to_string()),
-            Token::Text("World!".to_string()),
-            Token::CurlyBracketClose,
-        ]);
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text("Hello, ".to_string()),
+                Token::CurlyBracketOpen,
+                Token::Ident("*".to_string()),
+                Token::Text("World!".to_string()),
+                Token::CurlyBracketClose,
+            ]
+        );
     }
 
     #[test]
     fn test_split_commands_with_an_argument_includes_angle_brackets() {
         let tokens = tokenize("Hello, <* World!>");
-        assert_eq!(tokens, vec![
-            Token::Text("Hello, ".to_string()),
-            Token::AngleBracketOpen,
-            Token::Ident("*".to_string()),
-            Token::Text("World!".to_string()),
-            Token::AngleBracketClose,
-        ]);
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text("Hello, ".to_string()),
+                Token::AngleBracketOpen,
+                Token::Ident("*".to_string()),
+                Token::Text("World!".to_string()),
+                Token::AngleBracketClose,
+            ]
+        );
     }
 
     #[test]
     fn test_split_commands_with_two_arguments_includes_square_brackets() {
         let tokens = tokenize("Hello, [@ World!, https://example.com/]");
-        assert_eq!(tokens, vec![
-            Token::Text("Hello, ".to_string()),
-            Token::SquareBracketOpen,
-            Token::Ident("@".to_string()),
-            Token::Text("World!".to_string()),
-            Token::Comma,
-            Token::Text("https://example.com/".to_string()),
-            Token::SquareBracketClose,
-        ]);
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text("Hello, ".to_string()),
+                Token::SquareBracketOpen,
+                Token::Ident("@".to_string()),
+                Token::Text("World!".to_string()),
+                Token::Comma,
+                Token::Text("https://example.com/".to_string()),
+                Token::SquareBracketClose,
+            ]
+        );
     }
 
     #[test]
     fn test_split_nesting_commands() {
         let tokens = tokenize("Hello, [* [@ World!, https://example.com/]]");
-        assert_eq!(tokens, vec![
-            Token::Text("Hello, ".to_string()),
-            Token::SquareBracketOpen,
-            Token::Ident("*".to_string()),
-            Token::SquareBracketOpen,
-            Token::Ident("@".to_string()),
-            Token::Text("World!".to_string()),
-            Token::Comma,
-            Token::Text("https://example.com/".to_string()),
-            Token::SquareBracketClose,
-            Token::SquareBracketClose,
-        ]);
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text("Hello, ".to_string()),
+                Token::SquareBracketOpen,
+                Token::Ident("*".to_string()),
+                Token::SquareBracketOpen,
+                Token::Ident("@".to_string()),
+                Token::Text("World!".to_string()),
+                Token::Comma,
+                Token::Text("https://example.com/".to_string()),
+                Token::SquareBracketClose,
+                Token::SquareBracketClose,
+            ]
+        );
     }
 
     #[test]
     fn test_split_newlines() {
-        let tokens = tokenize("Hello,\nWorld,\n{** Contact}\n[@ My website, https://example.com/]\n\n2023.12.28\n");
-        assert_eq!(tokens, vec![
-            Token::Text("Hello,".to_string()),
-            Token::NewLine,
-            Token::Text("World,".to_string()),
-            Token::NewLine,
-            Token::CurlyBracketOpen,
-            Token::Ident("**".to_string()),
-            Token::Text("Contact".to_string()),
-            Token::CurlyBracketClose,
-            Token::NewLine,
-            Token::SquareBracketOpen,
-            Token::Ident("@".to_string()),
-            Token::Text("My website".to_string()),
-            Token::Comma,
-            Token::Text("https://example.com/".to_string()),
-            Token::SquareBracketClose,
-            Token::NewLine,
-            Token::NewLine,
-            Token::Text("2023.12.28".to_string()),
-            Token::NewLine,
-        ]);
+        let tokens = tokenize(
+            "Hello,\nWorld,\n{** Contact}\n[@ My website, https://example.com/]\n\n2023.12.28\n",
+        );
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text("Hello,".to_string()),
+                Token::NewLine,
+                Token::Text("World,".to_string()),
+                Token::NewLine,
+                Token::CurlyBracketOpen,
+                Token::Ident("**".to_string()),
+                Token::Text("Contact".to_string()),
+                Token::CurlyBracketClose,
+                Token::NewLine,
+                Token::SquareBracketOpen,
+                Token::Ident("@".to_string()),
+                Token::Text("My website".to_string()),
+                Token::Comma,
+                Token::Text("https://example.com/".to_string()),
+                Token::SquareBracketClose,
+                Token::NewLine,
+                Token::NewLine,
+                Token::Text("2023.12.28".to_string()),
+                Token::NewLine,
+            ]
+        );
     }
 }
