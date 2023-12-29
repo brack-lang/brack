@@ -63,3 +63,43 @@ impl Tokenizer {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_merge() {
+        use super::*;
+        let a = Tokenizer {
+            untreated: Some("a".to_string()),
+            pool: Some("a".to_string()),
+            tokens: Some(vec![Token::Text("a".to_string())]),
+            escaped: Some(true),
+            angle_nest_count: Some(1),
+            square_nest_count: Some(1),
+            curly_nest_count: Some(1),
+            looking_for_identifier: Some(true),
+        };
+        let b = Tokenizer {
+            untreated: Some("b".to_string()),
+            pool: Some("b".to_string()),
+            tokens: Some(vec![Token::Text("b".to_string())]),
+            escaped: Some(false),
+            angle_nest_count: Some(2),
+            square_nest_count: Some(2),
+            curly_nest_count: Some(2),
+            looking_for_identifier: Some(false),
+        };
+        let c = a.merge(&b);
+        let res = Tokenizer {
+            untreated: Some("b".to_string()),
+            pool: Some("b".to_string()),
+            tokens: Some(vec![Token::Text("b".to_string())]),
+            escaped: Some(false),
+            angle_nest_count: Some(2),
+            square_nest_count: Some(2),
+            curly_nest_count: Some(2),
+            looking_for_identifier: Some(false),
+        };
+        assert_eq!(c, res);
+    }
+}
