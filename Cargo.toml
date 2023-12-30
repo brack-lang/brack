@@ -10,3 +10,11 @@ anyhow = "1.0.77"
 extism = "^1.0.0-rc3"
 serde = "1.0.193"
 serde_json = "1.0.108"
+
+[dependencies.uuid]
+version = "1.6.1"
+features = [
+    "v4",
+    "fast-rng",
+    "macro-diagnostics",
+]
