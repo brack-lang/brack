@@ -139,9 +139,10 @@ mod tests {
             token_start_column: Some(1),
             untreated: Some("a".to_string()),
             pool: Some("a".to_string()),
-            tokens: Some(vec![
-                Token::Text("a".to_string(), TokenData { line: 1, column: 1 }),
-            ]),
+            tokens: Some(vec![Token::Text(
+                "a".to_string(),
+                TokenData { line: 1, column: 1 },
+            )]),
             escaped: Some(true),
             angle_nest_count: Some(1),
             square_nest_count: Some(1),
@@ -155,10 +156,10 @@ mod tests {
             token_start_column: Some(2),
             untreated: Some("b".to_string()),
             pool: Some("b".to_string()),
-            tokens: Some(vec![Token::Text("b".to_string(), TokenData {
-                line: 2,
-                column: 2,
-            })]),
+            tokens: Some(vec![Token::Text(
+                "b".to_string(),
+                TokenData { line: 2, column: 2 },
+            )]),
             escaped: Some(false),
             angle_nest_count: Some(2),
             square_nest_count: Some(2),
@@ -173,10 +174,10 @@ mod tests {
             token_start_column: Some(2),
             untreated: Some("b".to_string()),
             pool: Some("b".to_string()),
-            tokens: Some(vec![Token::Text("b".to_string(), TokenData {
-                line: 2,
-                column: 2,
-            })]),
+            tokens: Some(vec![Token::Text(
+                "b".to_string(),
+                TokenData { line: 2, column: 2 },
+            )]),
             escaped: Some(false),
             angle_nest_count: Some(2),
             square_nest_count: Some(2),
