@@ -297,9 +297,9 @@ fn tokenize_newline(t: &Tokenizer) -> Vec<Token> {
 
     let t2 = Tokenizer {
         line: Some(line + 1),
-        column: Some(0),
+        column: Some(1),
         token_start_line: Some(line + 1),
-        token_start_column: Some(0),
+        token_start_column: Some(1),
         untreated: Some(tail),
         pool: Some(String::new()),
         tokens: Some(new_tokens),
@@ -359,9 +359,9 @@ fn inner_tokenize(t: &Tokenizer) -> Vec<Token> {
 pub fn tokenize(s: &str) -> Vec<Token> {
     let t = Tokenizer {
         line: Some(1),
-        column: Some(0),
+        column: Some(1),
         token_start_line: Some(1),
-        token_start_column: Some(0),
+        token_start_column: Some(1),
         untreated: Some(s.to_string()),
         ..Default::default()
     };
@@ -382,11 +382,11 @@ mod tests {
             vec![
                 Token::Text(
                     "Hello, World!".to_string(),
-                    TokenData { line: 1, column: 0 }
+                    TokenData { line: 1, column: 1 }
                 ),
                 Token::EOF(TokenData {
                     line: 1,
-                    column: 13,
+                    column: 14,
                 }),
             ]
         );
@@ -398,23 +398,23 @@ mod tests {
         assert_eq!(
             tokens,
             vec![
-                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 0 }),
-                Token::SquareBracketOpen(TokenData { line: 1, column: 7 }),
-                Token::Ident("*".to_string(), TokenData { line: 1, column: 8 }),
+                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
+                Token::SquareBracketOpen(TokenData { line: 1, column: 8 }),
+                Token::Ident("*".to_string(), TokenData { line: 1, column: 9 }),
                 Token::Text(
                     "World!".to_string(),
                     TokenData {
                         line: 1,
-                        column: 10,
+                        column: 11,
                     }
                 ),
                 Token::SquareBracketClose(TokenData {
                     line: 1,
-                    column: 16,
+                    column: 17,
                 }),
                 Token::EOF(TokenData {
                     line: 1,
-                    column: 17,
+                    column: 18,
                 }),
             ]
         );
@@ -426,23 +426,23 @@ mod tests {
         assert_eq!(
             tokens,
             vec![
-                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 0 }),
-                Token::CurlyBracketOpen(TokenData { line: 1, column: 7 }),
-                Token::Ident("*".to_string(), TokenData { line: 1, column: 8 }),
+                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
+                Token::CurlyBracketOpen(TokenData { line: 1, column: 8 }),
+                Token::Ident("*".to_string(), TokenData { line: 1, column: 9 }),
                 Token::Text(
                     "World!".to_string(),
                     TokenData {
                         line: 1,
-                        column: 10,
+                        column: 11,
                     }
                 ),
                 Token::CurlyBracketClose(TokenData {
                     line: 1,
-                    column: 16,
+                    column: 17,
                 }),
                 Token::EOF(TokenData {
                     line: 1,
-                    column: 17,
+                    column: 18,
                 }),
             ]
         );
@@ -454,23 +454,23 @@ mod tests {
         assert_eq!(
             tokens,
             vec![
-                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 0 }),
-                Token::AngleBracketOpen(TokenData { line: 1, column: 7 }),
-                Token::Ident("*".to_string(), TokenData { line: 1, column: 8 }),
+                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
+                Token::AngleBracketOpen(TokenData { line: 1, column: 8 }),
+                Token::Ident("*".to_string(), TokenData { line: 1, column: 9 }),
                 Token::Text(
                     "World!".to_string(),
                     TokenData {
                         line: 1,
-                        column: 10,
+                        column: 11,
                     }
                 ),
                 Token::AngleBracketClose(TokenData {
                     line: 1,
-                    column: 16,
+                    column: 17,
                 }),
                 Token::EOF(TokenData {
                     line: 1,
-                    column: 17,
+                    column: 18,
                 }),
             ]
         );
@@ -482,34 +482,34 @@ mod tests {
         assert_eq!(
             tokens,
             vec![
-                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 0 }),
-                Token::SquareBracketOpen(TokenData { line: 1, column: 7 }),
-                Token::Ident("@".to_string(), TokenData { line: 1, column: 8 }),
+                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
+                Token::SquareBracketOpen(TokenData { line: 1, column: 8 }),
+                Token::Ident("@".to_string(), TokenData { line: 1, column: 9 }),
                 Token::Text(
                     "World!".to_string(),
                     TokenData {
                         line: 1,
-                        column: 10,
+                        column: 11,
                     }
                 ),
                 Token::Comma(TokenData {
                     line: 1,
-                    column: 16,
+                    column: 17,
                 }),
                 Token::Text(
                     "https://example.com/".to_string(),
                     TokenData {
                         line: 1,
-                        column: 18,
+                        column: 19,
                     }
                 ),
                 Token::SquareBracketClose(TokenData {
                     line: 1,
-                    column: 38,
+                    column: 39,
                 }),
                 Token::EOF(TokenData {
                     line: 1,
-                    column: 39,
+                    column: 40,
                 }),
             ]
         );
@@ -521,49 +521,49 @@ mod tests {
         assert_eq!(
             tokens,
             vec![
-                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 0 }),
-                Token::SquareBracketOpen(TokenData { line: 1, column: 7 }),
-                Token::Ident("*".to_string(), TokenData { line: 1, column: 8 }),
+                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
+                Token::SquareBracketOpen(TokenData { line: 1, column: 8 }),
+                Token::Ident("*".to_string(), TokenData { line: 1, column: 9 }),
                 Token::SquareBracketOpen(TokenData {
                     line: 1,
-                    column: 10,
+                    column: 11,
                 }),
                 Token::Ident(
                     "@".to_string(),
                     TokenData {
                         line: 1,
-                        column: 11,
+                        column: 12,
                     }
                 ),
                 Token::Text(
                     "World!".to_string(),
                     TokenData {
                         line: 1,
-                        column: 13,
+                        column: 14,
                     }
                 ),
                 Token::Comma(TokenData {
                     line: 1,
-                    column: 19,
+                    column: 20,
                 }),
                 Token::Text(
                     "https://example.com/".to_string(),
                     TokenData {
                         line: 1,
-                        column: 21,
+                        column: 22,
                     }
                 ),
                 Token::SquareBracketClose(TokenData {
                     line: 1,
-                    column: 41,
+                    column: 42,
                 }),
                 Token::SquareBracketClose(TokenData {
                     line: 1,
-                    column: 42,
+                    column: 43,
                 }),
                 Token::EOF(TokenData {
                     line: 1,
-                    column: 43,
+                    column: 44,
                 }),
             ]
         );
@@ -577,50 +577,50 @@ mod tests {
         assert_eq!(
             tokens,
             vec![
-                Token::Text("Hello,".to_string(), TokenData { line: 1, column: 0 }),
-                Token::NewLine(TokenData { line: 1, column: 6 }),
-                Token::Text("World,".to_string(), TokenData { line: 2, column: 0 }),
-                Token::NewLine(TokenData { line: 2, column: 6 }),
-                Token::CurlyBracketOpen(TokenData { line: 3, column: 0 }),
-                Token::Ident("**".to_string(), TokenData { line: 3, column: 1 }),
-                Token::Text("Contact".to_string(), TokenData { line: 3, column: 4 }),
+                Token::Text("Hello,".to_string(), TokenData { line: 1, column: 1 }),
+                Token::NewLine(TokenData { line: 1, column: 7 }),
+                Token::Text("World,".to_string(), TokenData { line: 2, column: 1 }),
+                Token::NewLine(TokenData { line: 2, column: 7 }),
+                Token::CurlyBracketOpen(TokenData { line: 3, column: 1 }),
+                Token::Ident("**".to_string(), TokenData { line: 3, column: 2 }),
+                Token::Text("Contact".to_string(), TokenData { line: 3, column: 5 }),
                 Token::CurlyBracketClose(TokenData {
-                    line: 3,
-                    column: 11,
-                }),
-                Token::NewLine(TokenData {
                     line: 3,
                     column: 12,
                 }),
-                Token::SquareBracketOpen(TokenData { line: 4, column: 0 }),
-                Token::Ident("@".to_string(), TokenData { line: 4, column: 1 }),
-                Token::Text("My website".to_string(), TokenData { line: 4, column: 3 }),
+                Token::NewLine(TokenData {
+                    line: 3,
+                    column: 13,
+                }),
+                Token::SquareBracketOpen(TokenData { line: 4, column: 1 }),
+                Token::Ident("@".to_string(), TokenData { line: 4, column: 2 }),
+                Token::Text("My website".to_string(), TokenData { line: 4, column: 4 }),
                 Token::Comma(TokenData {
                     line: 4,
-                    column: 13,
+                    column: 14,
                 }),
                 Token::Text(
                     "https://example.com/".to_string(),
                     TokenData {
                         line: 4,
-                        column: 15,
+                        column: 16,
                     }
                 ),
                 Token::SquareBracketClose(TokenData {
                     line: 4,
-                    column: 35,
+                    column: 36,
                 }),
                 Token::NewLine(TokenData {
                     line: 4,
-                    column: 36,
+                    column: 37,
                 }),
-                Token::NewLine(TokenData { line: 5, column: 0 }),
-                Token::Text("2023.12.28".to_string(), TokenData { line: 6, column: 0 }),
+                Token::NewLine(TokenData { line: 5, column: 1 }),
+                Token::Text("2023.12.28".to_string(), TokenData { line: 6, column: 1 }),
                 Token::NewLine(TokenData {
                     line: 6,
-                    column: 10,
+                    column: 11,
                 }),
-                Token::EOF(TokenData { line: 7, column: 0 }),
+                Token::EOF(TokenData { line: 7, column: 1 }),
             ]
         );
     }

@@ -1,4 +1,7 @@
+use std::fmt::{Display, Formatter, self};
+
 use anyhow::Result;
+use thiserror::Error;
 
 use crate::{
     ast::{
@@ -9,6 +12,43 @@ use crate::{
 };
 
 type Parser = (AST, Vec<Token>);
+
+#[derive(Error, Debug)]
+struct ParserError {
+    message: String,
+    line: usize,
+    column: usize,
+}
+
+impl Display for ParserError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "Error at line {}, column {}: {}", self.line, self.column, self.message)
+    }
+}
+
+impl ParserError {
+    fn new(message: String, token: Token) -> Self {
+        let token_data = match token {
+            Token::Empty(data) => data,
+            Token::Text(_, data) => data,
+            Token::Ident(_, data) => data,
+            Token::NewLine(data) => data,
+            Token::AngleBracketOpen(data) => data,
+            Token::AngleBracketClose(data) => data,
+            Token::SquareBracketOpen(data) => data,
+            Token::SquareBracketClose(data) => data,
+            Token::CurlyBracketOpen(data) => data,
+            Token::CurlyBracketClose(data) => data,
+            Token::Comma(data) => data,
+            Token::EOF(data) => data,
+        };
+        Self {
+            message,
+            line: token_data.line,
+            column: token_data.column,
+        }
+    }
+}
 
 fn separate(tokens: &Vec<Token>) -> (Token, Vec<Token>) {
     if tokens.len() == 0 {
@@ -54,7 +94,10 @@ fn parse_stmt(tokens: &Vec<Token>) -> Result<Parser> {
         }
         tokens
     } else {
-        anyhow::bail!("Failed to parse curly or expr_seq.");
+        return Err(anyhow::anyhow!(ParserError::new(
+            "Failed to parse curly or expr_seq.".to_string(),
+            new_tokens.first().unwrap().clone(),
+        )));
     };
 
     let mut newline_count = 0;
@@ -71,7 +114,10 @@ fn parse_stmt(tokens: &Vec<Token>) -> Result<Parser> {
     if check_eof(&new_tokens) {
         new_tokens = new_tokens[1..].to_vec();
     } else if newline_count == 0 {
-        anyhow::bail!("Expected at least one newline after statement.");
+        return Err(anyhow::anyhow!(ParserError::new(
+            "Expected at least one newline after statement.".to_string(),
+            new_tokens.first().unwrap().clone(),
+        )));
     }
 
     Ok((result, new_tokens))
@@ -157,7 +203,10 @@ fn parse_expr_component(tokens: &Vec<Token>) -> Result<Parser> {
     if let Ok(parser) = parse_square(tokens) {
         return Ok(parser);
     }
-    anyhow::bail!("could not parse expr_component");
+    Err(anyhow::anyhow!(ParserError::new(
+        "Could not parse expr_component.".to_string(),
+        tokens.first().unwrap().clone(),
+    )))
 }
 
 // "<" ident (expr ("," expr)*)? ">"
@@ -165,7 +214,10 @@ fn parse_angle(tokens: &Vec<Token>) -> Result<Parser> {
     let (mut consumed, mut new_tokens) =
         consume_by_kind(&tokens, Token::AngleBracketOpen(mock_token_data()));
     if !consumed {
-        anyhow::bail!("Angle Brackets is not opened.")
+        return Err(anyhow::anyhow!(ParserError::new(
+            "Angle Brackets is not opened.".to_string(),
+            tokens.first().unwrap().clone(),
+        )));
     }
     let mut result = new_angle();
 
@@ -182,7 +234,10 @@ fn parse_angle(tokens: &Vec<Token>) -> Result<Parser> {
     (consumed, new_tokens) =
         consume_by_kind(&new_tokens, Token::AngleBracketClose(mock_token_data()));
     if !consumed {
-        anyhow::bail!("Angle Brackets is not closed.")
+        return Err(anyhow::anyhow!(ParserError::new(
+            "Angle Brackets is not closed.".to_string(),
+            tokens.first().unwrap().clone(),
+        )));
     }
 
     Ok((result, new_tokens))
@@ -193,7 +248,10 @@ fn parse_curly(tokens: &Vec<Token>) -> Result<Parser> {
     let (mut consumed, mut new_tokens) =
         consume_by_kind(&tokens, Token::CurlyBracketOpen(mock_token_data()));
     if !consumed {
-        anyhow::bail!("Curly Brackets is not opened.")
+        return Err(anyhow::anyhow!(ParserError::new(
+            "Curly Brackets is not opened.".to_string(),
+            tokens.first().unwrap().clone(),
+        )));
     }
     let mut result = new_curly();
 
@@ -210,7 +268,10 @@ fn parse_curly(tokens: &Vec<Token>) -> Result<Parser> {
     (consumed, new_tokens) =
         consume_by_kind(&new_tokens, Token::CurlyBracketClose(mock_token_data()));
     if !consumed {
-        anyhow::bail!("Curly Brackets is not closed.")
+        return Err(anyhow::anyhow!(ParserError::new(
+            "Curly Brackets is not closed.".to_string(),
+            tokens.first().unwrap().clone(),
+        )));
     }
 
     Ok((result, new_tokens))
@@ -221,7 +282,10 @@ fn parse_square(tokens: &Vec<Token>) -> Result<Parser> {
     let (mut consumed, mut new_tokens) =
         consume_by_kind(&tokens, Token::SquareBracketOpen(mock_token_data()));
     if !consumed {
-        anyhow::bail!("Square Brackets is not opened.")
+        return Err(anyhow::anyhow!(ParserError::new(
+            "Square Brackets is not opened.".to_string(),
+            tokens.first().unwrap().clone(),
+        )));
     }
     let mut result = new_square();
 
@@ -238,7 +302,10 @@ fn parse_square(tokens: &Vec<Token>) -> Result<Parser> {
     (consumed, new_tokens) =
         consume_by_kind(&new_tokens, Token::SquareBracketClose(mock_token_data()));
     if !consumed {
-        anyhow::bail!("Square Brackets is not closed.")
+        return Err(anyhow::anyhow!(ParserError::new(
+            "Square Brackets is not closed.".to_string(),
+            tokens.first().unwrap().clone(),
+        )));
     }
 
     Ok((result, new_tokens))
@@ -255,7 +322,10 @@ fn parse_surrounded(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
             new_tokens = (new_tokens.clone())[1..].to_vec()
         }
     } else {
-        anyhow::bail!("Could not parse ident.");
+        return Err(anyhow::anyhow!(ParserError::new(
+            "Could not parse ident.".to_string(),
+            new_tokens.first().unwrap().clone(),
+        )));
     }
 
     if let Ok((asts, tokens)) = parse_arguments(&new_tokens) {
