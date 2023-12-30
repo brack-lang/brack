@@ -11,6 +11,7 @@ pub enum Token {
     CurlyBracketOpen,
     CurlyBracketClose,
     Comma,
+    EOF,
 }
 
 #[derive(Debug, Default, Clone, PartialEq)]

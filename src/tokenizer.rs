@@ -224,7 +224,9 @@ fn inner_tokenize(t: &Tokenizer) -> Vec<Token> {
     let (head, tail) = separate(&s);
 
     if head == '\0' {
-        return update_tokens(t, false);
+        let mut updated = update_tokens(t, false);
+        updated.push(Token::EOF);
+        return updated;
     }
 
     if t.escaped.unwrap_or_default() {
@@ -275,7 +277,12 @@ mod tests {
     #[test]
     fn test_split_no_commands() {
         let tokens = tokenize("Hello, World!");
-        assert_eq!(tokens, vec![Token::Text("Hello, World!".to_string()),]);
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text("Hello, World!".to_string()),
+                Token::EOF,
+            ]);
     }
 
     #[test]
@@ -289,6 +296,7 @@ mod tests {
                 Token::Ident("*".to_string()),
                 Token::Text("World!".to_string()),
                 Token::SquareBracketClose,
+                Token::EOF,
             ]
         );
     }
@@ -304,6 +312,7 @@ mod tests {
                 Token::Ident("*".to_string()),
                 Token::Text("World!".to_string()),
                 Token::CurlyBracketClose,
+                Token::EOF,
             ]
         );
     }
@@ -319,6 +328,7 @@ mod tests {
                 Token::Ident("*".to_string()),
                 Token::Text("World!".to_string()),
                 Token::AngleBracketClose,
+                Token::EOF,
             ]
         );
     }
@@ -336,6 +346,7 @@ mod tests {
                 Token::Comma,
                 Token::Text("https://example.com/".to_string()),
                 Token::SquareBracketClose,
+                Token::EOF,
             ]
         );
     }
@@ -356,6 +367,7 @@ mod tests {
                 Token::Text("https://example.com/".to_string()),
                 Token::SquareBracketClose,
                 Token::SquareBracketClose,
+                Token::EOF,
             ]
         );
     }
@@ -387,6 +399,7 @@ mod tests {
                 Token::NewLine,
                 Token::Text("2023.12.28".to_string()),
                 Token::NewLine,
+                Token::EOF,
             ]
         );
     }
