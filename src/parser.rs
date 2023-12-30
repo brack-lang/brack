@@ -1,35 +1,41 @@
 use anyhow::Result;
 
-use crate::{ast::{AST, new_document, new_stmt, new_text, new_expr, new_angle, new_square, new_curly, new_ident}, tokens::Token};
+use crate::{
+    ast::{
+        new_angle, new_curly, new_document, new_expr, new_ident, new_square, new_stmt, new_text,
+        AST,
+    },
+    tokens::Token,
+};
 
 type Parser = (AST, Vec<Token>);
 
-fn separate (tokens: &Vec<Token>) -> (Token, Vec<Token>) {
+fn separate(tokens: &Vec<Token>) -> (Token, Vec<Token>) {
     if tokens.len() == 0 {
-        return (Token::Empty, vec![])
+        return (Token::Empty, vec![]);
     }
     if tokens.len() == 1 {
-        return (tokens[0].clone(), vec![])
+        return (tokens[0].clone(), vec![]);
     }
     (tokens[0].clone(), tokens[1..].to_vec())
 }
 
-fn check_text (tokens: &Vec<Token>) -> bool {
+fn check_text(tokens: &Vec<Token>) -> bool {
     matches!(tokens.first(), Some(Token::Text(_)))
 }
 
-fn check_ident (tokens: &Vec<Token>) -> bool {
+fn check_ident(tokens: &Vec<Token>) -> bool {
     matches!(tokens.first(), Some(Token::Ident(_)))
 }
 
-fn check_eof (tokens: &Vec<Token>) -> bool {
+fn check_eof(tokens: &Vec<Token>) -> bool {
     matches!(tokens.first(), Some(Token::EOF))
 }
 
-fn consume_by_kind (tokens: &Vec<Token>, kind: Token) -> (bool, Vec<Token>) {
+fn consume_by_kind(tokens: &Vec<Token>, kind: Token) -> (bool, Vec<Token>) {
     let (head, tail) = separate(tokens);
     if head == kind {
-        return (true, tail)
+        return (true, tail);
     }
     (false, tokens.to_vec())
 }
@@ -55,7 +61,7 @@ fn parse_stmt(tokens: &Vec<Token>) -> Result<Parser> {
     loop {
         let (consumed, new_tokens_from_newline) = consume_by_kind(&new_tokens, Token::NewLine);
         if !consumed {
-            break
+            break;
         }
         newline_count += 1;
         new_tokens = new_tokens_from_newline;
@@ -79,11 +85,11 @@ fn parse_expr_seq(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
         Ok((ast, tokens)) => {
             new_tokens = tokens;
             result.push(ast);
-        },
+        }
         Err(e) => return Err(e),
     }
 
-    // ("\n" expr)* 
+    // ("\n" expr)*
     {
         let mut tokens = new_tokens.clone();
         let mut succeeded_parse_expr = true;
@@ -94,16 +100,16 @@ fn parse_expr_seq(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
                 break;
             }
             tokens = new_tokens_from_newline;
-    
+
             match parse_expr(&tokens) {
                 Ok((ast, tokens)) => {
                     new_tokens = tokens;
                     result.push(ast);
-                },
+                }
                 Err(_) => {
                     succeeded_parse_expr = false;
                     break;
-                },
+                }
             }
         }
         if succeeded_parse_expr {
@@ -123,7 +129,7 @@ fn parse_expr(tokens: &Vec<Token>) -> Result<Parser> {
         Ok((ast, tokens)) => {
             new_tokens = tokens;
             result.add(ast)?;
-        },
+        }
         Err(e) => return Err(e),
     }
 
@@ -135,19 +141,19 @@ fn parse_expr(tokens: &Vec<Token>) -> Result<Parser> {
     Ok((result, new_tokens))
 }
 
-// text | square | angle 
+// text | square | angle
 fn parse_expr_component(tokens: &Vec<Token>) -> Result<Parser> {
     if check_text(&tokens) && tokens.len() > 0 {
         if let Token::Text(t) = tokens.first().unwrap() {
-            return Ok((new_text(t.to_string()), tokens[1..].to_vec()))
+            return Ok((new_text(t.to_string()), tokens[1..].to_vec()));
         }
         unreachable!()
     }
     if let Ok(parser) = parse_angle(tokens) {
-        return Ok(parser)
+        return Ok(parser);
     }
     if let Ok(parser) = parse_square(tokens) {
-        return Ok(parser)
+        return Ok(parser);
     }
     anyhow::bail!("could not parse expr_component");
 }
@@ -166,7 +172,7 @@ fn parse_angle(tokens: &Vec<Token>) -> Result<Parser> {
             for ast in asts {
                 result.add(ast)?;
             }
-        },
+        }
         Err(e) => return Err(e),
     }
 
@@ -192,7 +198,7 @@ fn parse_curly(tokens: &Vec<Token>) -> Result<Parser> {
             for ast in asts {
                 result.add(ast)?;
             }
-        },
+        }
         Err(e) => return Err(e),
     }
 
@@ -201,7 +207,7 @@ fn parse_curly(tokens: &Vec<Token>) -> Result<Parser> {
         anyhow::bail!("Curly Brackets is not closed.")
     }
 
-    Ok((result, new_tokens)) 
+    Ok((result, new_tokens))
 }
 
 // "[" ident (expr ("," expr)*)? "]"
@@ -218,7 +224,7 @@ fn parse_square(tokens: &Vec<Token>) -> Result<Parser> {
             for ast in asts {
                 result.add(ast)?;
             }
-        },
+        }
         Err(e) => return Err(e),
     }
 
@@ -227,7 +233,7 @@ fn parse_square(tokens: &Vec<Token>) -> Result<Parser> {
         anyhow::bail!("Square Brackets is not closed.")
     }
 
-    Ok((result, new_tokens)) 
+    Ok((result, new_tokens))
 }
 
 // ident (expr ("," expr)*)?
@@ -263,11 +269,11 @@ fn parse_arguments(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
         Ok((ast, tokens)) => {
             new_tokens = tokens;
             result.push(ast);
-        },
+        }
         Err(e) => return Err(e),
     }
 
-    // ("," expr)* 
+    // ("," expr)*
     while new_tokens.len() > 0 {
         let (consumed, new_tokens_from_comma) = consume_by_kind(&new_tokens, Token::Comma);
         if !consumed {
@@ -279,7 +285,7 @@ fn parse_arguments(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
             Ok((ast, tokens)) => {
                 new_tokens = tokens;
                 result.push(ast);
-            },
+            }
             Err(e) => return Err(e),
         }
     }
@@ -287,7 +293,7 @@ fn parse_arguments(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
     Ok((result, new_tokens))
 }
 
-pub fn parse (tokens: &Vec<Token>) -> Result<AST> {
+pub fn parse(tokens: &Vec<Token>) -> Result<AST> {
     let mut new_tokens = tokens.clone();
     let mut result = new_document();
 
@@ -296,7 +302,7 @@ pub fn parse (tokens: &Vec<Token>) -> Result<AST> {
             Ok((ast, tokens)) => {
                 new_tokens = tokens;
                 result.add(ast)?;
-            },
+            }
             Err(e) => return Err(e),
         }
     }
@@ -308,24 +314,25 @@ pub fn parse (tokens: &Vec<Token>) -> Result<AST> {
 mod test {
     use anyhow::Result;
 
-    use crate::{tokens::Token, ast::{assert_ast_eq, new_document_with_children, new_stmt_with_children, new_expr_with_children, new_text, new_square_with_children, new_ident, new_curly_with_children, new_angle_with_children}};
+    use crate::{
+        ast::{
+            assert_ast_eq, new_angle_with_children, new_curly_with_children,
+            new_document_with_children, new_expr_with_children, new_ident,
+            new_square_with_children, new_stmt_with_children, new_text,
+        },
+        tokens::Token,
+    };
 
     use super::parse;
 
     #[test]
     fn test_parse_no_commands() -> Result<()> {
-        let tokens = vec![
-            Token::Text("Hello, World!".to_string()),
-            Token::EOF,
-        ];
+        let tokens = vec![Token::Text("Hello, World!".to_string()), Token::EOF];
         let parsed = parse(&tokens)?;
-        let expected = new_document_with_children(vec![
-            new_stmt_with_children(vec![
-                new_expr_with_children(vec![
-                    new_text("Hello, World!".to_string())
-                ])
-            ])
-        ]);
+        let expected =
+            new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
+                vec![new_text("Hello, World!".to_string())],
+            )])]);
         assert_ast_eq(&parsed, &expected);
         Ok(())
     }
@@ -341,19 +348,16 @@ mod test {
             Token::EOF,
         ];
         let parsed = parse(&tokens)?;
-        let expected = new_document_with_children(vec![
-            new_stmt_with_children(vec![
-                new_expr_with_children(vec![
+        let expected =
+            new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
+                vec![
                     new_text("Hello, ".to_string()),
                     new_square_with_children(vec![
                         new_ident("*".to_string()),
-                        new_expr_with_children(vec![
-                            new_text("World!".to_string())
-                        ])
-                    ])
-                ]),
-            ])
-        ]);
+                        new_expr_with_children(vec![new_text("World!".to_string())]),
+                    ]),
+                ],
+            )])]);
         assert_ast_eq(&parsed, &expected);
         Ok(())
     }
@@ -371,19 +375,13 @@ mod test {
         ];
         let parsed = parse(&tokens)?;
         let expected = new_document_with_children(vec![
-            new_stmt_with_children(vec![
-                new_curly_with_children(vec![
-                    new_ident("*".to_string()),
-                    new_expr_with_children(vec![
-                        new_text("Heading".to_string())
-                    ])
-                ]),
-            ]),
-            new_stmt_with_children(vec![
-                new_expr_with_children(vec![
-                    new_text("Hello, World!".to_string())
-                ])
-            ]),
+            new_stmt_with_children(vec![new_curly_with_children(vec![
+                new_ident("*".to_string()),
+                new_expr_with_children(vec![new_text("Heading".to_string())]),
+            ])]),
+            new_stmt_with_children(vec![new_expr_with_children(vec![new_text(
+                "Hello, World!".to_string(),
+            )])]),
         ]);
         assert_ast_eq(&parsed, &expected);
         Ok(())
@@ -400,19 +398,16 @@ mod test {
             Token::EOF,
         ];
         let parsed = parse(&tokens)?;
-        let expected = new_document_with_children(vec![
-            new_stmt_with_children(vec![
-                new_expr_with_children(vec![
+        let expected =
+            new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
+                vec![
                     new_text("Hello, ".to_string()),
                     new_angle_with_children(vec![
                         new_ident("*".to_string()),
-                        new_expr_with_children(vec![
-                            new_text("World!".to_string())
-                        ])
-                    ])
-                ]),
-            ])
-        ]);
+                        new_expr_with_children(vec![new_text("World!".to_string())]),
+                    ]),
+                ],
+            )])]);
         assert_ast_eq(&parsed, &expected);
         Ok(())
     }
@@ -430,22 +425,17 @@ mod test {
             Token::EOF,
         ];
         let parsed = parse(&tokens)?;
-        let expected = new_document_with_children(vec![
-            new_stmt_with_children(vec![
-                new_expr_with_children(vec![
+        let expected =
+            new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
+                vec![
                     new_text("Hello, ".to_string()),
                     new_square_with_children(vec![
                         new_ident("@".to_string()),
-                        new_expr_with_children(vec![
-                            new_text("World!".to_string())
-                        ]),
-                        new_expr_with_children(vec![
-                            new_text("https://example.com/".to_string())
-                        ])
-                    ])
-                ]),
-            ])
-        ]);
+                        new_expr_with_children(vec![new_text("World!".to_string())]),
+                        new_expr_with_children(vec![new_text("https://example.com/".to_string())]),
+                    ]),
+                ],
+            )])]);
         assert_ast_eq(&parsed, &expected);
         Ok(())
     }
@@ -466,27 +456,22 @@ mod test {
             Token::EOF,
         ];
         let parsed = parse(&tokens)?;
-        let expected = new_document_with_children(vec![
-            new_stmt_with_children(vec![
-                new_expr_with_children(vec![
+        let expected =
+            new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
+                vec![
                     new_text("Hello, ".to_string()),
                     new_square_with_children(vec![
                         new_ident("*".to_string()),
-                        new_expr_with_children(vec![
-                            new_square_with_children(vec![
-                                new_ident("@".to_string()),
-                                new_expr_with_children(vec![
-                                    new_text("World!".to_string())
-                                ]),
-                                new_expr_with_children(vec![
-                                    new_text("https://example.com/".to_string())
-                                ])
-                            ])
-                        ])
-                    ])
-                ]),
-            ])
-        ]);
+                        new_expr_with_children(vec![new_square_with_children(vec![
+                            new_ident("@".to_string()),
+                            new_expr_with_children(vec![new_text("World!".to_string())]),
+                            new_expr_with_children(vec![new_text(
+                                "https://example.com/".to_string(),
+                            )]),
+                        ])]),
+                    ]),
+                ],
+            )])]);
         assert_ast_eq(&parsed, &expected);
         Ok(())
     }
@@ -518,39 +503,23 @@ mod test {
         let parsed = parse(&tokens)?;
         let expected = new_document_with_children(vec![
             new_stmt_with_children(vec![
-                new_expr_with_children(vec![
-                    new_text("Hello,".to_string()),
-                ]),
-                new_expr_with_children(vec![
-                    new_text("World,".to_string()),
-                ]),
+                new_expr_with_children(vec![new_text("Hello,".to_string())]),
+                new_expr_with_children(vec![new_text("World,".to_string())]),
             ]),
-            new_stmt_with_children(vec![
-                new_curly_with_children(vec![
-                    new_ident("**".to_string()),
-                    new_expr_with_children(vec![
-                        new_text("Contact".to_string()),
-                    ]),
+            new_stmt_with_children(vec![new_curly_with_children(vec![
+                new_ident("**".to_string()),
+                new_expr_with_children(vec![new_text("Contact".to_string())]),
+            ])]),
+            new_stmt_with_children(vec![new_expr_with_children(vec![
+                new_square_with_children(vec![
+                    new_ident("@".to_string()),
+                    new_expr_with_children(vec![new_text("My website".to_string())]),
+                    new_expr_with_children(vec![new_text("https://example.com/".to_string())]),
                 ]),
-            ]),
-            new_stmt_with_children(vec![
-                new_expr_with_children(vec![
-                    new_square_with_children(vec![
-                        new_ident("@".to_string()),
-                        new_expr_with_children(vec![
-                            new_text("My website".to_string()),
-                        ]),
-                        new_expr_with_children(vec![
-                            new_text("https://example.com/".to_string()),
-                        ]),
-                    ]),
-                ]),
-            ]),
-            new_stmt_with_children(vec![
-                new_expr_with_children(vec![
-                    new_text("2023.12.28".to_string()),
-                ]),
-            ]),
+            ])]),
+            new_stmt_with_children(vec![new_expr_with_children(vec![new_text(
+                "2023.12.28".to_string(),
+            )])]),
         ]);
         assert_ast_eq(&parsed, &expected);
         Ok(())

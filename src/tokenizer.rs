@@ -279,10 +279,8 @@ mod tests {
         let tokens = tokenize("Hello, World!");
         assert_eq!(
             tokens,
-            vec![
-                Token::Text("Hello, World!".to_string()),
-                Token::EOF,
-            ]);
+            vec![Token::Text("Hello, World!".to_string()), Token::EOF,]
+        );
     }
 
     #[test]

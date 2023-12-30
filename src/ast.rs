@@ -119,14 +119,19 @@ pub fn new_ident(value: String) -> AST {
 pub fn new_text(value: String) -> AST {
     AST::Text(LeafNode {
         id: Uuid::new_v4(),
-        value
+        value,
     })
 }
 
 impl AST {
     pub fn add(&mut self, ast: AST) -> Result<()> {
         match self {
-            AST::Document(node) | AST::Stmt(node) | AST::Expr(node) | AST::Angle(node) | AST::Square(node) | AST::Curly(node) => {
+            AST::Document(node)
+            | AST::Stmt(node)
+            | AST::Expr(node)
+            | AST::Angle(node)
+            | AST::Square(node)
+            | AST::Curly(node) => {
                 node.children.push(ast);
             }
             AST::Identifier(_) | AST::Text(_) => {
@@ -158,6 +163,9 @@ pub fn assert_ast_eq(node1: &AST, node2: &AST) {
         (AST::Curly(inner1), AST::Curly(inner2)) => assert_inner_node_eq(inner1, inner2),
         (AST::Identifier(leaf1), AST::Identifier(leaf2)) => assert_leaf_node_eq(leaf1, leaf2),
         (AST::Text(leaf1), AST::Text(leaf2)) => assert_leaf_node_eq(leaf1, leaf2),
-        _ => panic!("Mismatched AST node types or unexpected AST node\nleft: {:?}\nright: {:?}", node1, node2),
+        _ => panic!(
+            "Mismatched AST node types or unexpected AST node\nleft: {:?}\nright: {:?}",
+            node1, node2
+        ),
     }
 }
