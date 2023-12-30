@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter, self};
+use std::fmt::{self, Display, Formatter};
 
 use anyhow::Result;
 use thiserror::Error;
@@ -8,7 +8,7 @@ use crate::{
         new_angle, new_curly, new_document, new_expr, new_ident, new_square, new_stmt, new_text,
         AST,
     },
-    tokens::{mock_token_data, Token},
+    tokens::{mock_token_data, Token, TokenData},
 };
 
 type Parser = (AST, Vec<Token>);
@@ -22,7 +22,11 @@ struct ParserError {
 
 impl Display for ParserError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "Error at line {}, column {}: {}", self.line, self.column, self.message)
+        write!(
+            f,
+            "Error at line {}, column {}: {}",
+            self.line, self.column, self.message
+        )
     }
 }
 
@@ -50,16 +54,6 @@ impl ParserError {
     }
 }
 
-fn separate(tokens: &Vec<Token>) -> (Token, Vec<Token>) {
-    if tokens.len() == 0 {
-        return (Token::Empty(mock_token_data()), vec![]);
-    }
-    if tokens.len() == 1 {
-        return (tokens[0].clone(), vec![]);
-    }
-    (tokens[0].clone(), tokens[1..].to_vec())
-}
-
 fn check_text(tokens: &Vec<Token>) -> bool {
     matches!(tokens.first(), Some(Token::Text(_, _)))
 }
@@ -71,13 +65,34 @@ fn check_ident(tokens: &Vec<Token>) -> bool {
 fn check_eof(tokens: &Vec<Token>) -> bool {
     matches!(tokens.first(), Some(Token::EOF(_)))
 }
-
-fn consume_by_kind(tokens: &Vec<Token>, kind: Token) -> (bool, Vec<Token>) {
-    let (head, tail) = separate(tokens);
-    if head == kind {
-        return (true, tail);
+fn consume_by_kind(tokens: &[Token], kind: Token) -> (bool, Vec<Token>) {
+    let (head, tail) = tokens
+        .split_first()
+        .unwrap_or((&Token::EOF(TokenData { line: 0, column: 0 }), &[]));
+    if matches_kind(head, &kind) {
+        (true, tail.to_vec())
+    } else {
+        (false, tokens.to_vec())
     }
-    (false, tokens.to_vec())
+}
+
+fn matches_kind(token: &Token, kind: &Token) -> bool {
+    use Token::*;
+    match (token, kind) {
+        (Empty(_), Empty(_)) => true,
+        (Text(_, _), Text(_, _)) => true,
+        (Ident(_, _), Ident(_, _)) => true,
+        (NewLine(_), NewLine(_)) => true,
+        (AngleBracketOpen(_), AngleBracketOpen(_)) => true,
+        (AngleBracketClose(_), AngleBracketClose(_)) => true,
+        (SquareBracketOpen(_), SquareBracketOpen(_)) => true,
+        (SquareBracketClose(_), SquareBracketClose(_)) => true,
+        (CurlyBracketOpen(_), CurlyBracketOpen(_)) => true,
+        (CurlyBracketClose(_), CurlyBracketClose(_)) => true,
+        (Comma(_), Comma(_)) => true,
+        (EOF(_), EOF(_)) => true,
+        _ => false,
+    }
 }
 
 // (curly | expr ("\n" expr)*) ("\n"+ | "\n"* EOF)
