@@ -119,20 +119,17 @@ fn parse_expr(tokens: &Vec<Token>) -> Result<Parser> {
     let mut new_tokens = tokens.clone();
     let mut result = new_expr();
 
-    if let Ok((ast, tokens)) = parse_expr_component(&new_tokens) {
-        new_tokens = tokens;
-        result.add(ast)?;
-    } else {
-        anyhow::bail!("")
-    }
-
-    while new_tokens.len() > 0 {
-        if let Ok((ast, tokens)) = parse_expr_component(&new_tokens) {
+    match parse_expr_component(&new_tokens) {
+        Ok((ast, tokens)) => {
             new_tokens = tokens;
             result.add(ast)?;
-            continue
-        }
-        break
+        },
+        Err(e) => return Err(e),
+    }
+
+    while let Ok((ast, tokens)) = parse_expr_component(&new_tokens) {
+        new_tokens = tokens;
+        result.add(ast)?;
     }
 
     Ok((result, new_tokens))
@@ -152,29 +149,30 @@ fn parse_expr_component(tokens: &Vec<Token>) -> Result<Parser> {
     if let Ok(parser) = parse_square(tokens) {
         return Ok(parser)
     }
-    anyhow::bail!("")
+    anyhow::bail!("could not parse expr_component");
 }
 
 // "<" ident (expr ("," expr)*)? ">"
 fn parse_angle(tokens: &Vec<Token>) -> Result<Parser> {
     let (mut consumed, mut new_tokens) = consume_by_kind(&tokens, Token::AngleBracketOpen);
     if !consumed {
-        anyhow::bail!("")
+        anyhow::bail!("Angle Brackets is not opened.")
     }
     let mut result = new_angle();
 
-    if let Ok((asts, tokens)) = parse_surrounded(&new_tokens) {
-        new_tokens = tokens;
-        for ast in asts {
-            result.add(ast)?;
-        }
-    } else {
-        anyhow::bail!("")
+    match parse_surrounded(&new_tokens) {
+        Ok((asts, tokens)) => {
+            new_tokens = tokens;
+            for ast in asts {
+                result.add(ast)?;
+            }
+        },
+        Err(e) => return Err(e),
     }
 
     (consumed, new_tokens) = consume_by_kind(&new_tokens, Token::AngleBracketClose);
     if !consumed {
-        anyhow::bail!("")
+        anyhow::bail!("Angle Brackets is not closed.")
     }
 
     Ok((result, new_tokens))
@@ -184,22 +182,23 @@ fn parse_angle(tokens: &Vec<Token>) -> Result<Parser> {
 fn parse_curly(tokens: &Vec<Token>) -> Result<Parser> {
     let (mut consumed, mut new_tokens) = consume_by_kind(&tokens, Token::CurlyBracketOpen);
     if !consumed {
-        anyhow::bail!("")
+        anyhow::bail!("Curly Brackets is not opened.")
     }
     let mut result = new_curly();
 
-    if let Ok((asts, tokens)) = parse_surrounded(&new_tokens) {
-        new_tokens = tokens;
-        for ast in asts {
-            result.add(ast)?;
-        }
-    } else {
-        anyhow::bail!("")
+    match parse_surrounded(&new_tokens) {
+        Ok((asts, tokens)) => {
+            new_tokens = tokens;
+            for ast in asts {
+                result.add(ast)?;
+            }
+        },
+        Err(e) => return Err(e),
     }
 
     (consumed, new_tokens) = consume_by_kind(&new_tokens, Token::CurlyBracketClose);
     if !consumed {
-        anyhow::bail!("")
+        anyhow::bail!("Curly Brackets is not closed.")
     }
 
     Ok((result, new_tokens)) 
@@ -209,22 +208,23 @@ fn parse_curly(tokens: &Vec<Token>) -> Result<Parser> {
 fn parse_square(tokens: &Vec<Token>) -> Result<Parser> {
     let (mut consumed, mut new_tokens) = consume_by_kind(&tokens, Token::SquareBracketOpen);
     if !consumed {
-        anyhow::bail!("")
+        anyhow::bail!("Square Brackets is not opened.")
     }
     let mut result = new_square();
 
-    if let Ok((asts, tokens)) = parse_surrounded(&new_tokens) {
-        new_tokens = tokens;
-        for ast in asts {
-            result.add(ast)?;
-        }
-    } else {
-        anyhow::bail!("")
+    match parse_surrounded(&new_tokens) {
+        Ok((asts, tokens)) => {
+            new_tokens = tokens;
+            for ast in asts {
+                result.add(ast)?;
+            }
+        },
+        Err(e) => return Err(e),
     }
 
     (consumed, new_tokens) = consume_by_kind(&new_tokens, Token::SquareBracketClose);
     if !consumed {
-        anyhow::bail!("")
+        anyhow::bail!("Square Brackets is not closed.")
     }
 
     Ok((result, new_tokens)) 
@@ -241,7 +241,7 @@ fn parse_surrounded(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
             new_tokens = (new_tokens.clone())[1..].to_vec()
         }
     } else {
-        anyhow::bail!("")
+        anyhow::bail!("Could not parse ident.");
     }
 
     if let Ok((asts, tokens)) = parse_arguments(&new_tokens) {
