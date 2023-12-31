@@ -3,14 +3,14 @@ use uuid::Uuid;
 
 #[derive(Debug, PartialEq)]
 pub struct InnerNode {
-    id: Uuid,
-    children: Vec<AST>,
+    pub id: Uuid,
+    pub children: Vec<AST>,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct LeafNode {
-    id: Uuid,
-    value: String,
+    pub id: Uuid,
+    pub value: String,
 }
 
 #[derive(Debug, PartialEq)]
@@ -23,6 +23,32 @@ pub enum AST {
     Curly(InnerNode),
     Identifier(LeafNode),
     Text(LeafNode),
+}
+
+impl AST {
+    pub fn children(&self) -> &Vec<AST> {
+        match self {
+            AST::Document(node)
+            | AST::Stmt(node)
+            | AST::Expr(node)
+            | AST::Angle(node)
+            | AST::Square(node)
+            | AST::Curly(node) => &node.children,
+            AST::Identifier(_) | AST::Text(_) => panic!("Leaf node has no children"),
+        }
+    }
+
+    pub fn value(&self) -> String {
+        match self {
+            AST::Identifier(leaf) | AST::Text(leaf) => leaf.value.clone(),
+            AST::Document(_)
+            | AST::Stmt(_)
+            | AST::Expr(_)
+            | AST::Angle(_)
+            | AST::Square(_)
+            | AST::Curly(_) => panic!("Inner node has no value"),
+        }
+    }
 }
 
 pub fn new_document() -> AST {
