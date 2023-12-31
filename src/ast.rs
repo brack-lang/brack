@@ -1,19 +1,20 @@
 use anyhow::Result;
+use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct InnerNode {
     pub id: Uuid,
     pub children: Vec<AST>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct LeafNode {
     pub id: Uuid,
     pub value: String,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub enum AST {
     Document(InnerNode),
     Stmt(InnerNode),
@@ -49,6 +50,19 @@ impl AST {
             | AST::Square(_)
             | AST::Curly(_)
             | AST::Identifier(_) => panic!("Inner node has no value"),
+        }
+    }
+
+    pub fn id(&self) -> Uuid {
+        match self {
+            AST::Document(node)
+            | AST::Stmt(node)
+            | AST::Expr(node)
+            | AST::Angle(node)
+            | AST::Square(node)
+            | AST::Curly(node)
+            | AST::Identifier(node) => node.id,
+            AST::Text(leaf) => leaf.id,
         }
     }
 }

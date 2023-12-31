@@ -24,4 +24,5 @@ features = [
     "v4",
     "fast-rng",
     "macro-diagnostics",
+    "serde",
 ]

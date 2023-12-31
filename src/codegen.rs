@@ -12,11 +12,11 @@ fn generate_document(ast: &AST, plugins: &mut Plugins) -> Result<String> {
         let res = match child {
             AST::Stmt(_) => generate_stmt(&child, plugins)?,
             AST::Expr(_) => generate_expr(&child, plugins)?,
-            AST::Angle(_) => generate_angle(&child, plugins)?,
             AST::Curly(_) => generate_curly(&child, plugins)?,
             AST::Square(_) => generate_square(&child, plugins)?,
             AST::Identifier(_) => generate_identifier(&child)?,
             AST::Text(_) => generate_text(&child)?,
+            AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
             _ => anyhow::bail!("Document cannot contain Document"),
         };
         result.push_str(&res);
@@ -29,11 +29,11 @@ fn generate_stmt(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     for child in ast.children() {
         let res = match child {
             AST::Expr(_) => generate_expr(&child, plugins)?,
-            AST::Angle(_) => generate_angle(&child, plugins)?,
             AST::Curly(_) => generate_curly(&child, plugins)?,
             AST::Square(_) => generate_square(&child, plugins)?,
             AST::Identifier(_) => generate_identifier(&child)?,
             AST::Text(_) => generate_text(&child)?,
+            AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
             _ => anyhow::bail!("Stmt cannot contain Document and Stmt"),
         };
         result.push_str(&res);
@@ -45,32 +45,15 @@ fn generate_expr(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     let mut result = String::from("");
     for child in ast.children() {
         let res = match child {
-            AST::Angle(_) => generate_angle(&child, plugins)?,
             AST::Square(_) => generate_square(&child, plugins)?,
             AST::Identifier(_) => generate_identifier(&child)?,
             AST::Text(_) => generate_text(&child)?,
+            AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
             _ => anyhow::bail!("Expr cannot contain Document, Stmt and Expr"),
         };
         result.push_str(&res);
     }
     Ok(result)
-}
-
-fn generate_angle(ast: &AST, plugins: &mut Plugins) -> Result<String> {
-    let mut result = String::from("");
-    for child in ast.children() {
-        let res = match child {
-            AST::Expr(_) => generate_expr(&child, plugins)?,
-            AST::Angle(_) => generate_angle(&child, plugins)?,
-            AST::Curly(_) => generate_curly(&child, plugins)?,
-            AST::Square(_) => generate_square(&child, plugins)?,
-            AST::Identifier(_) => generate_identifier(&child)?,
-            AST::Text(_) => generate_text(&child)?,
-            _ => anyhow::bail!("Angle cannot contain Document, Stmt, Expr and Angle"),
-        };
-        result.push_str(&res);
-    }
-    Ok(format!("<{}>", result))
 }
 
 fn generate_curly(ast: &AST, plugins: &mut Plugins) -> Result<String> {
@@ -81,11 +64,11 @@ fn generate_curly(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     for (i, child) in ast.children().iter().enumerate() {
         let res = match child {
             AST::Expr(_) => generate_expr(&child, plugins)?,
-            AST::Angle(_) => generate_angle(&child, plugins)?,
             AST::Curly(_) => generate_curly(&child, plugins)?,
             AST::Square(_) => generate_square(&child, plugins)?,
             AST::Identifier(_) => generate_identifier(&child)?,
             AST::Text(_) => generate_text(&child)?,
+            AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
             _ => anyhow::bail!("Curly cannot contain Document, Stmt, Expr and Curly"),
         };
         if i == 0 {
@@ -106,7 +89,7 @@ fn generate_curly(ast: &AST, plugins: &mut Plugins) -> Result<String> {
         .ok_or_else(|| anyhow::anyhow!("Module {} not found", module_name))?;
     let res = plugin.call::<Json<PluginArgument>, &str>(&ident_name, Json(plugin_argument))?;
 
-    Ok(format!("{{{}}}", res))
+    Ok(format!("{}", res))
 }
 
 fn generate_square(ast: &AST, plugins: &mut Plugins) -> Result<String> {
@@ -117,11 +100,11 @@ fn generate_square(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     for (i, child) in ast.children().iter().enumerate() {
         let res = match child {
             AST::Expr(_) => generate_expr(&child, plugins)?,
-            AST::Angle(_) => generate_angle(&child, plugins)?,
             AST::Curly(_) => generate_curly(&child, plugins)?,
             AST::Square(_) => generate_square(&child, plugins)?,
             AST::Identifier(_) => generate_identifier(&child)?,
             AST::Text(_) => generate_text(&child)?,
+            AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
             _ => anyhow::bail!("Square cannot contain Document, Stmt, Expr and Square"),
         };
         if i == 0 {
@@ -152,7 +135,8 @@ fn generate_identifier(ast: &AST) -> Result<String> {
             AST::Text(_) => {
                 result.push(generate_text(&child)?);
             }
-            _ => anyhow::bail!("Identifier cannot contain Document, Stmt, Expr, Angle, Curly, Square and Identifier"),
+            AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
+            _ => anyhow::bail!("Identifier cannot contain Document, Stmt, Expr, Curly, Square and Identifier"),
         }
     }
     Ok(result.join(" "))

@@ -1,7 +1,7 @@
 use std::fs::read_dir;
 
 use anyhow::Result;
-use brack::{codegen::generate, parser::parse, plugins::new_plugins, tokenizer::tokenize};
+use brack::{codegen::generate, parser::parse, plugins::new_plugins, tokenizer::tokenize, expander::expander};
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -53,7 +53,8 @@ fn main() -> Result<()> {
     let code = std::fs::read_to_string(args.filename)?;
     let tokenized = tokenize(&code);
     let parsed = parse(&tokenized)?;
-    let gen = generate(&parsed, &mut plugins)?;
+    let expanded = expander(&parsed, &mut plugins)?;
+    let gen = generate(&expanded, &mut plugins)?;
     println!("{}", gen);
     Ok(())
 }

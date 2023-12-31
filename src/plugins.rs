@@ -3,6 +3,9 @@ use std::{collections::HashMap, path::Path};
 use anyhow::Result;
 use extism::{Manifest, Plugin, Wasm};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+use crate::ast::AST;
 
 pub type Plugins = HashMap<String, Plugin>;
 
@@ -26,6 +29,12 @@ pub enum PluginArgument {
         String,
         String,
     ),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PluginMacroArgument {
+    pub ast: AST,
+    pub uuid: Uuid,
 }
 
 impl PluginArgument {
