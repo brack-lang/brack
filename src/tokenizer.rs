@@ -249,6 +249,33 @@ fn tokenize_arguments(t: &Tokenizer) -> Vec<Token> {
     inner_tokenize(&t.merge(&t2))
 }
 
+fn tokenize_module(t: &Tokenizer) -> Vec<Token> {
+    let s = t.untreated.clone().unwrap_or_default();
+    let column = t.column.unwrap_or_default();
+    let (_, tail) = separate(&s);
+    let mut new_tokens = t.tokens.clone().unwrap_or_default();
+    new_tokens.push(Token::Module(
+        t.pool.clone().unwrap_or_default(),
+        TokenData {
+            line: t.token_start_line.unwrap_or_default(),
+            column: t.token_start_column.unwrap_or_default(),
+        },
+    ));
+    new_tokens.push(Token::Dot(TokenData {
+        line: t.token_start_line.unwrap_or_default(),
+        column,
+    }));
+    let t2 = Tokenizer {
+        column: Some(column + 1),
+        token_start_column: Some(column + 1),
+        untreated: Some(tail),
+        pool: Some(String::new()),
+        tokens: Some(new_tokens),
+        ..Default::default()
+    };
+    inner_tokenize(&t.merge(&t2)) 
+}
+
 fn tokenize_identifier(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
     let column = t.column.unwrap_or_default();
@@ -342,6 +369,7 @@ fn inner_tokenize(t: &Tokenizer) -> Vec<Token> {
         ']' if square_c > 0 => tokenize_square_bracket_close(t),
         ',' if (angle_c + curly_c + square_c) > 0 => tokenize_arguments(t),
         ' ' if look_for_ident => tokenize_identifier(t),
+        '.' if look_for_ident => tokenize_module(t),
         '\n' => tokenize_newline(t),
         _ => {
             let t2 = Tokenizer {
@@ -394,27 +422,35 @@ mod tests {
 
     #[test]
     fn test_split_commands_with_an_argument_includes_square_brackets() {
-        let tokens = tokenize("Hello, [* World!]");
+        let tokens = tokenize("Hello, [std.* World!]");
         assert_eq!(
             tokens,
             vec![
                 Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
                 Token::SquareBracketOpen(TokenData { line: 1, column: 8 }),
-                Token::Ident("*".to_string(), TokenData { line: 1, column: 9 }),
+                Token::Module("std".to_string(), TokenData {
+                    line: 1,
+                    column: 9,
+                }),
+                Token::Dot(TokenData {
+                    line: 1,
+                    column: 12,
+                }),
+                Token::Ident("*".to_string(), TokenData { line: 1, column: 13 }),
                 Token::Text(
                     "World!".to_string(),
                     TokenData {
                         line: 1,
-                        column: 11,
+                        column: 15,
                     }
                 ),
                 Token::SquareBracketClose(TokenData {
                     line: 1,
-                    column: 17,
+                    column: 21,
                 }),
                 Token::EOF(TokenData {
                     line: 1,
-                    column: 18,
+                    column: 22,
                 }),
             ]
         );
@@ -422,27 +458,35 @@ mod tests {
 
     #[test]
     fn test_split_commands_with_an_argument_includes_curly_brackets() {
-        let tokens = tokenize("Hello, {* World!}");
+        let tokens = tokenize("Hello, {std.* World!}");
         assert_eq!(
             tokens,
             vec![
                 Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
                 Token::CurlyBracketOpen(TokenData { line: 1, column: 8 }),
-                Token::Ident("*".to_string(), TokenData { line: 1, column: 9 }),
+                Token::Module("std".to_string(), TokenData {
+                    line: 1,
+                    column: 9,
+                }),
+                Token::Dot(TokenData {
+                    line: 1,
+                    column: 12,
+                }),
+                Token::Ident("*".to_string(), TokenData { line: 1, column: 13 }),
                 Token::Text(
                     "World!".to_string(),
                     TokenData {
                         line: 1,
-                        column: 11,
+                        column: 15,
                     }
                 ),
                 Token::CurlyBracketClose(TokenData {
                     line: 1,
-                    column: 17,
+                    column: 21,
                 }),
                 Token::EOF(TokenData {
                     line: 1,
-                    column: 18,
+                    column: 22,
                 }),
             ]
         );
@@ -478,85 +522,39 @@ mod tests {
 
     #[test]
     fn test_split_commands_with_two_arguments_includes_square_brackets() {
-        let tokens = tokenize("Hello, [@ World!, https://example.com/]");
+        let tokens = tokenize("Hello, [std.@ World!, https://example.com/]");
         assert_eq!(
             tokens,
             vec![
                 Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
                 Token::SquareBracketOpen(TokenData { line: 1, column: 8 }),
-                Token::Ident("@".to_string(), TokenData { line: 1, column: 9 }),
+                Token::Module("std".to_string(), TokenData {
+                    line: 1,
+                    column: 9,
+                }),
+                Token::Dot(TokenData {
+                    line: 1,
+                    column: 12,
+                }),
+                Token::Ident("@".to_string(), TokenData { line: 1, column: 13 }),
                 Token::Text(
                     "World!".to_string(),
                     TokenData {
                         line: 1,
-                        column: 11,
+                        column: 15,
                     }
                 ),
                 Token::Comma(TokenData {
                     line: 1,
-                    column: 17,
+                    column: 21,
                 }),
                 Token::Text(
                     "https://example.com/".to_string(),
                     TokenData {
                         line: 1,
-                        column: 19,
+                        column: 23,
                     }
                 ),
-                Token::SquareBracketClose(TokenData {
-                    line: 1,
-                    column: 39,
-                }),
-                Token::EOF(TokenData {
-                    line: 1,
-                    column: 40,
-                }),
-            ]
-        );
-    }
-
-    #[test]
-    fn test_split_nesting_commands() {
-        let tokens = tokenize("Hello, [* [@ World!, https://example.com/]]");
-        assert_eq!(
-            tokens,
-            vec![
-                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
-                Token::SquareBracketOpen(TokenData { line: 1, column: 8 }),
-                Token::Ident("*".to_string(), TokenData { line: 1, column: 9 }),
-                Token::SquareBracketOpen(TokenData {
-                    line: 1,
-                    column: 11,
-                }),
-                Token::Ident(
-                    "@".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 12,
-                    }
-                ),
-                Token::Text(
-                    "World!".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 14,
-                    }
-                ),
-                Token::Comma(TokenData {
-                    line: 1,
-                    column: 20,
-                }),
-                Token::Text(
-                    "https://example.com/".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 22,
-                    }
-                ),
-                Token::SquareBracketClose(TokenData {
-                    line: 1,
-                    column: 42,
-                }),
                 Token::SquareBracketClose(TokenData {
                     line: 1,
                     column: 43,
@@ -570,57 +568,171 @@ mod tests {
     }
 
     #[test]
+    fn test_split_nesting_commands() {
+        let tokens = tokenize("Hello, [std.* [std.@ World!, https://example.com/]]");
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
+                Token::SquareBracketOpen(TokenData { line: 1, column: 8 }),
+                Token::Module("std".to_string(), TokenData {
+                    line: 1,
+                    column: 9,
+                }),
+                Token::Dot(TokenData {
+                    line: 1,
+                    column: 12,
+                }),
+                Token::Ident("*".to_string(), TokenData { line: 1, column: 13 }),
+                Token::SquareBracketOpen(TokenData {
+                    line: 1,
+                    column: 15,
+                }),
+                Token::Module("std".to_string(), TokenData {
+                    line: 1,
+                    column: 16,
+                }),
+                Token::Dot(TokenData {
+                    line: 1,
+                    column: 19,
+                }),
+                Token::Ident(
+                    "@".to_string(),
+                    TokenData {
+                        line: 1,
+                        column: 20,
+                    }
+                ),
+                Token::Text(
+                    "World!".to_string(),
+                    TokenData {
+                        line: 1,
+                        column: 22,
+                    }
+                ),
+                Token::Comma(TokenData {
+                    line: 1,
+                    column: 28,
+                }),
+                Token::Text(
+                    "https://example.com/".to_string(),
+                    TokenData {
+                        line: 1,
+                        column: 30,
+                    }
+                ),
+                Token::SquareBracketClose(TokenData {
+                    line: 1,
+                    column: 50,
+                }),
+                Token::SquareBracketClose(TokenData {
+                    line: 1,
+                    column: 51,
+                }),
+                Token::EOF(TokenData {
+                    line: 1,
+                    column: 52,
+                }),
+            ]
+        );
+    }
+
+    #[test]
     fn test_split_newlines() {
         let tokens = tokenize(
-            "Hello,\nWorld,\n{** Contact}\n[@ My website, https://example.com/]\n\n2023.12.28\n",
+            "Hello,\nWorld,\n{std.** Contact}\n[std.@ My website, https://example.com/]\n\n2023.12.28\n",
         );
         assert_eq!(
             tokens,
             vec![
                 Token::Text("Hello,".to_string(), TokenData { line: 1, column: 1 }),
-                Token::NewLine(TokenData { line: 1, column: 7 }),
+                Token::NewLine(TokenData {
+                    line: 1,
+                    column: 7,
+                }),
                 Token::Text("World,".to_string(), TokenData { line: 2, column: 1 }),
-                Token::NewLine(TokenData { line: 2, column: 7 }),
+                Token::NewLine(TokenData {
+                    line: 2,
+                    column: 7,
+                }),
                 Token::CurlyBracketOpen(TokenData { line: 3, column: 1 }),
-                Token::Ident("**".to_string(), TokenData { line: 3, column: 2 }),
-                Token::Text("Contact".to_string(), TokenData { line: 3, column: 5 }),
+                Token::Module("std".to_string(), TokenData {
+                    line: 3,
+                    column: 2,
+                }),
+                Token::Dot(TokenData {
+                    line: 3,
+                    column: 5,
+                }),
+                Token::Ident("**".to_string(), TokenData { line: 3, column: 6 }),
+                Token::Text(
+                    "Contact".to_string(),
+                    TokenData {
+                        line: 3,
+                        column: 9,
+                    }
+                ),
                 Token::CurlyBracketClose(TokenData {
                     line: 3,
-                    column: 12,
+                    column: 16,
                 }),
                 Token::NewLine(TokenData {
                     line: 3,
-                    column: 13,
+                    column: 17,
                 }),
-                Token::SquareBracketOpen(TokenData { line: 4, column: 1 }),
-                Token::Ident("@".to_string(), TokenData { line: 4, column: 2 }),
-                Token::Text("My website".to_string(), TokenData { line: 4, column: 4 }),
+                Token::SquareBracketOpen(TokenData {
+                    line: 4,
+                    column: 1,
+                }),
+                Token::Module("std".to_string(), TokenData {
+                    line: 4,
+                    column: 2,
+                }),
+                Token::Dot(TokenData {
+                    line: 4,
+                    column: 5,
+                }),
+                Token::Ident("@".to_string(), TokenData { line: 4, column: 6 }),
+                Token::Text(
+                    "My website".to_string(),
+                    TokenData {
+                        line: 4,
+                        column: 8,
+                    }
+                ),
                 Token::Comma(TokenData {
                     line: 4,
-                    column: 14,
+                    column: 18,
                 }),
                 Token::Text(
                     "https://example.com/".to_string(),
                     TokenData {
                         line: 4,
-                        column: 16,
+                        column: 20,
                     }
                 ),
                 Token::SquareBracketClose(TokenData {
                     line: 4,
-                    column: 36,
+                    column: 40,
                 }),
                 Token::NewLine(TokenData {
                     line: 4,
-                    column: 37,
+                    column: 41,
                 }),
-                Token::NewLine(TokenData { line: 5, column: 1 }),
-                Token::Text("2023.12.28".to_string(), TokenData { line: 6, column: 1 }),
+                Token::NewLine(TokenData {
+                    line: 5,
+                    column: 1,
+                }),
+                Token::Text("2023.12.28
+                ".to_string(), TokenData { line: 6, column: 1 }),
                 Token::NewLine(TokenData {
                     line: 6,
                     column: 11,
                 }),
-                Token::EOF(TokenData { line: 7, column: 1 }),
+                Token::EOF(TokenData {
+                    line: 7,
+                    column: 1,
+                }),
             ]
         );
     }

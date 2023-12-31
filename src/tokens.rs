@@ -2,8 +2,10 @@
 pub enum Token {
     Empty(TokenData),
     Text(String, TokenData),
+    Module(String, TokenData),
     Ident(String, TokenData),
     NewLine(TokenData),
+    Dot(TokenData),
     AngleBracketOpen(TokenData),
     AngleBracketClose(TokenData),
     SquareBracketOpen(TokenData),
@@ -41,8 +43,10 @@ impl Token {
         match self {
             Token::Empty(data) => data.line,
             Token::Text(_, data) => data.line,
+            Token::Module(_, data) => data.line,
             Token::Ident(_, data) => data.line,
             Token::NewLine(data) => data.line,
+            Token::Dot(data) => data.line,
             Token::AngleBracketOpen(data) => data.line,
             Token::AngleBracketClose(data) => data.line,
             Token::SquareBracketOpen(data) => data.line,
@@ -58,8 +62,10 @@ impl Token {
         match self {
             Token::Empty(data) => data.column,
             Token::Text(_, data) => data.column,
+            Token::Module(_, data) => data.column,
             Token::Ident(_, data) => data.column,
             Token::NewLine(data) => data.column,
+            Token::Dot(data) => data.column,
             Token::AngleBracketOpen(data) => data.column,
             Token::AngleBracketClose(data) => data.column,
             Token::SquareBracketOpen(data) => data.column,

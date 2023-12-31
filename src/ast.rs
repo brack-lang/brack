@@ -21,7 +21,7 @@ pub enum AST {
     Angle(InnerNode),
     Square(InnerNode),
     Curly(InnerNode),
-    Identifier(LeafNode),
+    Identifier(InnerNode),
     Text(LeafNode),
 }
 
@@ -33,20 +33,22 @@ impl AST {
             | AST::Expr(node)
             | AST::Angle(node)
             | AST::Square(node)
-            | AST::Curly(node) => &node.children,
-            AST::Identifier(_) | AST::Text(_) => panic!("Leaf node has no children"),
+            | AST::Curly(node)
+            | AST::Identifier(node) => &node.children,
+            AST::Text(_) => panic!("Leaf node has no children"),
         }
     }
 
     pub fn value(&self) -> String {
         match self {
-            AST::Identifier(leaf) | AST::Text(leaf) => leaf.value.clone(),
+            AST::Text(leaf) => leaf.value.clone(),
             AST::Document(_)
             | AST::Stmt(_)
             | AST::Expr(_)
             | AST::Angle(_)
             | AST::Square(_)
-            | AST::Curly(_) => panic!("Inner node has no value"),
+            | AST::Curly(_)
+            | AST::Identifier(_) => panic!("Inner node has no value"),
         }
     }
 }
@@ -135,10 +137,10 @@ pub fn new_square_with_children(children: Vec<AST>) -> AST {
     })
 }
 
-pub fn new_ident(value: String) -> AST {
-    AST::Identifier(LeafNode {
+pub fn new_ident(children: Vec<AST>) -> AST {
+    AST::Identifier(InnerNode {
         id: Uuid::new_v4(),
-        value,
+        children,
     })
 }
 
@@ -157,10 +159,11 @@ impl AST {
             | AST::Expr(node)
             | AST::Angle(node)
             | AST::Square(node)
-            | AST::Curly(node) => {
+            | AST::Curly(node)
+            | AST::Identifier(node) => {
                 node.children.push(ast);
             }
-            AST::Identifier(_) | AST::Text(_) => {
+            AST::Text(_) => {
                 anyhow::bail!("Cannot add child to leaf node");
             }
         }
@@ -187,7 +190,7 @@ pub fn assert_ast_eq(node1: &AST, node2: &AST) {
         (AST::Angle(inner1), AST::Angle(inner2)) => assert_inner_node_eq(inner1, inner2),
         (AST::Square(inner1), AST::Square(inner2)) => assert_inner_node_eq(inner1, inner2),
         (AST::Curly(inner1), AST::Curly(inner2)) => assert_inner_node_eq(inner1, inner2),
-        (AST::Identifier(leaf1), AST::Identifier(leaf2)) => assert_leaf_node_eq(leaf1, leaf2),
+        (AST::Identifier(leaf1), AST::Identifier(leaf2)) => assert_inner_node_eq(leaf1, leaf2),
         (AST::Text(leaf1), AST::Text(leaf2)) => assert_leaf_node_eq(leaf1, leaf2),
         _ => panic!(
             "Mismatched AST node types or unexpected AST node\nleft: {:?}\nright: {:?}",

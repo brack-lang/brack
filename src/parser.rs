@@ -35,8 +35,10 @@ impl ParserError {
         let token_data = match token {
             Token::Empty(data) => data,
             Token::Text(_, data) => data,
+            Token::Module(_, data) => data,
             Token::Ident(_, data) => data,
             Token::NewLine(data) => data,
+            Token::Dot(data) => data,
             Token::AngleBracketOpen(data) => data,
             Token::AngleBracketClose(data) => data,
             Token::SquareBracketOpen(data) => data,
@@ -58,13 +60,10 @@ fn check_text(tokens: &Vec<Token>) -> bool {
     matches!(tokens.first(), Some(Token::Text(_, _)))
 }
 
-fn check_ident(tokens: &Vec<Token>) -> bool {
-    matches!(tokens.first(), Some(Token::Ident(_, _)))
-}
-
 fn check_eof(tokens: &Vec<Token>) -> bool {
     matches!(tokens.first(), Some(Token::EOF(_)))
 }
+
 fn consume_by_kind(tokens: &[Token], kind: Token) -> (bool, Vec<Token>) {
     let (head, tail) = tokens
         .split_first()
@@ -83,6 +82,7 @@ fn matches_kind(token: &Token, kind: &Token) -> bool {
         (Text(_, _), Text(_, _)) => true,
         (Ident(_, _), Ident(_, _)) => true,
         (NewLine(_), NewLine(_)) => true,
+        (Dot(_), Dot(_)) => true,
         (AngleBracketOpen(_), AngleBracketOpen(_)) => true,
         (AngleBracketClose(_), AngleBracketClose(_)) => true,
         (SquareBracketOpen(_), SquareBracketOpen(_)) => true,
@@ -100,19 +100,25 @@ fn parse_stmt(tokens: &Vec<Token>) -> Result<Parser> {
     let new_tokens = tokens.clone();
     let mut result = new_stmt();
 
-    let mut new_tokens = if let Ok((ast, tokens)) = parse_curly(&new_tokens) {
-        result.add(ast)?;
-        tokens
-    } else if let Ok((asts, tokens)) = parse_expr_seq(&new_tokens) {
-        for ast in asts {
+    let mut new_tokens = match parse_curly(&new_tokens) {
+        Ok((ast, tokens)) => {
             result.add(ast)?;
+            tokens
         }
-        tokens
-    } else {
-        return Err(anyhow::anyhow!(ParserError::new(
-            "Failed to parse curly or expr_seq.".to_string(),
-            new_tokens.first().unwrap().clone(),
-        )));
+        Err(curry_err) => match parse_expr_seq(&new_tokens) {
+            Ok((asts, tokens)) => {
+                for ast in asts {
+                    result.add(ast)?;
+                }
+                tokens
+            }
+            Err(expr_seq_err) => {
+                if let Token::CurlyBracketOpen(_) = new_tokens.first().unwrap() {
+                    return Err(curry_err);
+                }
+                return Err(expr_seq_err);
+            }
+        },
     };
 
     let mut newline_count = 0;
@@ -285,7 +291,7 @@ fn parse_curly(tokens: &Vec<Token>) -> Result<Parser> {
     if !consumed {
         return Err(anyhow::anyhow!(ParserError::new(
             "Curly Brackets is not closed.".to_string(),
-            tokens.first().unwrap().clone(),
+            new_tokens.first().unwrap().clone(),
         )));
     }
 
@@ -331,14 +337,18 @@ fn parse_surrounded(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
     let mut new_tokens = tokens.clone();
     let mut result = vec![];
 
-    if check_ident(&new_tokens) && new_tokens.len() > 0 {
-        if let Token::Ident(i, _) = new_tokens.first().unwrap() {
-            result.push(new_ident(i.to_string()));
-            new_tokens = (new_tokens.clone())[1..].to_vec()
+    match parse_ident(&new_tokens) {
+        Ok((ast, tokens)) => {
+            result.push(ast);
+            new_tokens = tokens;
         }
-    } else {
+        Err(e) => return Err(e),
+    }
+
+    if let Token::CurlyBracketOpen(_) = new_tokens.first().unwrap() {
         return Err(anyhow::anyhow!(ParserError::new(
-            "Could not parse ident.".to_string(),
+            "Curly Brackets is not allowed in Square Brackets or Angle Brackets."
+                .to_string(),
             new_tokens.first().unwrap().clone(),
         )));
     }
@@ -349,6 +359,53 @@ fn parse_surrounded(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
         }
         new_tokens = tokens;
     }
+
+    Ok((result, new_tokens))
+}
+
+// text "." text
+fn parse_ident(tokens: &Vec<Token>) -> Result<(AST, Vec<Token>)> {
+    let mut result = new_ident(vec![]);
+
+    let new_tokens = if let Token::Module(i, _) = tokens.first().ok_or_else(|| anyhow::anyhow!(
+        ParserError::new(
+            "Could not parse ident.".to_string(),
+            tokens.first().unwrap().clone(),
+        )
+    ))? {
+        result.add(new_text(i.to_string()))?;
+        tokens[1..].to_vec() 
+    } else {
+        return Err(anyhow::anyhow!(ParserError::new(
+            "Could not parse ident.".to_string(),
+            tokens.first().unwrap().clone(),
+        )));
+    };
+
+    let (consumed, new_tokens_from_dot) =
+    consume_by_kind(&new_tokens, Token::Dot(mock_token_data()));
+    if !consumed {
+        return Err(anyhow::anyhow!(ParserError::new(
+            "".to_string(),
+            new_tokens.first().unwrap().clone(),
+        )));
+    }
+    let new_tokens = new_tokens_from_dot;
+
+    let new_tokens = if let Token::Ident(i, _) = new_tokens.first().ok_or_else(|| anyhow::anyhow!(
+        ParserError::new(
+            "Could not parse ident.".to_string(),
+            new_tokens.first().unwrap().clone(),
+        )
+    ))? {
+            result.add(new_text(i.to_string()))?;
+            (new_tokens.clone())[1..].to_vec()
+    } else {
+        return Err(anyhow::anyhow!(ParserError::new(
+            "Could not parse ident.".to_string(),
+            new_tokens.first().unwrap().clone(),
+        )));
+    };
 
     Ok((result, new_tokens))
 }
@@ -439,6 +496,8 @@ mod test {
         let tokens = vec![
             Token::Text("Hello, ".to_string(), mock_token_data()),
             Token::SquareBracketOpen(mock_token_data()),
+            Token::Module("std".to_string(), mock_token_data()),
+            Token::Dot(mock_token_data()),
             Token::Ident("*".to_string(), mock_token_data()),
             Token::Text("World!".to_string(), mock_token_data()),
             Token::SquareBracketClose(mock_token_data()),
@@ -450,7 +509,10 @@ mod test {
                 vec![
                     new_text("Hello, ".to_string()),
                     new_square_with_children(vec![
-                        new_ident("*".to_string()),
+                        new_ident(vec![
+                            new_text("std".to_string()),
+                            new_text("*".to_string()),
+                        ]),
                         new_expr_with_children(vec![new_text("World!".to_string())]),
                     ]),
                 ],
@@ -463,6 +525,8 @@ mod test {
     fn test_parse_commands_with_an_argument_includes_curly_brackets() -> Result<()> {
         let tokens = vec![
             Token::CurlyBracketOpen(mock_token_data()),
+            Token::Module("std".to_string(), mock_token_data()),
+            Token::Dot(mock_token_data()),
             Token::Ident("*".to_string(), mock_token_data()),
             Token::Text("Heading".to_string(), mock_token_data()),
             Token::CurlyBracketClose(mock_token_data()),
@@ -473,7 +537,10 @@ mod test {
         let parsed = parse(&tokens)?;
         let expected = new_document_with_children(vec![
             new_stmt_with_children(vec![new_curly_with_children(vec![
-                new_ident("*".to_string()),
+                new_ident(vec![
+                    new_text("std".to_string()),
+                    new_text("*".to_string()),
+                ]),
                 new_expr_with_children(vec![new_text("Heading".to_string())]),
             ])]),
             new_stmt_with_children(vec![new_expr_with_children(vec![new_text(
@@ -489,6 +556,8 @@ mod test {
         let tokens = vec![
             Token::Text("Hello, ".to_string(), mock_token_data()),
             Token::AngleBracketOpen(mock_token_data()),
+            Token::Module("std".to_string(), mock_token_data()),
+            Token::Dot(mock_token_data()),
             Token::Ident("*".to_string(), mock_token_data()),
             Token::Text("World!".to_string(), mock_token_data()),
             Token::AngleBracketClose(mock_token_data()),
@@ -500,7 +569,10 @@ mod test {
                 vec![
                     new_text("Hello, ".to_string()),
                     new_angle_with_children(vec![
-                        new_ident("*".to_string()),
+                        new_ident(vec![
+                            new_text("std".to_string()),
+                            new_text("*".to_string()),
+                        ]),
                         new_expr_with_children(vec![new_text("World!".to_string())]),
                     ]),
                 ],
@@ -514,6 +586,8 @@ mod test {
         let tokens = vec![
             Token::Text("Hello, ".to_string(), mock_token_data()),
             Token::SquareBracketOpen(mock_token_data()),
+            Token::Module("std".to_string(), mock_token_data()),
+            Token::Dot(mock_token_data()),
             Token::Ident("@".to_string(), mock_token_data()),
             Token::Text("World!".to_string(), mock_token_data()),
             Token::Comma(mock_token_data()),
@@ -527,7 +601,10 @@ mod test {
                 vec![
                     new_text("Hello, ".to_string()),
                     new_square_with_children(vec![
-                        new_ident("@".to_string()),
+                        new_ident(vec![
+                            new_text("std".to_string()),
+                            new_text("@".to_string()),
+                        ]),
                         new_expr_with_children(vec![new_text("World!".to_string())]),
                         new_expr_with_children(vec![new_text("https://example.com/".to_string())]),
                     ]),
@@ -542,8 +619,12 @@ mod test {
         let tokens = vec![
             Token::Text("Hello, ".to_string(), mock_token_data()),
             Token::SquareBracketOpen(mock_token_data()),
+            Token::Module("std".to_string(), mock_token_data()),
+            Token::Dot(mock_token_data()),
             Token::Ident("*".to_string(), mock_token_data()),
             Token::SquareBracketOpen(mock_token_data()),
+            Token::Module("std".to_string(), mock_token_data()),
+            Token::Dot(mock_token_data()),
             Token::Ident("@".to_string(), mock_token_data()),
             Token::Text("World!".to_string(), mock_token_data()),
             Token::Comma(mock_token_data()),
@@ -558,9 +639,15 @@ mod test {
                 vec![
                     new_text("Hello, ".to_string()),
                     new_square_with_children(vec![
-                        new_ident("*".to_string()),
+                        new_ident(vec![
+                            new_text("std".to_string()),
+                            new_text("*".to_string()),
+                        ]),
                         new_expr_with_children(vec![new_square_with_children(vec![
-                            new_ident("@".to_string()),
+                            new_ident(vec![
+                                new_text("std".to_string()),
+                                new_text("@".to_string()),
+                            ]),
                             new_expr_with_children(vec![new_text("World!".to_string())]),
                             new_expr_with_children(vec![new_text(
                                 "https://example.com/".to_string(),
@@ -581,11 +668,15 @@ mod test {
             Token::Text("World,".to_string(), mock_token_data()),
             Token::NewLine(mock_token_data()),
             Token::CurlyBracketOpen(mock_token_data()),
+            Token::Module("std".to_string(), mock_token_data()),
+            Token::Dot(mock_token_data()),
             Token::Ident("**".to_string(), mock_token_data()),
             Token::Text("Contact".to_string(), mock_token_data()),
             Token::CurlyBracketClose(mock_token_data()),
             Token::NewLine(mock_token_data()),
             Token::SquareBracketOpen(mock_token_data()),
+            Token::Module("std".to_string(), mock_token_data()),
+            Token::Dot(mock_token_data()),
             Token::Ident("@".to_string(), mock_token_data()),
             Token::Text("My website".to_string(), mock_token_data()),
             Token::Comma(mock_token_data()),
@@ -604,12 +695,18 @@ mod test {
                 new_expr_with_children(vec![new_text("World,".to_string())]),
             ]),
             new_stmt_with_children(vec![new_curly_with_children(vec![
-                new_ident("**".to_string()),
+                new_ident(vec![
+                    new_text("std".to_string()),
+                    new_text("**".to_string()),
+                ]),
                 new_expr_with_children(vec![new_text("Contact".to_string())]),
             ])]),
             new_stmt_with_children(vec![new_expr_with_children(vec![
                 new_square_with_children(vec![
-                    new_ident("@".to_string()),
+                    new_ident(vec![
+                        new_text("std".to_string()),
+                        new_text("@".to_string()),
+                    ]),
                     new_expr_with_children(vec![new_text("My website".to_string())]),
                     new_expr_with_children(vec![new_text("https://example.com/".to_string())]),
                 ]),
