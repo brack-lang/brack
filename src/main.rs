@@ -1,7 +1,9 @@
 use std::fs::read_dir;
 
 use anyhow::Result;
-use brack::{codegen::generate, parser::parse, plugins::new_plugins, tokenizer::tokenize, expander::expander};
+use brack::{
+    codegen::generate, expander::expander, parser::parse, plugins::new_plugins, tokenizer::tokenize,
+};
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -22,12 +24,10 @@ fn main() -> Result<()> {
 
     let plugins_dir_path = match args.plugins_dir_path {
         Some(path) => path,
-        None => {
-            match std::env::var("BRACK_PLUGINS_PATH") {
-                Ok(path) => path,
-                Err(_) => String::new(),
-            }
-        }
+        None => match std::env::var("BRACK_PLUGINS_PATH") {
+            Ok(path) => path,
+            Err(_) => String::new(),
+        },
     };
 
     let entries = read_dir(plugins_dir_path)?;

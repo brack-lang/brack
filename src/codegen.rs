@@ -136,7 +136,9 @@ fn generate_identifier(ast: &AST) -> Result<String> {
                 result.push(generate_text(&child)?);
             }
             AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
-            _ => anyhow::bail!("Identifier cannot contain Document, Stmt, Expr, Curly, Square and Identifier"),
+            _ => anyhow::bail!(
+                "Identifier cannot contain Document, Stmt, Expr, Curly, Square and Identifier"
+            ),
         }
     }
     Ok(result.join(" "))
