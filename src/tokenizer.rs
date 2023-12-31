@@ -723,8 +723,7 @@ mod tests {
                     line: 5,
                     column: 1,
                 }),
-                Token::Text("2023.12.28
-                ".to_string(), TokenData { line: 6, column: 1 }),
+                Token::Text("2023.12.28".to_string(), TokenData { line: 6, column: 1 }),
                 Token::NewLine(TokenData {
                     line: 6,
                     column: 11,
