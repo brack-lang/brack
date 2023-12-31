@@ -5,13 +5,17 @@
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    naersk = {
+      url = "github:nix-community/naersk";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     flake-utils.url = "github:numtide/flake-utils";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
     };
   };
-  outputs = { self, nixpkgs, fenix, flake-utils, flake-compat, ... }:
+  outputs = { self, nixpkgs, fenix, naersk, flake-utils, flake-compat, ... }:
     flake-utils.lib.eachDefaultSystem (
       system: let
         overlays = [
@@ -20,6 +24,7 @@
         pkgs = import nixpkgs {
           inherit system overlays;
         };
+        naersk' = pkgs.callPackage naersk {};
       in {
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
@@ -37,6 +42,13 @@
             rust-analyzer-nightly
           ];
           RUST_SRC_PATH = "${fenix.packages.${system}.complete.rust-src}/lib/rustlib/src/rust/library";
+        };
+        packages.default = naersk'.buildPackage {
+          src = ./.;
+        };
+        apps.${system}.default = {
+          type = "app";
+          program = "${self.packages.default}/bin/brack";
         };
       }
     );
