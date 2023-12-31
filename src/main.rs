@@ -7,7 +7,7 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 struct Args {
     #[arg(short, long)]
-    plugins_dir_path: String,
+    plugins_dir_path: Option<String>,
 
     #[arg(short, long)]
     backend: String,
@@ -20,7 +20,17 @@ fn main() -> Result<()> {
     let args = Args::parse();
     let mut pathes = vec![];
 
-    let entries = read_dir(args.plugins_dir_path)?;
+    let plugins_dir_path = match args.plugins_dir_path {
+        Some(path) => path,
+        None => {
+            match std::env::var("BRACK_PLUGINS_PATH") {
+                Ok(path) => path,
+                Err(_) => String::new(),
+            }
+        }
+    };
+
+    let entries = read_dir(plugins_dir_path)?;
     for entry in entries {
         let entry = entry?;
         let path = entry.path();
