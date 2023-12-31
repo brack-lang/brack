@@ -273,7 +273,7 @@ fn tokenize_module(t: &Tokenizer) -> Vec<Token> {
         tokens: Some(new_tokens),
         ..Default::default()
     };
-    inner_tokenize(&t.merge(&t2)) 
+    inner_tokenize(&t.merge(&t2))
 }
 
 fn tokenize_identifier(t: &Tokenizer) -> Vec<Token> {
@@ -428,15 +428,18 @@ mod tests {
             vec![
                 Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
                 Token::SquareBracketOpen(TokenData { line: 1, column: 8 }),
-                Token::Module("std".to_string(), TokenData {
-                    line: 1,
-                    column: 9,
-                }),
+                Token::Module("std".to_string(), TokenData { line: 1, column: 9 }),
                 Token::Dot(TokenData {
                     line: 1,
                     column: 12,
                 }),
-                Token::Ident("*".to_string(), TokenData { line: 1, column: 13 }),
+                Token::Ident(
+                    "*".to_string(),
+                    TokenData {
+                        line: 1,
+                        column: 13
+                    }
+                ),
                 Token::Text(
                     "World!".to_string(),
                     TokenData {
@@ -464,15 +467,18 @@ mod tests {
             vec![
                 Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
                 Token::CurlyBracketOpen(TokenData { line: 1, column: 8 }),
-                Token::Module("std".to_string(), TokenData {
-                    line: 1,
-                    column: 9,
-                }),
+                Token::Module("std".to_string(), TokenData { line: 1, column: 9 }),
                 Token::Dot(TokenData {
                     line: 1,
                     column: 12,
                 }),
-                Token::Ident("*".to_string(), TokenData { line: 1, column: 13 }),
+                Token::Ident(
+                    "*".to_string(),
+                    TokenData {
+                        line: 1,
+                        column: 13
+                    }
+                ),
                 Token::Text(
                     "World!".to_string(),
                     TokenData {
@@ -528,15 +534,18 @@ mod tests {
             vec![
                 Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
                 Token::SquareBracketOpen(TokenData { line: 1, column: 8 }),
-                Token::Module("std".to_string(), TokenData {
-                    line: 1,
-                    column: 9,
-                }),
+                Token::Module("std".to_string(), TokenData { line: 1, column: 9 }),
                 Token::Dot(TokenData {
                     line: 1,
                     column: 12,
                 }),
-                Token::Ident("@".to_string(), TokenData { line: 1, column: 13 }),
+                Token::Ident(
+                    "@".to_string(),
+                    TokenData {
+                        line: 1,
+                        column: 13
+                    }
+                ),
                 Token::Text(
                     "World!".to_string(),
                     TokenData {
@@ -575,23 +584,29 @@ mod tests {
             vec![
                 Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
                 Token::SquareBracketOpen(TokenData { line: 1, column: 8 }),
-                Token::Module("std".to_string(), TokenData {
-                    line: 1,
-                    column: 9,
-                }),
+                Token::Module("std".to_string(), TokenData { line: 1, column: 9 }),
                 Token::Dot(TokenData {
                     line: 1,
                     column: 12,
                 }),
-                Token::Ident("*".to_string(), TokenData { line: 1, column: 13 }),
+                Token::Ident(
+                    "*".to_string(),
+                    TokenData {
+                        line: 1,
+                        column: 13
+                    }
+                ),
                 Token::SquareBracketOpen(TokenData {
                     line: 1,
                     column: 15,
                 }),
-                Token::Module("std".to_string(), TokenData {
-                    line: 1,
-                    column: 16,
-                }),
+                Token::Module(
+                    "std".to_string(),
+                    TokenData {
+                        line: 1,
+                        column: 16,
+                    }
+                ),
                 Token::Dot(TokenData {
                     line: 1,
                     column: 19,
@@ -646,32 +661,14 @@ mod tests {
             tokens,
             vec![
                 Token::Text("Hello,".to_string(), TokenData { line: 1, column: 1 }),
-                Token::NewLine(TokenData {
-                    line: 1,
-                    column: 7,
-                }),
+                Token::NewLine(TokenData { line: 1, column: 7 }),
                 Token::Text("World,".to_string(), TokenData { line: 2, column: 1 }),
-                Token::NewLine(TokenData {
-                    line: 2,
-                    column: 7,
-                }),
+                Token::NewLine(TokenData { line: 2, column: 7 }),
                 Token::CurlyBracketOpen(TokenData { line: 3, column: 1 }),
-                Token::Module("std".to_string(), TokenData {
-                    line: 3,
-                    column: 2,
-                }),
-                Token::Dot(TokenData {
-                    line: 3,
-                    column: 5,
-                }),
+                Token::Module("std".to_string(), TokenData { line: 3, column: 2 }),
+                Token::Dot(TokenData { line: 3, column: 5 }),
                 Token::Ident("**".to_string(), TokenData { line: 3, column: 6 }),
-                Token::Text(
-                    "Contact".to_string(),
-                    TokenData {
-                        line: 3,
-                        column: 9,
-                    }
-                ),
+                Token::Text("Contact".to_string(), TokenData { line: 3, column: 9 }),
                 Token::CurlyBracketClose(TokenData {
                     line: 3,
                     column: 16,
@@ -680,26 +677,11 @@ mod tests {
                     line: 3,
                     column: 17,
                 }),
-                Token::SquareBracketOpen(TokenData {
-                    line: 4,
-                    column: 1,
-                }),
-                Token::Module("std".to_string(), TokenData {
-                    line: 4,
-                    column: 2,
-                }),
-                Token::Dot(TokenData {
-                    line: 4,
-                    column: 5,
-                }),
+                Token::SquareBracketOpen(TokenData { line: 4, column: 1 }),
+                Token::Module("std".to_string(), TokenData { line: 4, column: 2 }),
+                Token::Dot(TokenData { line: 4, column: 5 }),
                 Token::Ident("@".to_string(), TokenData { line: 4, column: 6 }),
-                Token::Text(
-                    "My website".to_string(),
-                    TokenData {
-                        line: 4,
-                        column: 8,
-                    }
-                ),
+                Token::Text("My website".to_string(), TokenData { line: 4, column: 8 }),
                 Token::Comma(TokenData {
                     line: 4,
                     column: 18,
@@ -719,19 +701,13 @@ mod tests {
                     line: 4,
                     column: 41,
                 }),
-                Token::NewLine(TokenData {
-                    line: 5,
-                    column: 1,
-                }),
+                Token::NewLine(TokenData { line: 5, column: 1 }),
                 Token::Text("2023.12.28".to_string(), TokenData { line: 6, column: 1 }),
                 Token::NewLine(TokenData {
                     line: 6,
                     column: 11,
                 }),
-                Token::EOF(TokenData {
-                    line: 7,
-                    column: 1,
-                }),
+                Token::EOF(TokenData { line: 7, column: 1 }),
             ]
         );
     }

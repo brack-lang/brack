@@ -1,7 +1,10 @@
 use anyhow::Result;
 use extism::convert::Json;
 
-use crate::{ast::AST, plugins::{Plugins, PluginArgument}};
+use crate::{
+    ast::AST,
+    plugins::{PluginArgument, Plugins},
+};
 
 fn generate_document(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     let mut result = String::from("");
@@ -102,7 +105,7 @@ fn generate_curly(ast: &AST, plugins: &mut Plugins) -> Result<String> {
         .get_mut(&module_name)
         .ok_or_else(|| anyhow::anyhow!("Module {} not found", module_name))?;
     let res = plugin.call::<Json<PluginArgument>, &str>(&ident_name, Json(plugin_argument))?;
-    
+
     Ok(format!("{{{}}}", res))
 }
 

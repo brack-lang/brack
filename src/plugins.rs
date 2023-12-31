@@ -1,7 +1,7 @@
 use std::{collections::HashMap, path::Path};
 
 use anyhow::Result;
-use extism::{Plugin, Wasm, Manifest};
+use extism::{Manifest, Plugin, Wasm};
 use serde::{Deserialize, Serialize};
 
 pub type Plugins = HashMap<String, Plugin>;
@@ -16,7 +16,16 @@ pub enum PluginArgument {
     Arg5(String, String, String, String, String),
     Arg6(String, String, String, String, String, String),
     Arg7(String, String, String, String, String, String, String),
-    Arg8(String, String, String, String, String, String, String, String),
+    Arg8(
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+    ),
 }
 
 impl PluginArgument {
@@ -26,11 +35,46 @@ impl PluginArgument {
             1 => PluginArgument::Arg1(args[0].clone()),
             2 => PluginArgument::Arg2(args[0].clone(), args[1].clone()),
             3 => PluginArgument::Arg3(args[0].clone(), args[1].clone(), args[2].clone()),
-            4 => PluginArgument::Arg4(args[0].clone(), args[1].clone(), args[2].clone(), args[3].clone()),
-            5 => PluginArgument::Arg5(args[0].clone(), args[1].clone(), args[2].clone(), args[3].clone(), args[4].clone()),
-            6 => PluginArgument::Arg6(args[0].clone(), args[1].clone(), args[2].clone(), args[3].clone(), args[4].clone(), args[5].clone()),
-            7 => PluginArgument::Arg7(args[0].clone(), args[1].clone(), args[2].clone(), args[3].clone(), args[4].clone(), args[5].clone(), args[6].clone()),
-            8 => PluginArgument::Arg8(args[0].clone(), args[1].clone(), args[2].clone(), args[3].clone(), args[4].clone(), args[5].clone(), args[6].clone(), args[7].clone()),
+            4 => PluginArgument::Arg4(
+                args[0].clone(),
+                args[1].clone(),
+                args[2].clone(),
+                args[3].clone(),
+            ),
+            5 => PluginArgument::Arg5(
+                args[0].clone(),
+                args[1].clone(),
+                args[2].clone(),
+                args[3].clone(),
+                args[4].clone(),
+            ),
+            6 => PluginArgument::Arg6(
+                args[0].clone(),
+                args[1].clone(),
+                args[2].clone(),
+                args[3].clone(),
+                args[4].clone(),
+                args[5].clone(),
+            ),
+            7 => PluginArgument::Arg7(
+                args[0].clone(),
+                args[1].clone(),
+                args[2].clone(),
+                args[3].clone(),
+                args[4].clone(),
+                args[5].clone(),
+                args[6].clone(),
+            ),
+            8 => PluginArgument::Arg8(
+                args[0].clone(),
+                args[1].clone(),
+                args[2].clone(),
+                args[3].clone(),
+                args[4].clone(),
+                args[5].clone(),
+                args[6].clone(),
+                args[7].clone(),
+            ),
             _ => panic!("Too many arguments"),
         }
     }
@@ -42,11 +86,12 @@ pub fn new_plugins<P: AsRef<Path>>(pathes: Vec<P>) -> Result<Plugins> {
         let wasm = Wasm::file(&path);
         let manifest = Manifest::new([wasm]);
         let plugin = Plugin::new(&manifest, [], true)?;
-        
-        let file_stem = path.as_ref()
-                           .file_stem()
-                           .and_then(|s| s.to_str())
-                           .unwrap_or_default();
+
+        let file_stem = path
+            .as_ref()
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or_default();
         let parts: Vec<&str> = file_stem.split('.').collect();
         let name = parts.get(0).map_or("", |s| *s).to_string();
 

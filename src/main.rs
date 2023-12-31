@@ -1,7 +1,7 @@
 use std::fs::read_dir;
 
 use anyhow::Result;
-use brack::{parser::parse, tokenizer::tokenize, codegen::generate, plugins::new_plugins};
+use brack::{codegen::generate, parser::parse, plugins::new_plugins, tokenizer::tokenize};
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -19,12 +19,16 @@ struct Args {
 fn main() -> Result<()> {
     let args = Args::parse();
     let mut pathes = vec![];
-    
+
     let entries = read_dir(args.plugins_dir_path)?;
     for entry in entries {
         let entry = entry?;
         let path = entry.path();
-        let name = path.file_name().ok_or_else(|| anyhow::anyhow!(""))?.to_str().ok_or_else(|| anyhow::anyhow!(""))?;
+        let name = path
+            .file_name()
+            .ok_or_else(|| anyhow::anyhow!(""))?
+            .to_str()
+            .ok_or_else(|| anyhow::anyhow!(""))?;
         if name.ends_with(format!(".{}.wasm", args.backend).as_str()) {
             pathes.push(path);
         }
