@@ -2,8 +2,8 @@ use std::fs::read_dir;
 
 use anyhow::Result;
 use brack::{
-    codegen::generate, expander::expander, parser::parse, plugins::new_plugins, tokenizer::tokenize,
-    language_server,
+    codegen::generate, expander::expander, language_server, parser::parse, plugins::new_plugins,
+    tokenizer::tokenize,
 };
 use clap::{Parser, Subcommand};
 

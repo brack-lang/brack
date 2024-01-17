@@ -1,12 +1,14 @@
 use std::str::from_utf8;
 
 use anyhow::Result;
-use serde_json::{json, from_str, Value};
-use tokio::io::{stdin, AsyncReadExt, stdout, AsyncWriteExt};
+use serde_json::{from_str, json, Value};
+use tokio::io::{stdin, stdout, AsyncReadExt, AsyncWriteExt};
 
 async fn send_message(msg: &str) -> Result<()> {
     let mut output = stdout();
-    output.write_all(format!("Content-Length: {}\r\n\r\n{}", msg.len(), msg).as_bytes()).await?;
+    output
+        .write_all(format!("Content-Length: {}\r\n\r\n{}", msg.len(), msg).as_bytes())
+        .await?;
     output.flush().await?;
     Ok(())
 }
@@ -19,7 +21,8 @@ async fn log_message(message: &str) -> Result<()> {
             "type": 3,
             "message": message
         }
-    }).to_string();
+    })
+    .to_string();
     send_message(&response).await
 }
 
@@ -31,7 +34,8 @@ async fn send_error_response(id: Option<i64>, code: i32, message: &str) -> Resul
             "code": code,
             "message": message,
         }
-    }).to_string();
+    })
+    .to_string();
     send_message(&response).await
 }
 
@@ -55,10 +59,11 @@ async fn handle_request(_: &Value, id: i64, method: &str) -> Result<()> {
                 "jsonrpc": "2.0",
                 "id": id,
                 "result": { "capabilities": {} }
-            }).to_string();
+            })
+            .to_string();
             send_message(&response).await
-        },
-        _ => send_method_not_found_response(id, method).await
+        }
+        _ => send_method_not_found_response(id, method).await,
     }
 }
 
@@ -69,14 +74,14 @@ async fn handle_response(_: &Value, _: i64) -> Result<()> {
 async fn handle_notification(_: &Value, method: &str) -> Result<()> {
     match method {
         "initialized" => log_message("Brack Language Server has been initialized!").await,
-        _ => Ok(())
+        _ => Ok(()),
     }
 }
 
 async fn dispatch(msg: Value) -> Result<()> {
     match (
         msg.get("id").and_then(|i| i.as_i64()),
-        msg.get("method").and_then(|m| m.as_str())
+        msg.get("method").and_then(|m| m.as_str()),
     ) {
         (Some(id), Some(method)) => handle_request(&msg, id, method).await,
         (Some(id), None) => handle_response(&msg, id).await,
@@ -92,7 +97,7 @@ pub async fn run() -> Result<()> {
     loop {
         let mut tmp_buffer = [0; 1024];
 
-        let chunk= stdin.read(&mut tmp_buffer).await?;
+        let chunk = stdin.read(&mut tmp_buffer).await?;
 
         if chunk == 0 {
             break;
