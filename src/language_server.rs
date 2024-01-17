@@ -1,6 +1,6 @@
 use std::str::from_utf8;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use serde_json::{from_str, json, Value};
 use tokio::io::{stdin, stdout, AsyncReadExt, AsyncWriteExt};
 
@@ -58,7 +58,9 @@ async fn handle_request(_: &Value, id: i64, method: &str) -> Result<()> {
             let response = json!({
                 "jsonrpc": "2.0",
                 "id": id,
-                "result": { "capabilities": {} }
+                "result": { "capabilities": {
+                    "textDocumentSync": 1,
+                } }
             })
             .to_string();
             send_message(&response).await
@@ -71,9 +73,58 @@ async fn handle_response(_: &Value, _: i64) -> Result<()> {
     Ok(())
 }
 
-async fn handle_notification(_: &Value, method: &str) -> Result<()> {
+async fn handle_notification_text_document_did_open(msg: &Value) -> Result<()> {
+    let text_document = msg
+        .get("params")
+        .ok_or_else(|| anyhow!("No params"))?
+        .get("textDocument")
+        .ok_or_else(|| anyhow!("No textDocument"))?;
+    let uri = text_document
+        .get("uri")
+        .and_then(|uri| uri.as_str())
+        .ok_or_else(|| anyhow!("No uri"))?;
+    let _ = text_document
+        .get("text")
+        .and_then(|text| text.as_str())
+        .ok_or_else(|| anyhow!("No text"))?;
+    log_message(&format!("Did open {}", uri)).await?;
+
+    Ok(())
+}
+
+async fn handle_notification_text_document_did_change(msg: &Value) -> Result<()> {
+    let uri = msg
+        .get("params")
+        .ok_or_else(|| anyhow!("No params"))?
+        .get("textDocument")
+        .ok_or_else(|| anyhow!("No textDocument"))?
+        .get("uri")
+        .and_then(|uri| uri.as_str())
+        .ok_or_else(|| anyhow!("No uri"))?;
+    let index = msg
+        .get("params")
+        .ok_or_else(|| anyhow!("No params"))?
+        .get("contentChanges")
+        .and_then(|content_changes| content_changes.as_array())
+        .and_then(|content_changes| content_changes.len().checked_sub(1))
+        .ok_or_else(|| anyhow!("No contentChanges"))?;
+    let _ = msg
+        .get("params")
+        .ok_or_else(|| anyhow!("No params"))?
+        .get("contentChanges")
+        .and_then(|content_changes| content_changes.get(index))
+        .and_then(|content_change| content_change.get("text"))
+        .and_then(|text| text.as_str())
+        .ok_or_else(|| anyhow!("No text"))?;
+    log_message(&format!("Did change {}", uri)).await?;
+    Ok(())
+}
+
+async fn handle_notification(msg: &Value, method: &str) -> Result<()> {
     match method {
         "initialized" => log_message("Brack Language Server has been initialized!").await,
+        "textDocument/didOpen" => handle_notification_text_document_did_open(msg).await,
+        "textDocument/didChange" => handle_notification_text_document_did_change(msg).await,
         _ => Ok(()),
     }
 }
