@@ -6,3 +6,17 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.79"
+brack-codegen = { path = "../brack-codegen" }
+brack-expander = { path = "../brack-expander" }
+brack-language-server = { path = "../brack-language-server" }
+brack-parser = { path = "../brack-parser" }
+brack-plugin = { path = "../brack-plugin" }
+brack-tokenizer = { path = "../brack-tokenizer" }
+tokio = { version = "1", features = ["full"] }
+
+[dependencies.clap]
+version = "4.4.12"
+features = [
+    "derive",
+]

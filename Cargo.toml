@@ -6,5 +6,6 @@ members = [
     "brack-expander",
     "brack-language-server",
     "brack-parser",
+    "brack-plugin",
     "brack-tokenizer",
 ]
