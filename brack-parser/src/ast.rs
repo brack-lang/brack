@@ -1,5 +1,5 @@
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
+use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]

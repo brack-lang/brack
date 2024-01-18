@@ -1,10 +1,6 @@
 use std::fs::read_dir;
 
 use anyhow::Result;
-use brack::{
-    codegen::generate, expander::expander, language_server, parser::parse, plugins::new_plugins,
-    tokenizer::tokenize,
-};
 use clap::{Parser, Subcommand};
 
 #[derive(Debug, Subcommand)]
@@ -63,17 +59,17 @@ fn run_compile(subcommand: SubCommands) -> Result<()> {
         }
     }
 
-    let mut plugins = new_plugins(pathes)?;
+    let mut plugins = brack_plugin::plugin::new_plugins(pathes)?;
 
     if !args.2.ends_with(".[]") {
         anyhow::bail!("Filename must end with .[]");
     }
 
     let code = std::fs::read_to_string(args.2)?;
-    let tokenized = tokenize(&code);
-    let parsed = parse(&tokenized)?;
-    let expanded = expander(&parsed, &mut plugins)?;
-    let gen = generate(&expanded, &mut plugins)?;
+    let tokenized = brack_tokenizer::tokenize::tokenize(&code);
+    let parsed = brack_parser::parse::parse(&tokenized)?;
+    let expanded = brack_expander::expand::expander(&parsed, &mut plugins)?;
+    let gen = brack_codegen::generate::generate(&expanded, &mut plugins)?;
     println!("{}", gen);
     Ok(())
 }
@@ -83,7 +79,7 @@ async fn main() -> Result<()> {
     let args = Args::parse();
     match args.subcommand {
         SubCommands::Compile { .. } => run_compile(args.subcommand)?,
-        SubCommands::LanguageServer => language_server::run().await?,
+        SubCommands::LanguageServer => brack_language_server::server::run().await?,
     }
     Ok(())
 }

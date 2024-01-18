@@ -1,11 +1,10 @@
 use std::{collections::HashMap, path::Path};
 
 use anyhow::Result;
+use brack_parser::ast::AST;
 use extism::{Manifest, Plugin, Wasm};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-
-use crate::ast::AST;
 
 pub type Plugins = HashMap<String, Plugin>;
 

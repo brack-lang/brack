@@ -1,10 +1,7 @@
 use anyhow::Result;
+use brack_parser::ast::AST;
+use brack_plugin::plugin::{Plugins, PluginMacroArgument};
 use extism::convert::Json;
-
-use crate::{
-    ast::AST,
-    plugins::{PluginMacroArgument, Plugins},
-};
 
 fn expand_angle(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<AST> {
     let mut module_name = String::from("");

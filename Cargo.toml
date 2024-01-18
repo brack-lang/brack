@@ -1,29 +1,11 @@
-[package]
-name = "brack"
-version = "0.1.0"
-edition = "2021"
+[workspace]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-anyhow = "1.0.77"
-extism = "^1.0.0-rc3"
-serde = "1.0.193"
-serde_json = "1.0.108"
-thiserror = "1.0.52"
-tokio = { version = "1", features = ["full"] }
-
-[dependencies.clap]
-version = "4.4.12"
-features = [
-    "derive",
-]
-
-[dependencies.uuid]
-version = "1.6.1"
-features = [
-    "v4",
-    "fast-rng",
-    "macro-diagnostics",
-    "serde",
+members = [
+    "brack",
+    "brack-codegen",
+    "brack-expander",
+    "brack-language-server",
+    "brack-parser",
+    "brack-plugin",
+    "brack-tokenizer",
 ]
