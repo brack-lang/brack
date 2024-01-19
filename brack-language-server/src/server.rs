@@ -52,6 +52,19 @@ async fn send_parse_error_response() -> Result<()> {
     send_error_response(None, -32700, "received an invalid JSON").await
 }
 
+async fn send_publish_diagnostics(uri: &str, diagnostics: &Value) -> Result<()> {
+    let response = json!({
+        "jsonrpc": "2.0",
+        "method": "textDocument/publishDiagnostics",
+        "params": {
+            "uri": uri,
+            "diagnostics": diagnostics,
+        }
+    })
+    .to_string();
+    send_message(&response).await
+}
+
 async fn handle_request(_: &Value, id: i64, method: &str) -> Result<()> {
     match method {
         "initialize" => {
@@ -117,7 +130,24 @@ async fn handle_notification_text_document_did_change(msg: &Value) -> Result<()>
         .and_then(|text| text.as_str())
         .ok_or_else(|| anyhow!("No text"))?;
     log_message(&format!("Did change {}", uri)).await?;
-    Ok(())
+
+    let diagnostics = json!([
+        {
+            "range": {
+                "start": {
+                    "line": 0,
+                    "character": 0,
+                },
+                "end": {
+                    "line": 0,
+                    "character": 3,
+                },
+            },
+            "message": "This is a test diagnostic message",
+        }
+    ]);
+    log_message(&diagnostics.to_string()).await?;
+    send_publish_diagnostics(uri, &diagnostics).await
 }
 
 async fn handle_notification(msg: &Value, method: &str) -> Result<()> {
