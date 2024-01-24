@@ -3,7 +3,7 @@ use crate::{
     curly_bracket_open, escape, identifier, module, newline, square_bracket_close,
     square_bracket_open,
     tokenizer::Tokenizer,
-    tokens::{Token, TokenData},
+    tokens::{Location, LocationData, Token},
     utils::{separate, update_tokens},
 };
 
@@ -16,9 +16,15 @@ pub fn dispatch(t: &Tokenizer) -> Vec<Token> {
 
     if head == '\0' {
         let mut updated = update_tokens(t, false);
-        updated.push(Token::EOF(TokenData {
-            line: t.line.unwrap_or_default(),
-            column,
+        updated.push(Token::EOF(Location {
+            start: LocationData {
+                line: t.line.unwrap_or_default(),
+                character: t.column.unwrap_or_default(),
+            },
+            end: LocationData {
+                line: t.line.unwrap_or_default(),
+                character: t.column.unwrap_or_default(),
+            },
         }));
         return updated;
     }

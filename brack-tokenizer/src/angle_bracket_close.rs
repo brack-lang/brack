@@ -1,7 +1,7 @@
 use crate::{
     dispatch::dispatch,
     tokenizer::Tokenizer,
-    tokens::{Token, TokenData},
+    tokens::{Location, LocationData, Token},
     utils::{separate, update_tokens},
 };
 
@@ -11,9 +11,15 @@ pub fn tokenize(t: &Tokenizer) -> Vec<Token> {
     let (_, tail) = separate(&s);
 
     let mut new_tokens = update_tokens(t, true);
-    new_tokens.push(Token::AngleBracketClose(TokenData {
-        line: t.token_start_line.unwrap_or_default(),
-        column,
+    new_tokens.push(Token::AngleBracketClose(Location {
+        start: LocationData {
+            line: t.token_start_line.unwrap_or_default(),
+            character: t.token_start_column.unwrap_or_default(),
+        },
+        end: LocationData {
+            line: t.line.unwrap_or_default(),
+            character: t.column.unwrap_or_default(),
+        },
     }));
 
     let mut t2 = Tokenizer {

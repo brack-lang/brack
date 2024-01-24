@@ -1,7 +1,7 @@
 use crate::{
     dispatch::dispatch,
     tokenizer::Tokenizer,
-    tokens::{Token, TokenData},
+    tokens::{Location, LocationData, Token},
     utils::separate,
 };
 
@@ -15,16 +15,28 @@ pub fn tokenize(t: &Tokenizer) -> Vec<Token> {
     if !pool.trim().is_empty() {
         new_tokens.push(Token::Text(
             pool,
-            TokenData {
-                line: t.token_start_line.unwrap_or_default(),
-                column: t.token_start_column.unwrap_or_default(),
+            Location {
+                start: LocationData {
+                    line: t.token_start_line.unwrap_or_default(),
+                    character: t.token_start_column.unwrap_or_default(),
+                },
+                end: LocationData {
+                    line: t.line.unwrap_or_default(),
+                    character: t.column.unwrap_or_default(),
+                },
             },
         ));
     }
 
-    new_tokens.push(Token::NewLine(TokenData {
-        line: t.token_start_line.unwrap_or_default(),
-        column: t.column.unwrap_or_default(),
+    new_tokens.push(Token::NewLine(Location {
+        start: LocationData {
+            line: t.token_start_line.unwrap_or_default(),
+            character: t.token_start_column.unwrap_or_default(),
+        },
+        end: LocationData {
+            line: t.line.unwrap_or_default(),
+            character: t.column.unwrap_or_default(),
+        },
     }));
 
     let t2 = Tokenizer {

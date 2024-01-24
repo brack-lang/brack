@@ -17,35 +17,26 @@ pub enum Token {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct LocationRangeData {
+pub struct LocationData {
     pub line: usize,
     pub character: usize,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct LocationRange {
-    pub start: LocationRangeData,
-    pub end: LocationRangeData,
-}
-
-#[derive(Debug, Clone, PartialEq)]
 pub struct Location {
-    pub uri: String,
-    pub range: LocationRange,
+    pub start: LocationData,
+    pub end: LocationData,
 }
 
 pub fn mock_location() -> Location {
     Location {
-        uri: String::from("/example/path/to"),
-        range: LocationRange {
-            start: LocationRangeData {
-                line: 0,
-                character: 0
-            },
-            end: LocationRangeData {
-                line: 0,
-                character: 0
-            },
+        start: LocationData {
+            line: 0,
+            character: 0,
+        },
+        end: LocationData {
+            line: 0,
+            character: 0,
         },
     }
 }
