@@ -36,7 +36,7 @@ pub fn tokenize(t: &Tokenizer) -> Vec<Token> {
         untreated: Some(tail),
         pool: Some(String::new()),
         tokens: Some(tokens),
-        square_nest_count: Some(t.square_nest_count.unwrap_or_default() - 1),
+        curly_nest_count: Some(t.curly_nest_count.unwrap_or_default() - 1),
         ..Default::default()
     };
     if t.looking_for_identifier.unwrap_or_default() {

@@ -279,33 +279,90 @@ mod tests {
         Ok(())
     }
 
-    //     #[test]
-    //     fn test_split_commands_with_an_argument_includes_angle_brackets() {
-    //         let tokens = tokenize("Hello, <* World!>");
-    //         assert_eq!(
-    //             tokens,
-    //             vec![
-    //                 Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
-    //                 Token::AngleBracketOpen(TokenData { line: 1, column: 8 }),
-    //                 Token::Ident("*".to_string(), TokenData { line: 1, column: 9 }),
-    //                 Token::Text(
-    //                     "World!".to_string(),
-    //                     TokenData {
-    //                         line: 1,
-    //                         column: 11,
-    //                     }
-    //                 ),
-    //                 Token::AngleBracketClose(TokenData {
-    //                     line: 1,
-    //                     column: 17,
-    //                 }),
-    //                 Token::EOF(TokenData {
-    //                     line: 1,
-    //                     column: 18,
-    //                 }),
-    //             ]
-    //         );
-    //     }
+    #[test]
+    fn test_split_commands_with_an_argument_includes_angle_brackets() -> Result<()> {
+        let pwd = std::env::current_dir()?;
+        let uri = pwd
+            .join("text/split_commands_with_an_argument_includes_angle_brackets.[]")
+            .to_string_lossy()
+            .to_string();
+        let tokens = tokenize(uri.clone())?;
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text(
+                    "Hello, ".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 1,
+                            character: 1,
+                        },
+                        end: LocationData {
+                            line: 1,
+                            character: 8,
+                        },
+                    }
+                ),
+                Token::AngleBracketOpen(Location {
+                    start: LocationData {
+                        line: 1,
+                        character: 8,
+                    },
+                    end: LocationData {
+                        line: 1,
+                        character: 9,
+                    },
+                }),
+                Token::Ident(
+                    "*".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 1,
+                            character: 9,
+                        },
+                        end: LocationData {
+                            line: 1,
+                            character: 10,
+                        },
+                    }
+                ),
+                Token::Text(
+                    "World!".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 1,
+                            character: 10,
+                        },
+                        end: LocationData {
+                            line: 1,
+                            character: 16,
+                        },
+                    }
+                ),
+                Token::AngleBracketClose(Location {
+                    start: LocationData {
+                        line: 1,
+                        character: 16,
+                    },
+                    end: LocationData {
+                        line: 1,
+                        character: 17,
+                    },
+                }),
+                Token::EOF(Location {
+                    start: LocationData {
+                        line: 1,
+                        character: 17,
+                    },
+                    end: LocationData {
+                        line: 1,
+                        character: 17,
+                    },
+                }),
+            ]
+        );
+        Ok(())
+    }
 
     //     #[test]
     //     fn test_split_commands_with_two_arguments_includes_square_brackets() {
