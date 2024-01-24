@@ -253,6 +253,9 @@ dependencies = [
 [[package]]
 name = "brack-tokenizer"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+]
 
 [[package]]
 name = "bumpalo"
