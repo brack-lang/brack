@@ -8,7 +8,7 @@ use crate::{
 pub fn tokenize(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
     let (_, tail) = separate(&s);
-    
+
     let mut tokens = t.tokens.clone().unwrap_or_default();
     tokens.push(Token::Ident(
         t.pool.clone().unwrap_or_default(),
@@ -23,7 +23,7 @@ pub fn tokenize(t: &Tokenizer) -> Vec<Token> {
             },
         },
     ));
-    
+
     let column = t.column.unwrap_or_default();
     let t2 = Tokenizer {
         column: Some(column),

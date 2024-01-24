@@ -171,44 +171,113 @@ mod tests {
         Ok(())
     }
 
-    //     #[test]
-    //     fn test_split_commands_with_an_argument_includes_curly_brackets() {
-    //         let tokens = tokenize("Hello, {std.* World!}");
-    //         assert_eq!(
-    //             tokens,
-    //             vec![
-    //                 Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
-    //                 Token::CurlyBracketOpen(TokenData { line: 1, column: 8 }),
-    //                 Token::Module("std".to_string(), TokenData { line: 1, column: 9 }),
-    //                 Token::Dot(TokenData {
-    //                     line: 1,
-    //                     column: 12,
-    //                 }),
-    //                 Token::Ident(
-    //                     "*".to_string(),
-    //                     TokenData {
-    //                         line: 1,
-    //                         column: 13
-    //                     }
-    //                 ),
-    //                 Token::Text(
-    //                     "World!".to_string(),
-    //                     TokenData {
-    //                         line: 1,
-    //                         column: 15,
-    //                     }
-    //                 ),
-    //                 Token::CurlyBracketClose(TokenData {
-    //                     line: 1,
-    //                     column: 21,
-    //                 }),
-    //                 Token::EOF(TokenData {
-    //                     line: 1,
-    //                     column: 22,
-    //                 }),
-    //             ]
-    //         );
-    //     }
+    #[test]
+    fn test_split_commands_with_an_argument_includes_curly_brackets() -> Result<()> {
+        let pwd = std::env::current_dir()?;
+        let uri = pwd
+            .join("text/split_commands_with_an_argument_includes_curly_brackets.[]")
+            .to_string_lossy()
+            .to_string();
+        let tokens = tokenize(uri.clone())?;
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text(
+                    "Hello, ".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 1,
+                            character: 1,
+                        },
+                        end: LocationData {
+                            line: 1,
+                            character: 8,
+                        },
+                    }
+                ),
+                Token::CurlyBracketOpen(Location {
+                    start: LocationData {
+                        line: 1,
+                        character: 8,
+                    },
+                    end: LocationData {
+                        line: 1,
+                        character: 9,
+                    },
+                }),
+                Token::Module(
+                    "std".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 1,
+                            character: 9,
+                        },
+                        end: LocationData {
+                            line: 1,
+                            character: 12,
+                        },
+                    }
+                ),
+                Token::Dot(Location {
+                    start: LocationData {
+                        line: 1,
+                        character: 12,
+                    },
+                    end: LocationData {
+                        line: 1,
+                        character: 13,
+                    },
+                }),
+                Token::Ident(
+                    "*".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 1,
+                            character: 13,
+                        },
+                        end: LocationData {
+                            line: 1,
+                            character: 14,
+                        },
+                    }
+                ),
+                Token::Text(
+                    "World!".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 1,
+                            character: 14,
+                        },
+                        end: LocationData {
+                            line: 1,
+                            character: 20,
+                        },
+                    }
+                ),
+                Token::CurlyBracketClose(Location {
+                    start: LocationData {
+                        line: 1,
+                        character: 20,
+                    },
+                    end: LocationData {
+                        line: 1,
+                        character: 21,
+                    },
+                }),
+                Token::EOF(Location {
+                    start: LocationData {
+                        line: 1,
+                        character: 21,
+                    },
+                    end: LocationData {
+                        line: 1,
+                        character: 21,
+                    },
+                }),
+            ]
+        );
+        Ok(())
+    }
 
     //     #[test]
     //     fn test_split_commands_with_an_argument_includes_angle_brackets() {

@@ -17,7 +17,7 @@ pub fn take_text_token_from_pool(t: &Tokenizer, strip: bool) -> Option<(Tokenize
     let pool = t.pool.clone().unwrap_or_default();
 
     if &pool == "" {
-        return None;        
+        return None;
     }
 
     if strip {
@@ -34,38 +34,44 @@ pub fn take_text_token_from_pool(t: &Tokenizer, strip: bool) -> Option<(Tokenize
             token_start_column: Some(t.token_start_column.unwrap_or_default() + space_count),
             ..Default::default()
         };
-        return Some((t.merge(&t2), Token::Text(
-            pool.trim().to_string(),
-            Location {
-                start: LocationData {
-                    line: t.token_start_line.unwrap_or_default(),
-                    character: t.token_start_column.unwrap_or_default() + space_count,
+        return Some((
+            t.merge(&t2),
+            Token::Text(
+                pool.trim().to_string(),
+                Location {
+                    start: LocationData {
+                        line: t.token_start_line.unwrap_or_default(),
+                        character: t.token_start_column.unwrap_or_default() + space_count,
+                    },
+                    end: LocationData {
+                        line: t.line.unwrap_or_default(),
+                        character: t.column.unwrap_or_default(),
+                    },
                 },
-                end: LocationData {
-                    line: t.line.unwrap_or_default(),
-                    character: t.column.unwrap_or_default(),
-                },
-            },
-        )));
+            ),
+        ));
     }
 
     let t2 = Tokenizer {
         token_start_column: Some(t.column.unwrap_or_default()),
         ..Default::default()
     };
-    return Some((t.merge(&t2), Token::Text(
-        pool.to_string(),
-        Location {
-            start: LocationData {
-                line: t.token_start_line.unwrap_or_default(),
-                character: t.token_start_column.unwrap_or_default(),
+    return Some((
+        t.merge(&t2),
+        Token::Text(
+            pool.to_string(),
+            Location {
+                start: LocationData {
+                    line: t.token_start_line.unwrap_or_default(),
+                    character: t.token_start_column.unwrap_or_default(),
+                },
+                end: LocationData {
+                    line: t.line.unwrap_or_default(),
+                    character: t.column.unwrap_or_default(),
+                },
             },
-            end: LocationData {
-                line: t.line.unwrap_or_default(),
-                character: t.column.unwrap_or_default(),
-            },
-        },
-    )));
+        ),
+    ));
 }
 
 pub fn update_tokens(t: &Tokenizer, strip: bool) -> Vec<Token> {
