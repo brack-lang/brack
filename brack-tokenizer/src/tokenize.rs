@@ -1,329 +1,971 @@
+use anyhow::Result;
+use std::{fs::File, io::Read, path::Path};
+
 use crate::{dispatch::dispatch, tokenizer::Tokenizer, tokens::Token};
 
-pub fn tokenize(s: &str) -> Vec<Token> {
+pub fn tokenize<P: AsRef<Path>>(path: P) -> Result<Vec<Token>> {
+    let mut file = File::open(&path)?;
+    let mut text = String::new();
+    file.read_to_string(&mut text)?;
     let t = Tokenizer {
-        line: Some(1),
-        column: Some(1),
-        token_start_line: Some(1),
-        token_start_column: Some(1),
-        untreated: Some(s.to_string()),
+        line: Some(0),
+        column: Some(0),
+        token_start_line: Some(0),
+        token_start_column: Some(0),
+        untreated: Some(text),
         ..Default::default()
     };
-    dispatch(&t)
+    Ok(dispatch(&t))
 }
 
 #[cfg(test)]
 mod tests {
     use super::tokenize;
-    use crate::tokens::{Token, TokenData};
+    use crate::tokens::{Location, LocationData, Token};
+    use anyhow::Result;
 
     #[test]
-    fn test_split_no_commands() {
-        let tokens = tokenize("Hello, World!");
+    fn test_split_no_commands() -> Result<()> {
+        let pwd = std::env::current_dir()?;
+        let uri = pwd
+            .join("text/split_no_commands.[]")
+            .to_string_lossy()
+            .to_string();
+        let tokens = tokenize(uri.clone())?;
         assert_eq!(
             tokens,
             vec![
                 Token::Text(
                     "Hello, World!".to_string(),
-                    TokenData { line: 1, column: 1 }
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 0,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 13,
+                        }
+                    },
                 ),
-                Token::EOF(TokenData {
-                    line: 1,
-                    column: 14,
+                Token::EOF(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 13,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 13,
+                    }
                 }),
             ]
         );
+        Ok(())
     }
 
     #[test]
-    fn test_split_commands_with_an_argument_includes_square_brackets() {
-        let tokens = tokenize("Hello, [std.* World!]");
+    fn test_split_commands_with_an_argument_includes_square_brackets() -> Result<()> {
+        let pwd = std::env::current_dir()?;
+        let uri = pwd
+            .join("text/split_commands_with_an_argument_includes_square_brackets.[]")
+            .to_string_lossy()
+            .to_string();
+        let tokens = tokenize(uri.clone())?;
         assert_eq!(
             tokens,
             vec![
-                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
-                Token::SquareBracketOpen(TokenData { line: 1, column: 8 }),
-                Token::Module("std".to_string(), TokenData { line: 1, column: 9 }),
-                Token::Dot(TokenData {
-                    line: 1,
-                    column: 12,
-                }),
-                Token::Ident(
-                    "*".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 13
-                    }
-                ),
                 Token::Text(
-                    "World!".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 15,
-                    }
+                    "Hello, ".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 0,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 7,
+                        },
+                    },
                 ),
-                Token::SquareBracketClose(TokenData {
-                    line: 1,
-                    column: 21,
-                }),
-                Token::EOF(TokenData {
-                    line: 1,
-                    column: 22,
-                }),
-            ]
-        );
-    }
-
-    #[test]
-    fn test_split_commands_with_an_argument_includes_curly_brackets() {
-        let tokens = tokenize("Hello, {std.* World!}");
-        assert_eq!(
-            tokens,
-            vec![
-                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
-                Token::CurlyBracketOpen(TokenData { line: 1, column: 8 }),
-                Token::Module("std".to_string(), TokenData { line: 1, column: 9 }),
-                Token::Dot(TokenData {
-                    line: 1,
-                    column: 12,
-                }),
-                Token::Ident(
-                    "*".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 13
-                    }
-                ),
-                Token::Text(
-                    "World!".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 15,
-                    }
-                ),
-                Token::CurlyBracketClose(TokenData {
-                    line: 1,
-                    column: 21,
-                }),
-                Token::EOF(TokenData {
-                    line: 1,
-                    column: 22,
-                }),
-            ]
-        );
-    }
-
-    #[test]
-    fn test_split_commands_with_an_argument_includes_angle_brackets() {
-        let tokens = tokenize("Hello, <* World!>");
-        assert_eq!(
-            tokens,
-            vec![
-                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
-                Token::AngleBracketOpen(TokenData { line: 1, column: 8 }),
-                Token::Ident("*".to_string(), TokenData { line: 1, column: 9 }),
-                Token::Text(
-                    "World!".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 11,
-                    }
-                ),
-                Token::AngleBracketClose(TokenData {
-                    line: 1,
-                    column: 17,
-                }),
-                Token::EOF(TokenData {
-                    line: 1,
-                    column: 18,
-                }),
-            ]
-        );
-    }
-
-    #[test]
-    fn test_split_commands_with_two_arguments_includes_square_brackets() {
-        let tokens = tokenize("Hello, [std.@ World!, https://example.com/]");
-        assert_eq!(
-            tokens,
-            vec![
-                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
-                Token::SquareBracketOpen(TokenData { line: 1, column: 8 }),
-                Token::Module("std".to_string(), TokenData { line: 1, column: 9 }),
-                Token::Dot(TokenData {
-                    line: 1,
-                    column: 12,
-                }),
-                Token::Ident(
-                    "@".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 13
-                    }
-                ),
-                Token::Text(
-                    "World!".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 15,
-                    }
-                ),
-                Token::Comma(TokenData {
-                    line: 1,
-                    column: 21,
-                }),
-                Token::Text(
-                    "https://example.com/".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 23,
-                    }
-                ),
-                Token::SquareBracketClose(TokenData {
-                    line: 1,
-                    column: 43,
-                }),
-                Token::EOF(TokenData {
-                    line: 1,
-                    column: 44,
-                }),
-            ]
-        );
-    }
-
-    #[test]
-    fn test_split_nesting_commands() {
-        let tokens = tokenize("Hello, [std.* [std.@ World!, https://example.com/]]");
-        assert_eq!(
-            tokens,
-            vec![
-                Token::Text("Hello, ".to_string(), TokenData { line: 1, column: 1 }),
-                Token::SquareBracketOpen(TokenData { line: 1, column: 8 }),
-                Token::Module("std".to_string(), TokenData { line: 1, column: 9 }),
-                Token::Dot(TokenData {
-                    line: 1,
-                    column: 12,
-                }),
-                Token::Ident(
-                    "*".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 13
-                    }
-                ),
-                Token::SquareBracketOpen(TokenData {
-                    line: 1,
-                    column: 15,
+                Token::SquareBracketOpen(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 7,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 8,
+                    },
                 }),
                 Token::Module(
                     "std".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 16,
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 8,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 11,
+                        },
                     }
                 ),
-                Token::Dot(TokenData {
-                    line: 1,
-                    column: 19,
+                Token::Dot(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 11,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 12,
+                    },
                 }),
                 Token::Ident(
-                    "@".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 20,
+                    "*".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 12,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 13,
+                        },
                     }
                 ),
                 Token::Text(
                     "World!".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 22,
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 14,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 20,
+                        },
                     }
                 ),
-                Token::Comma(TokenData {
-                    line: 1,
-                    column: 28,
+                Token::SquareBracketClose(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 20,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 21,
+                    },
                 }),
-                Token::Text(
-                    "https://example.com/".to_string(),
-                    TokenData {
-                        line: 1,
-                        column: 30,
-                    }
-                ),
-                Token::SquareBracketClose(TokenData {
-                    line: 1,
-                    column: 50,
-                }),
-                Token::SquareBracketClose(TokenData {
-                    line: 1,
-                    column: 51,
-                }),
-                Token::EOF(TokenData {
-                    line: 1,
-                    column: 52,
+                Token::EOF(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 21,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 21,
+                    },
                 }),
             ]
         );
+        Ok(())
     }
 
     #[test]
-    fn test_split_newlines() {
-        let tokens = tokenize(
-            "Hello,\nWorld,\n{std.** Contact}\n[std.@ My website, https://example.com/]\n\n2023.12.28\n",
-        );
+    fn test_split_commands_with_an_argument_includes_curly_brackets() -> Result<()> {
+        let pwd = std::env::current_dir()?;
+        let uri = pwd
+            .join("text/split_commands_with_an_argument_includes_curly_brackets.[]")
+            .to_string_lossy()
+            .to_string();
+        let tokens = tokenize(uri.clone())?;
         assert_eq!(
             tokens,
             vec![
-                Token::Text("Hello,".to_string(), TokenData { line: 1, column: 1 }),
-                Token::NewLine(TokenData { line: 1, column: 7 }),
-                Token::Text("World,".to_string(), TokenData { line: 2, column: 1 }),
-                Token::NewLine(TokenData { line: 2, column: 7 }),
-                Token::CurlyBracketOpen(TokenData { line: 3, column: 1 }),
-                Token::Module("std".to_string(), TokenData { line: 3, column: 2 }),
-                Token::Dot(TokenData { line: 3, column: 5 }),
-                Token::Ident("**".to_string(), TokenData { line: 3, column: 6 }),
-                Token::Text("Contact".to_string(), TokenData { line: 3, column: 9 }),
-                Token::CurlyBracketClose(TokenData {
-                    line: 3,
-                    column: 16,
+                Token::Text(
+                    "Hello, ".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 0,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 7,
+                        },
+                    }
+                ),
+                Token::CurlyBracketOpen(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 7,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 8,
+                    },
                 }),
-                Token::NewLine(TokenData {
-                    line: 3,
-                    column: 17,
+                Token::Module(
+                    "std".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 8,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 11,
+                        },
+                    }
+                ),
+                Token::Dot(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 11,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 12,
+                    },
                 }),
-                Token::SquareBracketOpen(TokenData { line: 4, column: 1 }),
-                Token::Module("std".to_string(), TokenData { line: 4, column: 2 }),
-                Token::Dot(TokenData { line: 4, column: 5 }),
-                Token::Ident("@".to_string(), TokenData { line: 4, column: 6 }),
-                Token::Text("My website".to_string(), TokenData { line: 4, column: 8 }),
-                Token::Comma(TokenData {
-                    line: 4,
-                    column: 18,
+                Token::Ident(
+                    "*".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 12,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 13,
+                        },
+                    }
+                ),
+                Token::Text(
+                    "World!".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 14,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 20,
+                        },
+                    }
+                ),
+                Token::CurlyBracketClose(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 20,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 21,
+                    },
+                }),
+                Token::EOF(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 21,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 21,
+                    },
+                }),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn test_split_commands_with_an_argument_includes_angle_brackets() -> Result<()> {
+        let pwd = std::env::current_dir()?;
+        let uri = pwd
+            .join("text/split_commands_with_an_argument_includes_angle_brackets.[]")
+            .to_string_lossy()
+            .to_string();
+        let tokens = tokenize(uri.clone())?;
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text(
+                    "Hello, ".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 0,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 7,
+                        },
+                    }
+                ),
+                Token::AngleBracketOpen(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 7,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 8,
+                    },
+                }),
+                Token::Ident(
+                    "*".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 8,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 9,
+                        },
+                    }
+                ),
+                Token::Text(
+                    "World!".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 10,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 16,
+                        },
+                    }
+                ),
+                Token::AngleBracketClose(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 16,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 17,
+                    },
+                }),
+                Token::EOF(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 17,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 17,
+                    },
+                }),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn test_split_commands_with_two_arguments_includes_square_brackets() -> Result<()> {
+        let pwd = std::env::current_dir()?;
+        let uri = pwd
+            .join("text/split_commands_with_two_arguments_includes_square_brackets.[]")
+            .to_string_lossy()
+            .to_string();
+        let tokens = tokenize(uri.clone())?;
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text(
+                    "Hello, ".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 0,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 7,
+                        },
+                    }
+                ),
+                Token::SquareBracketOpen(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 7,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 8,
+                    },
+                }),
+                Token::Module(
+                    "std".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 8,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 11,
+                        },
+                    }
+                ),
+                Token::Dot(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 11,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 12,
+                    },
+                }),
+                Token::Ident(
+                    "@".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 12,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 13,
+                        },
+                    }
+                ),
+                Token::Text(
+                    "World!".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 14,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 20,
+                        },
+                    }
+                ),
+                Token::Comma(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 20,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 21,
+                    },
                 }),
                 Token::Text(
                     "https://example.com/".to_string(),
-                    TokenData {
-                        line: 4,
-                        column: 20,
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 22,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 42,
+                        },
                     }
                 ),
-                Token::SquareBracketClose(TokenData {
-                    line: 4,
-                    column: 40,
+                Token::SquareBracketClose(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 42,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 43,
+                    },
                 }),
-                Token::NewLine(TokenData {
-                    line: 4,
-                    column: 41,
+                Token::EOF(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 43,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 43,
+                    },
                 }),
-                Token::NewLine(TokenData { line: 5, column: 1 }),
-                Token::Text("2023.12.28".to_string(), TokenData { line: 6, column: 1 }),
-                Token::NewLine(TokenData {
-                    line: 6,
-                    column: 11,
-                }),
-                Token::EOF(TokenData { line: 7, column: 1 }),
             ]
         );
+        Ok(())
+    }
+
+    #[test]
+    fn test_split_nesting_commands() -> Result<()> {
+        let pwd = std::env::current_dir()?;
+        let uri = pwd
+            .join("text/split_nesting_commands.[]")
+            .to_string_lossy()
+            .to_string();
+        let tokens = tokenize(uri.clone())?;
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text(
+                    "Hello, ".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 0,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 7,
+                        },
+                    }
+                ),
+                Token::SquareBracketOpen(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 7,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 8,
+                    },
+                }),
+                Token::Module(
+                    "std".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 8,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 11,
+                        },
+                    }
+                ),
+                Token::Dot(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 11,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 12,
+                    },
+                }),
+                Token::Ident(
+                    "*".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 12,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 13,
+                        },
+                    }
+                ),
+                Token::SquareBracketOpen(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 14,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 15,
+                    },
+                }),
+                Token::Module(
+                    "std".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 15,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 18,
+                        },
+                    }
+                ),
+                Token::Dot(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 18,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 19,
+                    },
+                }),
+                Token::Ident(
+                    "@".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 19,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 20,
+                        },
+                    }
+                ),
+                Token::Text(
+                    "World!".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 21,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 27,
+                        },
+                    }
+                ),
+                Token::Comma(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 27,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 28,
+                    },
+                }),
+                Token::Text(
+                    "https://example.com/".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 29,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 49,
+                        },
+                    }
+                ),
+                Token::SquareBracketClose(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 49,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 50,
+                    },
+                }),
+                Token::SquareBracketClose(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 50,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 51,
+                    },
+                }),
+                Token::EOF(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 51,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 51,
+                    },
+                }),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn test_split_newlines() -> Result<()> {
+        let pwd = std::env::current_dir()?;
+        let uri = pwd
+            .join("text/split_newlines.[]")
+            .to_string_lossy()
+            .to_string();
+        let tokens = tokenize(uri.clone())?;
+
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text(
+                    "Hello,".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 0,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 6,
+                        },
+                    }
+                ),
+                Token::NewLine(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 6,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 7,
+                    },
+                }),
+                Token::Text(
+                    "World,".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 1,
+                            character: 0,
+                        },
+                        end: LocationData {
+                            line: 1,
+                            character: 6,
+                        },
+                    }
+                ),
+                Token::NewLine(Location {
+                    start: LocationData {
+                        line: 1,
+                        character: 6,
+                    },
+                    end: LocationData {
+                        line: 1,
+                        character: 7,
+                    },
+                }),
+                Token::CurlyBracketOpen(Location {
+                    start: LocationData {
+                        line: 2,
+                        character: 0,
+                    },
+                    end: LocationData {
+                        line: 2,
+                        character: 1,
+                    },
+                }),
+                Token::Module(
+                    "std".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 2,
+                            character: 1,
+                        },
+                        end: LocationData {
+                            line: 2,
+                            character: 4,
+                        },
+                    }
+                ),
+                Token::Dot(Location {
+                    start: LocationData {
+                        line: 2,
+                        character: 4,
+                    },
+                    end: LocationData {
+                        line: 2,
+                        character: 5,
+                    },
+                }),
+                Token::Ident(
+                    "**".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 2,
+                            character: 5,
+                        },
+                        end: LocationData {
+                            line: 2,
+                            character: 7,
+                        },
+                    }
+                ),
+                Token::Text(
+                    "Contact".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 2,
+                            character: 8,
+                        },
+                        end: LocationData {
+                            line: 2,
+                            character: 15,
+                        },
+                    }
+                ),
+                Token::CurlyBracketClose(Location {
+                    start: LocationData {
+                        line: 2,
+                        character: 15,
+                    },
+                    end: LocationData {
+                        line: 2,
+                        character: 16,
+                    },
+                }),
+                Token::NewLine(Location {
+                    start: LocationData {
+                        line: 2,
+                        character: 16,
+                    },
+                    end: LocationData {
+                        line: 2,
+                        character: 17,
+                    },
+                }),
+                Token::SquareBracketOpen(Location {
+                    start: LocationData {
+                        line: 3,
+                        character: 0,
+                    },
+                    end: LocationData {
+                        line: 3,
+                        character: 1,
+                    },
+                }),
+                Token::Module(
+                    "std".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 3,
+                            character: 1,
+                        },
+                        end: LocationData {
+                            line: 3,
+                            character: 4,
+                        },
+                    }
+                ),
+                Token::Dot(Location {
+                    start: LocationData {
+                        line: 3,
+                        character: 4,
+                    },
+                    end: LocationData {
+                        line: 3,
+                        character: 5,
+                    },
+                }),
+                Token::Ident(
+                    "@".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 3,
+                            character: 5,
+                        },
+                        end: LocationData {
+                            line: 3,
+                            character: 6,
+                        },
+                    }
+                ),
+                Token::Text(
+                    "My website".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 3,
+                            character: 7,
+                        },
+                        end: LocationData {
+                            line: 3,
+                            character: 17,
+                        },
+                    }
+                ),
+                Token::Comma(Location {
+                    start: LocationData {
+                        line: 3,
+                        character: 17,
+                    },
+                    end: LocationData {
+                        line: 3,
+                        character: 18,
+                    },
+                }),
+                Token::Text(
+                    "https://example.com/".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 3,
+                            character: 19,
+                        },
+                        end: LocationData {
+                            line: 3,
+                            character: 39,
+                        },
+                    }
+                ),
+                Token::SquareBracketClose(Location {
+                    start: LocationData {
+                        line: 3,
+                        character: 39,
+                    },
+                    end: LocationData {
+                        line: 3,
+                        character: 40,
+                    },
+                }),
+                Token::NewLine(Location {
+                    start: LocationData {
+                        line: 3,
+                        character: 40,
+                    },
+                    end: LocationData {
+                        line: 3,
+                        character: 41,
+                    },
+                }),
+                Token::NewLine(Location {
+                    start: LocationData {
+                        line: 4,
+                        character: 0,
+                    },
+                    end: LocationData {
+                        line: 4,
+                        character: 1,
+                    },
+                }),
+                Token::Text(
+                    "2023.12.28".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 5,
+                            character: 0,
+                        },
+                        end: LocationData {
+                            line: 5,
+                            character: 10,
+                        },
+                    }
+                ),
+                Token::NewLine(Location {
+                    start: LocationData {
+                        line: 5,
+                        character: 10,
+                    },
+                    end: LocationData {
+                        line: 5,
+                        character: 11,
+                    },
+                }),
+                Token::EOF(Location {
+                    start: LocationData {
+                        line: 6,
+                        character: 0,
+                    },
+                    end: LocationData {
+                        line: 6,
+                        character: 0,
+                    },
+                }),
+            ]
+        );
+        Ok(())
     }
 }

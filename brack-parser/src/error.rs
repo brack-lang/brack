@@ -22,26 +22,26 @@ impl Display for ParserError {
 
 impl ParserError {
     pub fn new(message: String, token: Token) -> Self {
-        let token_data = match token {
-            Token::Empty(data) => data,
-            Token::Text(_, data) => data,
-            Token::Module(_, data) => data,
-            Token::Ident(_, data) => data,
-            Token::NewLine(data) => data,
-            Token::Dot(data) => data,
-            Token::AngleBracketOpen(data) => data,
-            Token::AngleBracketClose(data) => data,
-            Token::SquareBracketOpen(data) => data,
-            Token::SquareBracketClose(data) => data,
-            Token::CurlyBracketOpen(data) => data,
-            Token::CurlyBracketClose(data) => data,
-            Token::Comma(data) => data,
-            Token::EOF(data) => data,
+        let location = match token {
+            Token::Empty(location) => location,
+            Token::Text(_, location) => location,
+            Token::Module(_, location) => location,
+            Token::Ident(_, location) => location,
+            Token::NewLine(location) => location,
+            Token::Dot(location) => location,
+            Token::AngleBracketOpen(location) => location,
+            Token::AngleBracketClose(location) => location,
+            Token::SquareBracketOpen(location) => location,
+            Token::SquareBracketClose(location) => location,
+            Token::CurlyBracketOpen(location) => location,
+            Token::CurlyBracketClose(location) => location,
+            Token::Comma(location) => location,
+            Token::EOF(location) => location,
         };
         Self {
             message,
-            line: token_data.line,
-            column: token_data.column,
+            line: location.start.line,
+            column: location.start.character,
         }
     }
 }

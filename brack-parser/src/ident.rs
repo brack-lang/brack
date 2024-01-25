@@ -1,5 +1,5 @@
 use anyhow::Result;
-use brack_tokenizer::tokens::{Token, mock_token_data};
+use brack_tokenizer::tokens::{Token, mock_location};
 
 use crate::{ast::{AST, new_ident, new_text}, error::ParserError, utils::consume_by_kind};
 
@@ -23,7 +23,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<(AST, Vec<Token>)> {
     };
 
     let (consumed, new_tokens_from_dot) =
-        consume_by_kind(&new_tokens, Token::Dot(mock_token_data()));
+        consume_by_kind(&new_tokens, Token::Dot(mock_location()));
     if !consumed {
         return Err(anyhow::anyhow!(ParserError::new(
             "".to_string(),
