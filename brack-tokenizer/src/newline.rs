@@ -41,9 +41,9 @@ pub fn tokenize(t: &Tokenizer) -> Vec<Token> {
 
     let t2 = Tokenizer {
         line: Some(line + 1),
-        column: Some(1),
+        column: Some(0),
         token_start_line: Some(line + 1),
-        token_start_column: Some(1),
+        token_start_column: Some(0),
         untreated: Some(tail),
         pool: Some(String::new()),
         tokens: Some(new_tokens),
