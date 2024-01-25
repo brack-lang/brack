@@ -65,8 +65,7 @@ fn run_compile(subcommand: SubCommands) -> Result<()> {
         anyhow::bail!("Filename must end with .[]");
     }
 
-    let code = std::fs::read_to_string(args.2)?;
-    let tokenized = brack_tokenizer::tokenize::tokenize(&code);
+    let tokenized = brack_tokenizer::tokenize::tokenize(args.2)?;
     let parsed = brack_parser::parse::parse(&tokenized)?;
     let expanded = brack_expander::expand::expander(&parsed, &mut plugins)?;
     let gen = brack_codegen::generate::generate(&expanded, &mut plugins)?;
