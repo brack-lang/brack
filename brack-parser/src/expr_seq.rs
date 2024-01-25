@@ -1,5 +1,5 @@
 use anyhow::Result;
-use brack_tokenizer::tokens::{Token, mock_token_data};
+use brack_tokenizer::tokens::{Token, mock_location};
 
 use crate::{ast::AST, utils::consume_by_kind, expr};
 
@@ -22,7 +22,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
         let mut succeeded_parse_expr = true;
         while tokens.len() > 0 {
             let (consumed, new_tokens_from_newline) =
-                consume_by_kind(&tokens, Token::NewLine(mock_token_data()));
+                consume_by_kind(&tokens, Token::NewLine(mock_location()));
             if !consumed {
                 succeeded_parse_expr = false;
                 break;
