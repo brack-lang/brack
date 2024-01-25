@@ -30,12 +30,12 @@ pub fn tokenize(t: &Tokenizer) -> Vec<Token> {
 
     new_tokens.push(Token::NewLine(Location {
         start: LocationData {
-            line: t.token_start_line.unwrap_or_default(),
-            character: t.token_start_column.unwrap_or_default(),
+            line: t.line.unwrap_or_default(),
+            character: t.column.unwrap_or_default(),
         },
         end: LocationData {
             line: t.line.unwrap_or_default(),
-            character: t.column.unwrap_or_default(),
+            character: t.column.unwrap_or_default() + 1,
         },
     }));
 

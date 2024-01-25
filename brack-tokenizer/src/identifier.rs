@@ -26,8 +26,8 @@ pub fn tokenize(t: &Tokenizer) -> Vec<Token> {
 
     let column = t.column.unwrap_or_default();
     let t2 = Tokenizer {
-        column: Some(column),
-        token_start_column: Some(column),
+        column: Some(column + 1),
+        token_start_column: Some(column + 1),
         untreated: Some(tail),
         pool: Some(String::new()),
         tokens: Some(tokens),
