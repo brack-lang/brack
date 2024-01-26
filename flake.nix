@@ -29,9 +29,12 @@
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
             nil
+            pkg-config
             openssl
             glib
-            pkg-config
+            libiconv
+            darwin.Security
+            darwin.apple_sdk.frameworks.SystemConfiguration
             (fenix.packages.${system}.complete.withComponents [
               "cargo"
               "clippy"
@@ -42,6 +45,7 @@
             rust-analyzer-nightly
           ];
           RUST_SRC_PATH = "${fenix.packages.${system}.complete.rust-src}/lib/rustlib/src/rust/library";
+          PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
         };
         packages.default = naersk'.buildPackage {
           src = ./.;
