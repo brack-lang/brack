@@ -2,7 +2,7 @@ use anyhow::Result;
 use brack_parser::ast::AST;
 use brack_plugin::plugin::Plugins;
 
-use crate::{stmt, expr, curly, square, identifier, text};
+use crate::{curly, expr, identifier, square, stmt, text};
 
 pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     let mut result = String::from("");

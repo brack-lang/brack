@@ -87,14 +87,17 @@ fn new_project(name: &str) -> Result<()> {
     std::fs::write(format!("{}/docs/main.[]", name), "")?;
     std::fs::write(
         format!("{}/Brack.toml", name),
-        format!(r#"[document]
+        format!(
+            r#"[document]
 name = "{}"
 version = "0.1.0"
 backend = ""
 authors = ["your name <your email>"]
 
 [plugins]
-"#, name),
+"#,
+            name
+        ),
     )?;
     std::fs::write(
         format!("{}/.gitignore", name),
@@ -110,7 +113,8 @@ fn build() -> Result<()> {
         anyhow::bail!("Brack.toml is not found.");
     }
 
-    let config: brack_plugin_manager::add_plugin::Config = toml::from_str(&std::fs::read_to_string("Brack.toml")?)?;
+    let config: brack_plugin_manager::add_plugin::Config =
+        toml::from_str(&std::fs::read_to_string("Brack.toml")?)?;
     let backend = config.document.backend;
 
     let entries = read_dir("plugins")?;
@@ -127,7 +131,7 @@ fn build() -> Result<()> {
             pathes.push(path);
         }
     }
-    
+
     let mut plugins = brack_plugin::plugin::new_plugins(pathes)?;
 
     let entries = read_dir("docs")?;
@@ -145,7 +149,10 @@ fn build() -> Result<()> {
             let expanded = brack_expander::expand::expander(&parsed, &mut plugins)?;
             let gen = brack_codegen::generate::generate(&expanded, &mut plugins)?;
             std::fs::create_dir_all("out")?;
-            std::fs::write(format!("out/{}.{}", name.trim_end_matches(".[]"), backend), gen)?;
+            std::fs::write(
+                format!("out/{}.{}", name.trim_end_matches(".[]"), backend),
+                gen,
+            )?;
         }
     }
 
@@ -171,7 +178,9 @@ async fn main() -> Result<()> {
         SubCommands::Compile { .. } => run_compile(args.subcommand)?,
         SubCommands::LanguageServer => brack_language_server::server::run().await?,
         SubCommands::New { name } => new_project(&name)?,
-        SubCommands::Add { schema } => brack_plugin_manager::add_plugin::add_plugin(&schema).await?,
+        SubCommands::Add { schema } => {
+            brack_plugin_manager::add_plugin::add_plugin(&schema).await?
+        }
     }
     Ok(())
 }

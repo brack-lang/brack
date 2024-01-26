@@ -1,7 +1,7 @@
 use anyhow::Result;
-use brack_tokenizer::tokens::{Token, mock_location};
+use brack_tokenizer::tokens::{mock_location, Token};
 
-use crate::{utils::consume_by_kind, ast::AST, expr};
+use crate::{ast::AST, expr, utils::consume_by_kind};
 
 // expr ("," expr)*
 pub fn parse(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {

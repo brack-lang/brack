@@ -2,7 +2,11 @@ use core::fmt;
 use std::{collections::HashMap, fs::File, io, path::Path};
 
 use anyhow::Result;
-use serde::{de::{self, MapAccess, Visitor}, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{
+    de::{self, MapAccess, Visitor},
+    ser::SerializeStruct,
+    Deserialize, Deserializer, Serialize, Serializer,
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
@@ -33,7 +37,11 @@ impl Serialize for Plugin {
     {
         let mut s = serializer.serialize_struct("Plugin", 4)?;
         match *self {
-            Plugin::GitHub { ref owner, ref repo, ref version } => {
+            Plugin::GitHub {
+                ref owner,
+                ref repo,
+                ref version,
+            } => {
                 s.serialize_field("schema", "github")?;
                 s.serialize_field("owner", owner)?;
                 s.serialize_field("repo", repo)?;
@@ -103,8 +111,15 @@ impl<'de> Deserialize<'de> for Plugin {
                 let version: String = version.ok_or_else(|| de::Error::missing_field("version"))?;
 
                 match schema.as_str() {
-                    "github" => Ok(Plugin::GitHub { owner, repo, version }),
-                    _ => Err(de::Error::invalid_value(de::Unexpected::Str(&schema), &"github")),
+                    "github" => Ok(Plugin::GitHub {
+                        owner,
+                        repo,
+                        version,
+                    }),
+                    _ => Err(de::Error::invalid_value(
+                        de::Unexpected::Str(&schema),
+                        &"github",
+                    )),
                 }
             }
         }
@@ -124,25 +139,62 @@ pub async fn add_plugin(schema: &str) -> Result<()> {
         return Err(anyhow::anyhow!("Brack.toml is not found."));
     }
 
-    let repository_type = schema.split(':').nth(0).ok_or_else(|| anyhow::anyhow!("Repository type is not found."))?;
-    let owner = schema.split('/').nth(0).ok_or_else(|| anyhow::anyhow!("Owner is not found."))?.split(':').nth(1).ok_or_else(|| anyhow::anyhow!("Owner is not found."))?;
-    let repo = schema.split('/').nth(1).ok_or_else(|| anyhow::anyhow!("Repository is not found."))?.split('@').nth(0).ok_or_else(|| anyhow::anyhow!("Repository is not found."))?;
-    let version = schema.split('@').nth(1).ok_or_else(|| anyhow::anyhow!("Version is not found."))?;
+    let repository_type = schema
+        .split(':')
+        .nth(0)
+        .ok_or_else(|| anyhow::anyhow!("Repository type is not found."))?;
+    let owner = schema
+        .split('/')
+        .nth(0)
+        .ok_or_else(|| anyhow::anyhow!("Owner is not found."))?
+        .split(':')
+        .nth(1)
+        .ok_or_else(|| anyhow::anyhow!("Owner is not found."))?;
+    let repo = schema
+        .split('/')
+        .nth(1)
+        .ok_or_else(|| anyhow::anyhow!("Repository is not found."))?
+        .split('@')
+        .nth(0)
+        .ok_or_else(|| anyhow::anyhow!("Repository is not found."))?;
+    let version = schema
+        .split('@')
+        .nth(1)
+        .ok_or_else(|| anyhow::anyhow!("Version is not found."))?;
     let url = match repository_type {
         "github" => format!("https://github.com/{}/{}", owner, repo),
-        _ => return Err(anyhow::anyhow!("Repository type '{}' is not supported.", repository_type)),
+        _ => {
+            return Err(anyhow::anyhow!(
+                "Repository type '{}' is not supported.",
+                repository_type
+            ))
+        }
     };
 
     let mut config: Config = toml::from_str(&std::fs::read_to_string("Brack.toml")?)?;
 
-    let repository_name = url.trim_end_matches('/').split('/').last().ok_or_else(|| anyhow::anyhow!("Last element of URL is not found."))?;
-    let plugin_name = repository_name.split('.').next().ok_or_else(|| anyhow::anyhow!("First element of repository name is not found."))?;
+    let repository_name = url
+        .trim_end_matches('/')
+        .split('/')
+        .last()
+        .ok_or_else(|| anyhow::anyhow!("Last element of URL is not found."))?;
+    let plugin_name = repository_name
+        .split('.')
+        .next()
+        .ok_or_else(|| anyhow::anyhow!("First element of repository name is not found."))?;
 
-    if let Some(_) = config.plugins.as_ref().and_then(|plugins| plugins.get(plugin_name)) {
+    if let Some(_) = config
+        .plugins
+        .as_ref()
+        .and_then(|plugins| plugins.get(plugin_name))
+    {
         return Err(anyhow::anyhow!("Plugin already exists."));
     }
 
-    let download_url = format!("{}/releases/download/{}/{}.wasm", url, version, repository_name);
+    let download_url = format!(
+        "{}/releases/download/{}/{}.wasm",
+        url, version, repository_name
+    );
 
     let response = reqwest::get(&download_url).await?;
 
@@ -151,7 +203,10 @@ pub async fn add_plugin(schema: &str) -> Result<()> {
             "Failed to download plugin from {}.\nStatus: {} - {}",
             download_url,
             response.status().as_str(),
-            response.status().canonical_reason().unwrap_or("Unknown error")
+            response
+                .status()
+                .canonical_reason()
+                .unwrap_or("Unknown error")
         ));
     }
 
@@ -163,10 +218,10 @@ pub async fn add_plugin(schema: &str) -> Result<()> {
     config.plugins.get_or_insert_with(|| HashMap::new()).insert(
         plugin_name.to_string(),
         Plugin::GitHub {
-                owner: owner.to_string(),
-                repo: repo.to_string(),
-                version: version.to_string(),
-        }
+            owner: owner.to_string(),
+            repo: repo.to_string(),
+            version: version.to_string(),
+        },
     );
     let toml = toml::to_string(&config)?;
     std::fs::write("Brack.toml", toml)?;

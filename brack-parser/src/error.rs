@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter, self};
+use std::fmt::{self, Display, Formatter};
 
 use brack_tokenizer::tokens::Token;
 use thiserror::Error;

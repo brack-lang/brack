@@ -1,7 +1,10 @@
 use anyhow::Result;
 use brack_tokenizer::tokens::Token;
 
-use crate::{stmt, ast::{AST, new_document}};
+use crate::{
+    ast::{new_document, AST},
+    stmt,
+};
 
 pub fn parse(tokens: &Vec<Token>) -> Result<AST> {
     let mut new_tokens = tokens.clone();
@@ -23,9 +26,13 @@ pub fn parse(tokens: &Vec<Token>) -> Result<AST> {
 #[cfg(test)]
 mod test {
     use anyhow::Result;
-    use brack_tokenizer::tokens::{Token, mock_location};
+    use brack_tokenizer::tokens::{mock_location, Token};
 
-    use crate::ast::{new_document_with_children, new_stmt_with_children, new_expr_with_children, new_text, assert_ast_eq, new_square_with_children, new_ident, new_curly_with_children, new_angle_with_children};
+    use crate::ast::{
+        assert_ast_eq, new_angle_with_children, new_curly_with_children,
+        new_document_with_children, new_expr_with_children, new_ident, new_square_with_children,
+        new_stmt_with_children, new_text,
+    };
 
     use super::parse;
 

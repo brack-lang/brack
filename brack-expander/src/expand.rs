@@ -1,6 +1,6 @@
 use anyhow::Result;
 use brack_parser::ast::AST;
-use brack_plugin::plugin::{Plugins, PluginMacroArgument};
+use brack_plugin::plugin::{PluginMacroArgument, Plugins};
 use extism::convert::Json;
 
 fn expand_angle(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<AST> {
@@ -49,7 +49,7 @@ fn expand_other(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<A
     match ast {
         AST::Text(_) => {
             return Ok(ast.clone());
-        },
+        }
         _ => {}
     }
     for child in ast.children() {
