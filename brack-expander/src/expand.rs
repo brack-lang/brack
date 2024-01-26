@@ -46,6 +46,12 @@ fn expand_angle(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<A
 
 fn expand_other(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<AST> {
     let mut children = vec![];
+    match ast {
+        AST::Text(_) => {
+            return Ok(ast.clone());
+        },
+        _ => {}
+    }
     for child in ast.children() {
         match child {
             AST::Angle(_) => children.push(expand_angle(overall_ast, &child, plugins)?),
