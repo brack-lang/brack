@@ -23,11 +23,7 @@ enum SubCommands {
         name: String,
     },
     Add {
-        #[clap(short, long)]
-        url: String,
-
-        #[clap(short, long)]
-        version: String,  
+        schema: String,
     },
 }
 
@@ -175,7 +171,7 @@ async fn main() -> Result<()> {
         SubCommands::Compile { .. } => run_compile(args.subcommand)?,
         SubCommands::LanguageServer => brack_language_server::server::run().await?,
         SubCommands::New { name } => new_project(&name)?,
-        SubCommands::Add { url, version } => brack_plugin_manager::add_plugin::add_plugin(&url, &version).await?,
+        SubCommands::Add { schema } => brack_plugin_manager::add_plugin::add_plugin(&schema).await?,
     }
     Ok(())
 }
