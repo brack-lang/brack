@@ -1,9 +1,9 @@
 use anyhow::Result;
 use brack_parser::ast::AST;
-use brack_plugin::plugin::{Plugins, PluginArgument};
+use brack_plugin::plugin::{PluginArgument, Plugins};
 use extism::convert::Json;
 
-use crate::{expr, square, identifier, text};
+use crate::{expr, identifier, square, text};
 
 pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     let mut module_name = String::from("");

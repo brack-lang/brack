@@ -1,7 +1,7 @@
 use anyhow::Result;
 use brack_tokenizer::tokens::Token;
 
-use crate::{expr_component, parser::Parser, ast::new_expr};
+use crate::{ast::new_expr, expr_component, parser::Parser};
 
 // (text | square | angle)+
 pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {

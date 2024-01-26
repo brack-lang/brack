@@ -1,7 +1,9 @@
 use anyhow::Result;
-use brack_tokenizer::tokens::{Token, mock_location};
+use brack_tokenizer::tokens::{mock_location, Token};
 
-use crate::{parser::Parser, utils::consume_by_kind, error::ParserError, surrounded, ast::new_square};
+use crate::{
+    ast::new_square, error::ParserError, parser::Parser, surrounded, utils::consume_by_kind,
+};
 
 // "[" ident (expr ("," expr)*)? "]"
 pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {
