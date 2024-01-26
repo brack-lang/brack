@@ -1,7 +1,13 @@
 # Brack
-[![CI](https://github.com/brack-lang/brack/actions/workflows/ci.yml/badge.svg)](https://github.com/brack-lang/brack/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/badge/Release-a0_0_1)](https://github.com/user/repository)
 
+![](./brack-header.png)
+
+[![Release](https://img.shields.io/github/v/release/brack-lang/brack.svg)](https://github.com/user/repository)
+[![CI](https://github.com/brack-lang/brack/actions/workflows/ci.yml/badge.svg)](https://github.com/brack-lang/brack/actions/workflows/ci.yml)
+
+
+> [!CAUTION]
+> This project is experimental and just getting started. It is not a practical software. Your contribution would be very welcome!
 
 Brack is expandable by WebAssembly the lightweight markup language.
 It has the brackets-based simple syntax.
