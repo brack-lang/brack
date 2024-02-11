@@ -247,6 +247,10 @@ dependencies = [
  "anyhow",
  "brack-parser",
  "extism",
+ "extism-convert",
+ "modsurfer-plugins",
+ "modsurfer-proto",
+ "protobuf",
  "serde",
  "serde_json",
  "uuid",
@@ -756,14 +760,15 @@ dependencies = [
 
 [[package]]
 name = "extism-convert"
-version = "1.0.0"
+version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d01a01edfb12afa6ce5f4d5205831b0630edb867918aa3d2fc829a9dfbfa75f1"
+checksum = "37b5889f52d54f53d540f4661af6122cb6443449a0c9111d5458383352aa2dda"
 dependencies = [
  "anyhow",
  "base64",
  "bytemuck",
  "prost",
+ "protobuf",
  "rmp-serde",
  "serde",
  "serde_json",
@@ -1371,6 +1376,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "modsurfer-plugins"
+version = "0.1.0"
+source = "git+https://github.com/dylibso/modsurfer#0a915ee4978d16b1ed0c199320d10d382bf79200"
+
+[[package]]
+name = "modsurfer-proto"
+version = "0.1.0"
+source = "git+https://github.com/dylibso/modsurfer#0a915ee4978d16b1ed0c199320d10d382bf79200"
+dependencies = [
+ "protobuf",
+]
+
+[[package]]
 name = "native-tls"
 version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1574,6 +1592,26 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.48",
+]
+
+[[package]]
+name = "protobuf"
+version = "3.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b55bad9126f378a853655831eb7363b7b01b81d19f8cb1218861086ca4a1a61e"
+dependencies = [
+ "once_cell",
+ "protobuf-support",
+ "thiserror",
+]
+
+[[package]]
+name = "protobuf-support"
+version = "3.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a5d4d7b8601c814cfb36bcebb79f0e61e45e1e93640cf778837833bbed05c372"
+dependencies = [
+ "thiserror",
 ]
 
 [[package]]

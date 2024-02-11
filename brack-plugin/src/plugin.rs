@@ -107,3 +107,64 @@ pub fn new_plugins<P: AsRef<Path>>(pathes: Vec<P>) -> Result<Plugins> {
     }
     Ok(hash)
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum BrackType {
+    TVoid,
+    TInline,
+    TOption(Box<BrackType>),
+    TBlock,
+    TArray(Box<BrackType>),
+    TInlineCmd(String),
+    TBlockCmd(String),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct MetaData {
+    pub command_name: String,
+    pub call_name: String,
+    pub argument_types: Vec<(String, BrackType)>,
+    pub return_type: BrackType,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use extism_convert::Protobuf;
+    use modsurfer_proto::api::Module as ApiModule;
+    use modsurfer_plugins::MODSURFER_WASM;
+
+    #[test]
+    fn test1() {
+        // heavy
+        let mut plugin = Plugin::new(MODSURFER_WASM, [], false).unwrap();
+
+        let std_path = "./std.html.wasm";
+        let std_wasm_bin = std::fs::read(std_path).unwrap();
+
+        let Protobuf(data) = plugin.call::<Vec<u8>, Protobuf<ApiModule>>(
+            "parse_module",
+            std_wasm_bin.clone(),
+        ).unwrap();
+
+        let mut func_names = vec![];
+        for exp in data.exports {
+            if let Some(f) = exp.func.0 {
+                func_names.push(f.name);
+            }
+        }
+
+        let metadata_func_names = func_names
+            .iter()
+            .filter(|&x| x.starts_with("metadata_"))
+            .collect::<Vec<_>>();
+
+        println!("{:?}", func_names);
+        println!("{:?}", metadata_func_names);
+
+        let mut std_plugin = Plugin::new(std_wasm_bin, [], false).unwrap();
+        for metadata_func_name in metadata_func_names {
+            let _ = std_plugin.call::<&str, extism_convert::Json<MetaData>>(metadata_func_name, "").unwrap();
+        }
+    }
+}
