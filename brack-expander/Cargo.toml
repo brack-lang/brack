@@ -11,4 +11,3 @@ brack-sdk-rs = { path = "../brack-sdk-rs" }
 brack-plugin = { path = "../brack-plugin" }
 brack-parser = { path = "../brack-parser" }
 extism = "^1.0.0-rc3"
-uuid = "1.6.1"

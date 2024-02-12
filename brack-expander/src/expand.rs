@@ -3,7 +3,6 @@ use brack_parser::ast::AST;
 use brack_plugin::plugin::Plugins2;
 use brack_sdk_rs::Type;
 use extism::convert::Json;
-use uuid::Uuid;
 
 fn expand_angle(overall_ast: &AST, ast: &AST, plugins: &mut Plugins2) -> Result<AST> {
     let mut module_name = String::from("");
@@ -36,7 +35,7 @@ fn expand_angle(overall_ast: &AST, ast: &AST, plugins: &mut Plugins2) -> Result<
     let (plugin, plugin_metadata_map) = plugins.get_mut(&module_name).ok_or_else(|| anyhow::anyhow!("Module {} not found", module_name))?;
     let plugin_metadata = plugin_metadata_map.get(&(ident_name.clone(), Type::TAST)).ok_or_else(|| anyhow::anyhow!("Command {} not found", ident_name))?;
     let Json(res) =
-        plugin.call::<Json<(AST, Uuid)>, Json<AST>>(&plugin_metadata.call_name, Json((overall_ast.clone(), ast.id())))?;
+        plugin.call::<Json<(AST, String)>, Json<AST>>(&plugin_metadata.call_name, Json((overall_ast.clone(), ast.id())))?;
 
     Ok(res)
 }

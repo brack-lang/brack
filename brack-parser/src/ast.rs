@@ -4,13 +4,13 @@ use uuid::Uuid;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct InnerNode {
-    pub id: Uuid,
+    pub id: String,
     pub children: Vec<AST>,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct LeafNode {
-    pub id: Uuid,
+    pub id: String,
     pub value: String,
 }
 
@@ -53,7 +53,7 @@ impl AST {
         }
     }
 
-    pub fn id(&self) -> Uuid {
+    pub fn id(&self) -> String {
         match self {
             AST::Document(node)
             | AST::Stmt(node)
@@ -61,106 +61,106 @@ impl AST {
             | AST::Angle(node)
             | AST::Square(node)
             | AST::Curly(node)
-            | AST::Identifier(node) => node.id,
-            AST::Text(leaf) => leaf.id,
+            | AST::Identifier(node) => node.id.clone(),
+            AST::Text(leaf) => leaf.id.clone(),
         }
     }
 }
 
 pub fn new_document() -> AST {
     AST::Document(InnerNode {
-        id: Uuid::new_v4(),
+        id: Uuid::new_v4().to_string(),
         children: vec![],
     })
 }
 
 pub fn new_document_with_children(children: Vec<AST>) -> AST {
     AST::Document(InnerNode {
-        id: Uuid::new_v4(),
+        id: Uuid::new_v4().to_string(),
         children,
     })
 }
 
 pub fn new_stmt() -> AST {
     AST::Stmt(InnerNode {
-        id: Uuid::new_v4(),
+        id: Uuid::new_v4().to_string(),
         children: vec![],
     })
 }
 
 pub fn new_stmt_with_children(children: Vec<AST>) -> AST {
     AST::Stmt(InnerNode {
-        id: Uuid::new_v4(),
+        id: Uuid::new_v4().to_string(),
         children,
     })
 }
 
 pub fn new_expr() -> AST {
     AST::Expr(InnerNode {
-        id: Uuid::new_v4(),
+        id: Uuid::new_v4().to_string(),
         children: vec![],
     })
 }
 
 pub fn new_expr_with_children(children: Vec<AST>) -> AST {
     AST::Expr(InnerNode {
-        id: Uuid::new_v4(),
+        id: Uuid::new_v4().to_string(),
         children,
     })
 }
 
 pub fn new_angle() -> AST {
     AST::Angle(InnerNode {
-        id: Uuid::new_v4(),
+        id: Uuid::new_v4().to_string(),
         children: vec![],
     })
 }
 
 pub fn new_angle_with_children(children: Vec<AST>) -> AST {
     AST::Angle(InnerNode {
-        id: Uuid::new_v4(),
+        id: Uuid::new_v4().to_string(),
         children,
     })
 }
 
 pub fn new_curly() -> AST {
     AST::Curly(InnerNode {
-        id: Uuid::new_v4(),
+        id: Uuid::new_v4().to_string(),
         children: vec![],
     })
 }
 
 pub fn new_curly_with_children(children: Vec<AST>) -> AST {
     AST::Curly(InnerNode {
-        id: Uuid::new_v4(),
+        id: Uuid::new_v4().to_string(),
         children,
     })
 }
 
 pub fn new_square() -> AST {
     AST::Square(InnerNode {
-        id: Uuid::new_v4(),
+        id: Uuid::new_v4().to_string(),
         children: vec![],
     })
 }
 
 pub fn new_square_with_children(children: Vec<AST>) -> AST {
     AST::Square(InnerNode {
-        id: Uuid::new_v4(),
+        id: Uuid::new_v4().to_string(),
         children,
     })
 }
 
 pub fn new_ident(children: Vec<AST>) -> AST {
     AST::Identifier(InnerNode {
-        id: Uuid::new_v4(),
+        id: Uuid::new_v4().to_string(),
         children,
     })
 }
 
 pub fn new_text(value: String) -> AST {
     AST::Text(LeafNode {
-        id: Uuid::new_v4(),
+        id: Uuid::new_v4().to_string(),
         value,
     })
 }
