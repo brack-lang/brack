@@ -218,7 +218,6 @@ dependencies = [
  "brack-plugin",
  "brack-sdk-rs",
  "extism",
- "uuid",
 ]
 
 [[package]]
@@ -236,6 +235,7 @@ name = "brack-parser"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "brack-sdk-rs",
  "brack-tokenizer",
  "serde",
  "serde_json",
@@ -257,7 +257,6 @@ dependencies = [
  "protobuf",
  "serde",
  "serde_json",
- "uuid",
 ]
 
 [[package]]
@@ -275,6 +274,7 @@ dependencies = [
 name = "brack-sdk-rs"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "serde",
  "serde_json",
 ]

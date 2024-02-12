@@ -1,8 +1,9 @@
 use anyhow::Result;
+use brack_sdk_rs::ast::AST;
 use brack_tokenizer::tokens::Token;
 
 use crate::{
-    ast::{new_document, AST},
+    ast::new_document,
     stmt,
 };
 

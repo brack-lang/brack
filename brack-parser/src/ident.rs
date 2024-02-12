@@ -1,8 +1,9 @@
 use anyhow::Result;
+use brack_sdk_rs::ast::AST;
 use brack_tokenizer::tokens::{mock_location, Token};
 
 use crate::{
-    ast::{new_ident, new_text, AST},
+    ast::{new_ident, new_text},
     error::ParserError,
     utils::consume_by_kind,
 };
