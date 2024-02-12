@@ -8,6 +8,7 @@ pub enum Type {
     TArray(Box<Type>),
     TInlineCmd(String),
     TBlockCmd(String),
+    TAST,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

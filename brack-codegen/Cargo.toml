@@ -9,4 +9,5 @@ edition = "2021"
 anyhow = "1.0.79"
 brack-parser = { path = "../brack-parser" }
 brack-plugin = { path = "../brack-plugin" }
+brack-sdk-rs = { path = "../brack-sdk-rs" }
 extism = "^1.0.0-rc3"
