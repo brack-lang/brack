@@ -1,19 +1,19 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum BrackType {
+pub enum Type {
     TInline,
-    TOption(Box<BrackType>),
+    TOption(Box<Type>),
     TBlock,
-    TArray(Box<BrackType>),
+    TArray(Box<Type>),
     TInlineCmd(String),
     TBlockCmd(String),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct BrackMetaData {
+pub struct MetaData {
     pub command_name: String,
     pub call_name: String,
-    pub argument_types: Vec<(String, BrackType)>,
-    pub return_type: BrackType,
+    pub argument_types: Vec<(String, Type)>,
+    pub return_type: Type,
 }
