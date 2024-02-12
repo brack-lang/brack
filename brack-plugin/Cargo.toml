@@ -16,12 +16,3 @@ protobuf = "=3.2.0"
 modsurfer-proto = { git = "https://github.com/dylibso/modsurfer", package = "modsurfer-proto" }
 modsurfer-plugins = { git = "https://github.com/dylibso/modsurfer", package = "modsurfer-plugins" }
 extism-convert = { version = "1.0.3", features = ["protobuf"] }
-
-[dependencies.uuid]
-version = "1.6.1"
-features = [
-    "v4",
-    "fast-rng",
-    "macro-diagnostics",
-    "serde",
-]

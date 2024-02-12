@@ -110,7 +110,8 @@ mod tests {
     use core::panic;
 
     use super::*;
-    use brack_sdk_rs::{Type, Value};
+    use brack_parser::ast::new_document;
+    use brack_sdk_rs::{ast::AST, Type, Value};
     use extism_convert::Json;
 
     #[test]
@@ -135,6 +136,27 @@ mod tests {
                 }
             }
             _ => panic!("No metadata found for @"),
+        }
+    }
+
+    #[test]
+    fn test_macro() {
+        let mut plugins2 = new_plugins2(vec!["./test.html.wasm"]).unwrap();
+        let (plugin, metadata_map) = plugins2.get_mut("test").unwrap();
+
+        let ast = new_document();
+
+        match metadata_map.get(&("^".to_string(), Type::TAST)) {
+            Some(metadata) => {
+                match plugin.call::<Json<(AST, String)>, Json<AST>>(
+                    metadata.call_name.clone(),
+                    Json((ast.clone(), ast.id())),
+                ) {
+                    Ok(Json(ast)) => println!("{:?}", ast),
+                    Err(e) => panic!("{:?}", e),
+                }
+            }
+            _ => panic!("No metadata found for ^"),
         }
     }
 }
