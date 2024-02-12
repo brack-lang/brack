@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 pub enum Type {
     TInline,
     TOption(Box<Type>),
@@ -10,7 +10,7 @@ pub enum Type {
     TBlockCmd(String),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct MetaData {
     pub command_name: String,
     pub call_name: String,
@@ -18,7 +18,7 @@ pub struct MetaData {
     pub return_type: Type,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Value {
     Text(String),
     TextArray(Vec<String>),

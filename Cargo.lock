@@ -246,6 +246,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "brack-parser",
+ "brack-sdk-rs",
  "extism",
  "extism-convert",
  "modsurfer-plugins",

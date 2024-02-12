@@ -1,92 +1,19 @@
-use std::{collections::HashMap, path::Path};
+use std::{collections::HashMap, fs, path::Path};
 
 use anyhow::Result;
-use brack_parser::ast::AST;
+use brack_sdk_rs::{MetaData, Type};
 use extism::{Manifest, Plugin, Wasm};
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+use extism_convert::{Json, Protobuf};
+use modsurfer_plugins::MODSURFER_WASM;
+use modsurfer_proto::api::Module;
+use protobuf::MessageField;
 
 pub type Plugins = HashMap<String, Plugin>;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub enum PluginArgument {
-    Arg0,
-    Arg1(String),
-    Arg2(String, String),
-    Arg3(String, String, String),
-    Arg4(String, String, String, String),
-    Arg5(String, String, String, String, String),
-    Arg6(String, String, String, String, String, String),
-    Arg7(String, String, String, String, String, String, String),
-    Arg8(
-        String,
-        String,
-        String,
-        String,
-        String,
-        String,
-        String,
-        String,
-    ),
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct PluginMacroArgument {
-    pub ast: AST,
-    pub uuid: Uuid,
-}
-
-impl PluginArgument {
-    pub fn new(args: Vec<String>) -> Self {
-        match args.len() {
-            0 => PluginArgument::Arg0,
-            1 => PluginArgument::Arg1(args[0].clone()),
-            2 => PluginArgument::Arg2(args[0].clone(), args[1].clone()),
-            3 => PluginArgument::Arg3(args[0].clone(), args[1].clone(), args[2].clone()),
-            4 => PluginArgument::Arg4(
-                args[0].clone(),
-                args[1].clone(),
-                args[2].clone(),
-                args[3].clone(),
-            ),
-            5 => PluginArgument::Arg5(
-                args[0].clone(),
-                args[1].clone(),
-                args[2].clone(),
-                args[3].clone(),
-                args[4].clone(),
-            ),
-            6 => PluginArgument::Arg6(
-                args[0].clone(),
-                args[1].clone(),
-                args[2].clone(),
-                args[3].clone(),
-                args[4].clone(),
-                args[5].clone(),
-            ),
-            7 => PluginArgument::Arg7(
-                args[0].clone(),
-                args[1].clone(),
-                args[2].clone(),
-                args[3].clone(),
-                args[4].clone(),
-                args[5].clone(),
-                args[6].clone(),
-            ),
-            8 => PluginArgument::Arg8(
-                args[0].clone(),
-                args[1].clone(),
-                args[2].clone(),
-                args[3].clone(),
-                args[4].clone(),
-                args[5].clone(),
-                args[6].clone(),
-                args[7].clone(),
-            ),
-            _ => panic!("Too many arguments"),
-        }
-    }
-}
+pub type ModuleName = String;
+pub type CommandName = String;
+pub type Plugins2 = HashMap<ModuleName, (Plugin, PluginMetaDataMap)>;
+pub type PluginMetaDataMap = HashMap<(CommandName, Type), MetaData>;
 
 pub fn new_plugins<P: AsRef<Path>>(pathes: Vec<P>) -> Result<Plugins> {
     let mut hash = HashMap::new();
@@ -108,63 +35,84 @@ pub fn new_plugins<P: AsRef<Path>>(pathes: Vec<P>) -> Result<Plugins> {
     Ok(hash)
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub enum BrackType {
-    TVoid,
-    TInline,
-    TOption(Box<BrackType>),
-    TBlock,
-    TArray(Box<BrackType>),
-    TInlineCmd(String),
-    TBlockCmd(String),
+pub fn get_metadata_functions<P: AsRef<Path>>(
+    modsurfer: &mut Plugin,
+    path: P,
+) -> Result<Vec<String>> {
+    let wasm = fs::read(path)?;
+    let Protobuf(data) =
+        modsurfer.call::<Vec<u8>, Protobuf<Module>>("parse_module", wasm.clone())?;
+    let mut all_functions = vec![];
+    for export in data.exports {
+        if let MessageField(Some(f)) = export.func {
+            all_functions.push(f.name);
+        }
+    }
+    let result = all_functions
+        .iter()
+        .filter(|&x| x.starts_with("metadata_"))
+        .cloned()
+        .collect::<Vec<_>>();
+    Ok(result)
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct MetaData {
-    pub command_name: String,
-    pub call_name: String,
-    pub argument_types: Vec<(String, BrackType)>,
-    pub return_type: BrackType,
+pub fn new_plugins2<P: AsRef<Path>>(pathes: Vec<P>) -> Result<Plugins2> {
+    let mut result = HashMap::new();
+    let mut modsurfer = Plugin::new(MODSURFER_WASM, [], false)?;
+    for path in pathes {
+        let metadata_functions = get_metadata_functions(&mut modsurfer, &path)?;
+        let mut plugin = Plugin::new(fs::read(&path)?, [], false)?;
+        let mut metadata_map = HashMap::new();
+        for metadata_function in metadata_functions {
+            let Json(metadata) =
+                plugin.call::<(), extism_convert::Json<MetaData>>(&metadata_function, ())?;
+            metadata_map.insert(
+                (metadata.command_name.clone(), metadata.return_type.clone()),
+                metadata,
+            );
+        }
+        let file_stem = path
+            .as_ref()
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or_default();
+        let parts: Vec<&str> = file_stem.split('.').collect();
+        let name = parts.get(0).map_or("", |s| *s).to_string();
+        result.insert(name, (plugin, metadata_map));
+    }
+    Ok(result)
 }
 
 #[cfg(test)]
 mod tests {
+    use core::panic;
+
     use super::*;
-    use extism_convert::Protobuf;
-    use modsurfer_proto::api::Module as ApiModule;
-    use modsurfer_plugins::MODSURFER_WASM;
+    use brack_sdk_rs::{Type, Value};
+    use extism_convert::Json;
 
     #[test]
     fn test1() {
-        // heavy
-        let mut plugin = Plugin::new(MODSURFER_WASM, [], false).unwrap();
+        let mut plugins2 = new_plugins2(vec!["./test.html.wasm"]).unwrap();
+        let (plugin, metadata_map) = plugins2.get_mut("test").unwrap();
 
-        let std_path = "./std.html.wasm";
-        let std_wasm_bin = std::fs::read(std_path).unwrap();
-
-        let Protobuf(data) = plugin.call::<Vec<u8>, Protobuf<ApiModule>>(
-            "parse_module",
-            std_wasm_bin.clone(),
-        ).unwrap();
-
-        let mut func_names = vec![];
-        for exp in data.exports {
-            if let Some(f) = exp.func.0 {
-                func_names.push(f.name);
+        match metadata_map.get(&("@".to_string(), Type::TInline)) {
+            Some(metadata) => {
+                match plugin.call::<Json<Vec<Value>>, String>(
+                    metadata.call_name.clone(),
+                    Json(vec![
+                        Value::Text("https://github.com/momeemt".to_string()),
+                        Value::TextOption(Some("GitHub".to_string())),
+                    ]),
+                ) {
+                    Ok(processed) => assert_eq!(
+                        processed,
+                        "<a href=\"https://github.com/momeemt\">GitHub</a>"
+                    ),
+                    Err(e) => panic!("{:?}", e),
+                }
             }
-        }
-
-        let metadata_func_names = func_names
-            .iter()
-            .filter(|&x| x.starts_with("metadata_"))
-            .collect::<Vec<_>>();
-
-        println!("{:?}", func_names);
-        println!("{:?}", metadata_func_names);
-
-        let mut std_plugin = Plugin::new(std_wasm_bin, [], false).unwrap();
-        for metadata_func_name in metadata_func_names {
-            let _ = std_plugin.call::<&str, extism_convert::Json<MetaData>>(metadata_func_name, "").unwrap();
+            _ => panic!("No metadata found for @"),
         }
     }
 }
