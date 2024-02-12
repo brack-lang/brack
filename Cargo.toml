@@ -8,6 +8,7 @@ members = [
     "brack-parser",
     "brack-plugin",
     "brack-plugin-manager",
+    "brack-sdk-rs",
     "brack-tokenizer",
 ]
 
