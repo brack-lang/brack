@@ -17,3 +17,10 @@ pub struct MetaData {
     pub argument_types: Vec<(String, Type)>,
     pub return_type: Type,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum Value {
+    Text(String),
+    TextArray(Vec<String>),
+    TextOption(Option<String>),
+}
