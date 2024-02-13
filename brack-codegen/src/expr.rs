@@ -1,10 +1,10 @@
 use anyhow::Result;
-use brack_parser::ast::AST;
-use brack_plugin::plugin::Plugins;
+use brack_plugin::plugin::Plugins2;
+use brack_sdk_rs::ast::AST;
 
 use crate::{identifier, square, text};
 
-pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
+pub fn generate(ast: &AST, plugins: &mut Plugins2) -> Result<String> {
     let mut result = String::from("");
     for child in ast.children() {
         let res = match child {
