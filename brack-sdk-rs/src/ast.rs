@@ -84,4 +84,32 @@ impl AST {
         }
         Ok(())
     }
+
+    pub fn get(&self, id: &str) -> Option<&AST> {
+        match self {
+            AST::Document(node)
+            | AST::Stmt(node)
+            | AST::Expr(node)
+            | AST::Angle(node)
+            | AST::Square(node)
+            | AST::Curly(node)
+            | AST::Identifier(node) => {
+                if node.id == id {
+                    return Some(self);
+                }
+                for child in &node.children {
+                    if let Some(ast) = child.get(id) {
+                        return Some(ast);
+                    }
+                }
+                None
+            },
+            AST::Text(node) => {
+                if node.id == id {
+                    return Some(self);
+                }
+                None
+            },
+        }
+    }
 }
