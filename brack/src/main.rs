@@ -79,7 +79,10 @@ async fn main() -> Result<()> {
     let args = Args::parse();
     match args.subcommand {
         SubCommands::Compile { .. } => run_compile(args.subcommand)?,
-        SubCommands::LanguageServer => brack_language_server::server::run().await?,
+        SubCommands::LanguageServer => {
+            let mut language_server = brack_language_server::server::LanguageServer::new();
+            language_server.run().await?;
+        }
     }
     Ok(())
 }
