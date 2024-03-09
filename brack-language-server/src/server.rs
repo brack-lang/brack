@@ -1,36 +1,19 @@
 use std::str::from_utf8;
 
 use anyhow::{anyhow, Result};
+use lsp_types::{ClientCapabilities, Diagnostic, Position, Range};
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str, json, Value};
 use tokio::io::{stdin, stdout, AsyncReadExt, AsyncWriteExt};
 
 pub struct LanguageServer {
-    publish_diagnostics: bool,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Position {
-    line: u32,
-    character: u32,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Range {
-    start: Position,
-    end: Position,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Diagnostic {
-    range: Range,
-    message: String,
+    client_capabilities: ClientCapabilities,
 }
 
 impl LanguageServer {
     pub fn new() -> Self {
         Self {
-            publish_diagnostics: false,
+            client_capabilities: ClientCapabilities::default(),
         }
     }
 
@@ -90,6 +73,17 @@ impl LanguageServer {
         uri: &str,
         diagnostics: &Vec<Diagnostic>,
     ) -> Result<()> {
+        // check client_capabilities.text_document.publish_diagnostics
+        if self
+            .client_capabilities
+            .text_document
+            .as_ref()
+            .and_then(|td| td.publish_diagnostics.as_ref())
+            .is_none()
+        {
+            return Ok(());
+        }
+
         let response = json!({
             "jsonrpc": "2.0",
             "method": "textDocument/publishDiagnostics",
@@ -102,9 +96,26 @@ impl LanguageServer {
         self.send_message(&response).await
     }
 
-    async fn handle_request(&self, _: &Value, id: i64, method: &str) -> Result<()> {
+    async fn handle_request(&mut self, msg: &Value, id: i64, method: &str) -> Result<()> {
         match method {
             "initialize" => {
+                self.log_message("Brack Language Server is initializing...")
+                    .await?;
+                self.client_capabilities = serde_json::from_value(
+                    msg.get("params")
+                        .ok_or_else(|| anyhow!("No params"))?
+                        .get("capabilities")
+                        .ok_or_else(|| anyhow!("No capabilities"))?
+                        .clone(),
+                )?;
+
+                // for debugging
+                // self.log_message(&format!(
+                //     "Client capabilities : {:?}",
+                //     self.client_capabilities
+                // ))
+                // .await?;
+
                 let response = json!({
                     "jsonrpc": "2.0",
                     "id": id,
@@ -179,7 +190,8 @@ impl LanguageServer {
                     character: 3,
                 },
             },
-            message: "This is a test diagnostic message".to_string(),
+            message: "This is a test diagnostic message 2!".to_string(),
+            ..Default::default()
         }];
         self.log_message(&format!("{:?}", diagnostics)).await?;
         self.send_publish_diagnostics(uri, &diagnostics).await
@@ -190,12 +202,6 @@ impl LanguageServer {
             "initialized" => {
                 self.log_message("Brack Language Server has been initialized!")
                     .await?;
-                self.publish_diagnostics = msg
-                    .get("capabilities")
-                    .and_then(|capabilities| capabilities.get("textDocument"))
-                    .and_then(|text_document| text_document.get("publishDiagnostics"))
-                    .and_then(|publish_diagnostics| publish_diagnostics.as_bool())
-                    .unwrap_or(false);
                 Ok(())
             }
             "textDocument/didOpen" => self.handle_notification_text_document_did_open(msg).await,
