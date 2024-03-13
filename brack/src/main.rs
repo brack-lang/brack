@@ -179,6 +179,7 @@ async fn main() -> Result<()> {
         SubCommands::LanguageServer => {
             let mut language_server = brack_language_server::server::LanguageServer::new();
             language_server.run().await?;
+        }
         SubCommands::New { name } => new_project(&name)?,
         SubCommands::Add { schema } => {
             brack_plugin_manager::add_plugin::add_plugin(&schema).await?
