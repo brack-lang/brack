@@ -2,6 +2,7 @@ use crate::tokens::Token;
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Tokenizer {
+    pub uri: String,
     pub line: Option<usize>,
     pub column: Option<usize>,
     pub token_start_line: Option<usize>,
@@ -19,6 +20,7 @@ pub struct Tokenizer {
 impl Tokenizer {
     pub fn merge(&self, other: &Tokenizer) -> Tokenizer {
         Tokenizer {
+            uri: other.uri.clone(),
             line: match other.line {
                 Some(s) => Some(s),
                 None => self.line,
@@ -73,12 +75,13 @@ impl Tokenizer {
 
 #[cfg(test)]
 mod tests {
-    use crate::tokens::TokenData;
+    use crate::tokens::{Location, LocationData};
 
     #[test]
     fn test_merge() {
         use super::*;
         let a = Tokenizer {
+            uri: "a".to_string(),
             line: Some(1),
             column: Some(1),
             token_start_line: Some(1),
@@ -87,7 +90,16 @@ mod tests {
             pool: Some("a".to_string()),
             tokens: Some(vec![Token::Text(
                 "a".to_string(),
-                TokenData { line: 1, column: 1 },
+                Location {
+                    start: LocationData {
+                        line: 1,
+                        character: 1,
+                    },
+                    end: LocationData {
+                        line: 1,
+                        character: 1,
+                    },
+                },
             )]),
             escaped: Some(true),
             angle_nest_count: Some(1),
@@ -96,6 +108,7 @@ mod tests {
             looking_for_identifier: Some(true),
         };
         let b = Tokenizer {
+            uri: "b".to_string(),
             line: Some(2),
             column: Some(2),
             token_start_line: Some(2),
@@ -104,7 +117,16 @@ mod tests {
             pool: Some("b".to_string()),
             tokens: Some(vec![Token::Text(
                 "b".to_string(),
-                TokenData { line: 2, column: 2 },
+                Location {
+                    start: LocationData {
+                        line: 2,
+                        character: 2,
+                    },
+                    end: LocationData {
+                        line: 2,
+                        character: 2,
+                    },
+                },
             )]),
             escaped: Some(false),
             angle_nest_count: Some(2),
@@ -114,6 +136,7 @@ mod tests {
         };
         let c = a.merge(&b);
         let res = Tokenizer {
+            uri: "b".to_string(),
             line: Some(2),
             column: Some(2),
             token_start_line: Some(2),
@@ -122,7 +145,16 @@ mod tests {
             pool: Some("b".to_string()),
             tokens: Some(vec![Token::Text(
                 "b".to_string(),
-                TokenData { line: 2, column: 2 },
+                Location {
+                    start: LocationData {
+                        line: 2,
+                        character: 2,
+                    },
+                    end: LocationData {
+                        line: 2,
+                        character: 2,
+                    },
+                },
             )]),
             escaped: Some(false),
             angle_nest_count: Some(2),

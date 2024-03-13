@@ -1,7 +1,14 @@
 use anyhow::Result;
-use brack_tokenizer::tokens::{Token, mock_token_data};
+use brack_tokenizer::tokens::{mock_location, Token};
 
-use crate::{parser::Parser, ast::new_stmt, utils::{consume_by_kind, check_eof}, error::ParserError, curly, expr_seq};
+use crate::{
+    ast::new_stmt,
+    curly,
+    error::ParserError,
+    expr_seq,
+    parser::Parser,
+    utils::{check_eof, consume_by_kind},
+};
 
 // (curly | expr ("\n" expr)*) ("\n"+ | "\n"* EOF)
 pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {
@@ -32,7 +39,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {
     let mut newline_count = 0;
     loop {
         let (consumed, new_tokens_from_newline) =
-            consume_by_kind(&new_tokens, Token::NewLine(mock_token_data()));
+            consume_by_kind(&new_tokens, Token::NewLine(mock_location()));
         if !consumed {
             break;
         }

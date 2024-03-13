@@ -1,7 +1,11 @@
 use anyhow::Result;
+use brack_sdk_rs::ast::AST;
 use brack_tokenizer::tokens::Token;
 
-use crate::{stmt, ast::{AST, new_document}};
+use crate::{
+    ast::new_document,
+    stmt,
+};
 
 pub fn parse(tokens: &Vec<Token>) -> Result<AST> {
     let mut new_tokens = tokens.clone();
@@ -23,17 +27,21 @@ pub fn parse(tokens: &Vec<Token>) -> Result<AST> {
 #[cfg(test)]
 mod test {
     use anyhow::Result;
-    use brack_tokenizer::tokens::{Token, mock_token_data};
+    use brack_tokenizer::tokens::{mock_location, Token};
 
-    use crate::ast::{new_document_with_children, new_stmt_with_children, new_expr_with_children, new_text, assert_ast_eq, new_square_with_children, new_ident, new_curly_with_children, new_angle_with_children};
+    use crate::ast::{
+        assert_ast_eq, new_angle_with_children, new_curly_with_children,
+        new_document_with_children, new_expr_with_children, new_ident, new_square_with_children,
+        new_stmt_with_children, new_text,
+    };
 
     use super::parse;
 
     #[test]
     fn test_parse_no_commands() -> Result<()> {
         let tokens = vec![
-            Token::Text("Hello, World!".to_string(), mock_token_data()),
-            Token::EOF(mock_token_data()),
+            Token::Text("Hello, World!".to_string(), mock_location()),
+            Token::EOF(mock_location()),
         ];
         let parsed = parse(&tokens)?;
         let expected =
@@ -47,14 +55,14 @@ mod test {
     #[test]
     fn test_parse_commands_with_an_argument_includes_square_brackets() -> Result<()> {
         let tokens = vec![
-            Token::Text("Hello, ".to_string(), mock_token_data()),
-            Token::SquareBracketOpen(mock_token_data()),
-            Token::Module("std".to_string(), mock_token_data()),
-            Token::Dot(mock_token_data()),
-            Token::Ident("*".to_string(), mock_token_data()),
-            Token::Text("World!".to_string(), mock_token_data()),
-            Token::SquareBracketClose(mock_token_data()),
-            Token::EOF(mock_token_data()),
+            Token::Text("Hello, ".to_string(), mock_location()),
+            Token::SquareBracketOpen(mock_location()),
+            Token::Module("std".to_string(), mock_location()),
+            Token::Dot(mock_location()),
+            Token::Ident("*".to_string(), mock_location()),
+            Token::Text("World!".to_string(), mock_location()),
+            Token::SquareBracketClose(mock_location()),
+            Token::EOF(mock_location()),
         ];
         let parsed = parse(&tokens)?;
         let expected =
@@ -74,15 +82,15 @@ mod test {
     #[test]
     fn test_parse_commands_with_an_argument_includes_curly_brackets() -> Result<()> {
         let tokens = vec![
-            Token::CurlyBracketOpen(mock_token_data()),
-            Token::Module("std".to_string(), mock_token_data()),
-            Token::Dot(mock_token_data()),
-            Token::Ident("*".to_string(), mock_token_data()),
-            Token::Text("Heading".to_string(), mock_token_data()),
-            Token::CurlyBracketClose(mock_token_data()),
-            Token::NewLine(mock_token_data()),
-            Token::Text("Hello, World!".to_string(), mock_token_data()),
-            Token::EOF(mock_token_data()),
+            Token::CurlyBracketOpen(mock_location()),
+            Token::Module("std".to_string(), mock_location()),
+            Token::Dot(mock_location()),
+            Token::Ident("*".to_string(), mock_location()),
+            Token::Text("Heading".to_string(), mock_location()),
+            Token::CurlyBracketClose(mock_location()),
+            Token::NewLine(mock_location()),
+            Token::Text("Hello, World!".to_string(), mock_location()),
+            Token::EOF(mock_location()),
         ];
         let parsed = parse(&tokens)?;
         let expected = new_document_with_children(vec![
@@ -101,14 +109,14 @@ mod test {
     #[test]
     fn test_parse_commands_with_an_argument_includes_angle_brackets() -> Result<()> {
         let tokens = vec![
-            Token::Text("Hello, ".to_string(), mock_token_data()),
-            Token::AngleBracketOpen(mock_token_data()),
-            Token::Module("std".to_string(), mock_token_data()),
-            Token::Dot(mock_token_data()),
-            Token::Ident("*".to_string(), mock_token_data()),
-            Token::Text("World!".to_string(), mock_token_data()),
-            Token::AngleBracketClose(mock_token_data()),
-            Token::EOF(mock_token_data()),
+            Token::Text("Hello, ".to_string(), mock_location()),
+            Token::AngleBracketOpen(mock_location()),
+            Token::Module("std".to_string(), mock_location()),
+            Token::Dot(mock_location()),
+            Token::Ident("*".to_string(), mock_location()),
+            Token::Text("World!".to_string(), mock_location()),
+            Token::AngleBracketClose(mock_location()),
+            Token::EOF(mock_location()),
         ];
         let parsed = parse(&tokens)?;
         let expected =
@@ -128,16 +136,16 @@ mod test {
     #[test]
     fn test_parse_commands_with_two_arguments_includes_square_brackets() -> Result<()> {
         let tokens = vec![
-            Token::Text("Hello, ".to_string(), mock_token_data()),
-            Token::SquareBracketOpen(mock_token_data()),
-            Token::Module("std".to_string(), mock_token_data()),
-            Token::Dot(mock_token_data()),
-            Token::Ident("@".to_string(), mock_token_data()),
-            Token::Text("World!".to_string(), mock_token_data()),
-            Token::Comma(mock_token_data()),
-            Token::Text("https://example.com/".to_string(), mock_token_data()),
-            Token::SquareBracketClose(mock_token_data()),
-            Token::EOF(mock_token_data()),
+            Token::Text("Hello, ".to_string(), mock_location()),
+            Token::SquareBracketOpen(mock_location()),
+            Token::Module("std".to_string(), mock_location()),
+            Token::Dot(mock_location()),
+            Token::Ident("@".to_string(), mock_location()),
+            Token::Text("World!".to_string(), mock_location()),
+            Token::Comma(mock_location()),
+            Token::Text("https://example.com/".to_string(), mock_location()),
+            Token::SquareBracketClose(mock_location()),
+            Token::EOF(mock_location()),
         ];
         let parsed = parse(&tokens)?;
         let expected =
@@ -158,21 +166,21 @@ mod test {
     #[test]
     fn test_parse_nesting_commands() -> Result<()> {
         let tokens = vec![
-            Token::Text("Hello, ".to_string(), mock_token_data()),
-            Token::SquareBracketOpen(mock_token_data()),
-            Token::Module("std".to_string(), mock_token_data()),
-            Token::Dot(mock_token_data()),
-            Token::Ident("*".to_string(), mock_token_data()),
-            Token::SquareBracketOpen(mock_token_data()),
-            Token::Module("std".to_string(), mock_token_data()),
-            Token::Dot(mock_token_data()),
-            Token::Ident("@".to_string(), mock_token_data()),
-            Token::Text("World!".to_string(), mock_token_data()),
-            Token::Comma(mock_token_data()),
-            Token::Text("https://example.com/".to_string(), mock_token_data()),
-            Token::SquareBracketClose(mock_token_data()),
-            Token::SquareBracketClose(mock_token_data()),
-            Token::EOF(mock_token_data()),
+            Token::Text("Hello, ".to_string(), mock_location()),
+            Token::SquareBracketOpen(mock_location()),
+            Token::Module("std".to_string(), mock_location()),
+            Token::Dot(mock_location()),
+            Token::Ident("*".to_string(), mock_location()),
+            Token::SquareBracketOpen(mock_location()),
+            Token::Module("std".to_string(), mock_location()),
+            Token::Dot(mock_location()),
+            Token::Ident("@".to_string(), mock_location()),
+            Token::Text("World!".to_string(), mock_location()),
+            Token::Comma(mock_location()),
+            Token::Text("https://example.com/".to_string(), mock_location()),
+            Token::SquareBracketClose(mock_location()),
+            Token::SquareBracketClose(mock_location()),
+            Token::EOF(mock_location()),
         ];
         let parsed = parse(&tokens)?;
         let expected =
@@ -198,30 +206,30 @@ mod test {
     #[test]
     fn test_parse_newlines() -> Result<()> {
         let tokens = vec![
-            Token::Text("Hello,".to_string(), mock_token_data()),
-            Token::NewLine(mock_token_data()),
-            Token::Text("World,".to_string(), mock_token_data()),
-            Token::NewLine(mock_token_data()),
-            Token::CurlyBracketOpen(mock_token_data()),
-            Token::Module("std".to_string(), mock_token_data()),
-            Token::Dot(mock_token_data()),
-            Token::Ident("**".to_string(), mock_token_data()),
-            Token::Text("Contact".to_string(), mock_token_data()),
-            Token::CurlyBracketClose(mock_token_data()),
-            Token::NewLine(mock_token_data()),
-            Token::SquareBracketOpen(mock_token_data()),
-            Token::Module("std".to_string(), mock_token_data()),
-            Token::Dot(mock_token_data()),
-            Token::Ident("@".to_string(), mock_token_data()),
-            Token::Text("My website".to_string(), mock_token_data()),
-            Token::Comma(mock_token_data()),
-            Token::Text("https://example.com/".to_string(), mock_token_data()),
-            Token::SquareBracketClose(mock_token_data()),
-            Token::NewLine(mock_token_data()),
-            Token::NewLine(mock_token_data()),
-            Token::Text("2023.12.28".to_string(), mock_token_data()),
-            Token::NewLine(mock_token_data()),
-            Token::EOF(mock_token_data()),
+            Token::Text("Hello,".to_string(), mock_location()),
+            Token::NewLine(mock_location()),
+            Token::Text("World,".to_string(), mock_location()),
+            Token::NewLine(mock_location()),
+            Token::CurlyBracketOpen(mock_location()),
+            Token::Module("std".to_string(), mock_location()),
+            Token::Dot(mock_location()),
+            Token::Ident("**".to_string(), mock_location()),
+            Token::Text("Contact".to_string(), mock_location()),
+            Token::CurlyBracketClose(mock_location()),
+            Token::NewLine(mock_location()),
+            Token::SquareBracketOpen(mock_location()),
+            Token::Module("std".to_string(), mock_location()),
+            Token::Dot(mock_location()),
+            Token::Ident("@".to_string(), mock_location()),
+            Token::Text("My website".to_string(), mock_location()),
+            Token::Comma(mock_location()),
+            Token::Text("https://example.com/".to_string(), mock_location()),
+            Token::SquareBracketClose(mock_location()),
+            Token::NewLine(mock_location()),
+            Token::NewLine(mock_location()),
+            Token::Text("2023.12.28".to_string(), mock_location()),
+            Token::NewLine(mock_location()),
+            Token::EOF(mock_location()),
         ];
         let parsed = parse(&tokens)?;
         let expected = new_document_with_children(vec![

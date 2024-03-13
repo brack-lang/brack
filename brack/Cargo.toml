@@ -12,8 +12,10 @@ brack-expander = { path = "../brack-expander" }
 brack-language-server = { path = "../brack-language-server" }
 brack-parser = { path = "../brack-parser" }
 brack-plugin = { path = "../brack-plugin" }
+brack-plugin-manager = { path = "../brack-plugin-manager" }
 brack-tokenizer = { path = "../brack-tokenizer" }
 tokio = { version = "1", features = ["full"] }
+toml = "0.8.8"
 
 [dependencies.clap]
 version = "4.4.12"

@@ -7,5 +7,9 @@ members = [
     "brack-language-server",
     "brack-parser",
     "brack-plugin",
+    "brack-plugin-manager",
+    "brack-sdk-rs",
     "brack-tokenizer",
 ]
+
+resolver = "2"
