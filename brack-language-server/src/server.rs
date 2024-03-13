@@ -2,7 +2,6 @@ use std::str::from_utf8;
 
 use anyhow::{anyhow, Result};
 use lsp_types::{ClientCapabilities, Diagnostic, Position, Range};
-use serde::{Deserialize, Serialize};
 use serde_json::{from_str, json, Value};
 use tokio::io::{stdin, stdout, AsyncReadExt, AsyncWriteExt};
 
