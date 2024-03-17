@@ -1,0 +1,213 @@
+{
+    // IntelliSense を使用して利用可能な属性を学べます。
+    // 既存の属性の説明をホバーして表示します。
+    // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'brack'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=brack",
+                    "--package=brack"
+                ],
+                "filter": {
+                    "name": "brack",
+                    "kind": "bin"
+                }
+            },
+            "args": [
+                "compile",
+                "-p",
+                "./brack-plugin",
+                "-b",
+                "test.html",
+                "-f",
+                "./sample-for-debug/${input:getFileName}"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'brack'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=brack",
+                    "--package=brack"
+                ],
+                "filter": {
+                    "name": "brack",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'brack-codegen'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=brack-codegen"
+                ],
+                "filter": {
+                    "name": "brack-codegen",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'brack-parser'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=brack-parser"
+                ],
+                "filter": {
+                    "name": "brack-parser",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'brack-sdk-rs'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=brack-sdk-rs"
+                ],
+                "filter": {
+                    "name": "brack-sdk-rs",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'brack-tokenizer'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=brack-tokenizer"
+                ],
+                "filter": {
+                    "name": "brack-tokenizer",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'brack-plugin'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=brack-plugin"
+                ],
+                "filter": {
+                    "name": "brack-plugin",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'brack-expander'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=brack-expander"
+                ],
+                "filter": {
+                    "name": "brack-expander",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'brack-language-server'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=brack-language-server"
+                ],
+                "filter": {
+                    "name": "brack-language-server",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'brack-plugin-manager'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=brack-plugin-manager"
+                ],
+                "filter": {
+                    "name": "brack-plugin-manager",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "getFileName",
+            "type": "promptString",
+            "description": "Enter the file name to debug",
+            "default": "main.[]"
+        }
+    ]
+}
