@@ -6,13 +6,6 @@ use crate::{
 use unicode_segmentation::UnicodeSegmentation;
 
 pub fn separate(s: &str) -> (String, String) {
-    // if s == "" {
-    //     return ('\0'.to_string(), String::new());
-    // }
-    // let graphemes = s.graphemes(true);
-    // if graphemes.count() == 1 {
-    //     return (s.graphemes(true).nth(0).unwrap().to_string(), String::new());
-    // }
     let graphemes = s.graphemes(true);
     match graphemes.count() {
         0 => ('\0'.to_string(), String::new()),
