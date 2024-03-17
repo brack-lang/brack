@@ -968,4 +968,43 @@ mod tests {
         );
         Ok(())
     }
+
+    #[test]
+    fn test_split_japanese_and_emoji() -> Result<()> {
+        let pwd = std::env::current_dir()?;
+        let uri = pwd
+            .join("text/split_japanese_and_emoji.[]")
+            .to_string_lossy()
+            .to_string();
+        let tokens = tokenize(uri.clone())?;
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Text(
+                    "こんにちは！🇯🇵".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 0,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 7,
+                        },
+                    }
+                ),
+                Token::EOF(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 7,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 7,
+                    },
+                }),
+            ]
+        );
+        Ok(())
+    }
 }
