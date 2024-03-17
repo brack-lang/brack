@@ -7,7 +7,7 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'brack'",
+            "name": "Debug compile",
             "cargo": {
                 "args": [
                     "build",
