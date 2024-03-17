@@ -14,7 +14,7 @@ pub fn dispatch(t: &Tokenizer) -> Vec<Token> {
 
     let (head, tail) = separate(&s);
 
-    if head == '\0' {
+    if head == "\0" {
         let mut updated = update_tokens(t, false);
         updated.push(Token::EOF(Location {
             start: LocationData {
@@ -37,18 +37,18 @@ pub fn dispatch(t: &Tokenizer) -> Vec<Token> {
     let curly_c = t.curly_nest_count.unwrap_or_default();
     let square_c = t.square_nest_count.unwrap_or_default();
     let look_for_ident = t.looking_for_identifier.unwrap_or_default();
-    match head {
-        '\\' => backslash::tokenize(t),
-        '<' => angle_bracket_open::tokenize(t),
-        '>' if angle_c > 0 => angle_bracket_close::tokenize(t),
-        '{' => curly_bracket_open::tokenize(t),
-        '}' if curly_c > 0 => curly_bracket_close::tokenize(t),
-        '[' => square_bracket_open::tokenize(t),
-        ']' if square_c > 0 => square_bracket_close::tokenize(t),
-        ',' if (angle_c + curly_c + square_c) > 0 => arguments::tokenize(t),
-        ' ' if look_for_ident => identifier::tokenize(t),
-        '.' if look_for_ident => module::tokenize(t),
-        '\n' => newline::tokenize(t),
+    match &head[..] {
+        "\\" => backslash::tokenize(t),
+        "<" => angle_bracket_open::tokenize(t),
+        ">" if angle_c > 0 => angle_bracket_close::tokenize(t),
+        "{" => curly_bracket_open::tokenize(t),
+        "}" if curly_c > 0 => curly_bracket_close::tokenize(t),
+        "[" => square_bracket_open::tokenize(t),
+        "]" if square_c > 0 => square_bracket_close::tokenize(t),
+        "," if (angle_c + curly_c + square_c) > 0 => arguments::tokenize(t),
+        " " if look_for_ident => identifier::tokenize(t),
+        "." if look_for_ident => module::tokenize(t),
+        "\n" => newline::tokenize(t),
         _ => {
             let t2 = Tokenizer {
                 column: Some(column + 1),
