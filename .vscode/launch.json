@@ -26,6 +26,7 @@
                 "-b",
                 "test.html",
                 "-f",
+                // Create the document you wish to debug under the sample-for-debug directory.
                 "./sample-for-debug/${input:getFileName}"
             ],
             "cwd": "${workspaceFolder}"
