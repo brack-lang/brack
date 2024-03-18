@@ -186,13 +186,13 @@ name = "brack"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "brack-codegen",
- "brack-expander",
- "brack-language-server",
- "brack-parser",
- "brack-plugin",
- "brack-plugin-manager",
- "brack-tokenizer",
+ "brack-codegen 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-expander 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-language-server 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-parser 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-plugin 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-plugin-manager 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-tokenizer 0.1.0 (git+https://github.com/brack-lang/brack)",
  "clap",
  "tokio",
  "toml 0.8.8",
@@ -203,9 +203,21 @@ name = "brack-codegen"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "brack-parser",
- "brack-plugin",
- "brack-sdk-rs",
+ "brack-parser 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-plugin 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-sdk-rs 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "extism",
+]
+
+[[package]]
+name = "brack-codegen"
+version = "0.1.0"
+source = "git+https://github.com/brack-lang/brack#8b1000ce0ddd7cc9446f2210f7474dd2d61d903c"
+dependencies = [
+ "anyhow",
+ "brack-parser 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-plugin 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-sdk-rs 0.1.0 (git+https://github.com/brack-lang/brack)",
  "extism",
 ]
 
@@ -214,9 +226,21 @@ name = "brack-expander"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "brack-parser",
- "brack-plugin",
- "brack-sdk-rs",
+ "brack-parser 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-plugin 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-sdk-rs 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "extism",
+]
+
+[[package]]
+name = "brack-expander"
+version = "0.1.0"
+source = "git+https://github.com/brack-lang/brack#8b1000ce0ddd7cc9446f2210f7474dd2d61d903c"
+dependencies = [
+ "anyhow",
+ "brack-parser 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-plugin 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-sdk-rs 0.1.0 (git+https://github.com/brack-lang/brack)",
  "extism",
 ]
 
@@ -232,12 +256,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "brack-language-server"
+version = "0.1.0"
+source = "git+https://github.com/brack-lang/brack#8b1000ce0ddd7cc9446f2210f7474dd2d61d903c"
+dependencies = [
+ "anyhow",
+ "lsp-types",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "brack-parser"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "brack-sdk-rs",
- "brack-tokenizer",
+ "brack-sdk-rs 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-tokenizer 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "uuid",
+]
+
+[[package]]
+name = "brack-parser"
+version = "0.1.0"
+source = "git+https://github.com/brack-lang/brack#8b1000ce0ddd7cc9446f2210f7474dd2d61d903c"
+dependencies = [
+ "anyhow",
+ "brack-sdk-rs 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-tokenizer 0.1.0 (git+https://github.com/brack-lang/brack)",
  "serde",
  "serde_json",
  "thiserror",
@@ -249,8 +299,25 @@ name = "brack-plugin"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "brack-parser",
- "brack-sdk-rs",
+ "brack-parser 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-sdk-rs 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "extism",
+ "extism-convert",
+ "modsurfer-plugins",
+ "modsurfer-proto",
+ "protobuf",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "brack-plugin"
+version = "0.1.0"
+source = "git+https://github.com/brack-lang/brack#8b1000ce0ddd7cc9446f2210f7474dd2d61d903c"
+dependencies = [
+ "anyhow",
+ "brack-parser 0.1.0 (git+https://github.com/brack-lang/brack)",
+ "brack-sdk-rs 0.1.0 (git+https://github.com/brack-lang/brack)",
  "extism",
  "extism-convert",
  "modsurfer-plugins",
@@ -272,6 +339,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "brack-plugin-manager"
+version = "0.1.0"
+source = "git+https://github.com/brack-lang/brack#8b1000ce0ddd7cc9446f2210f7474dd2d61d903c"
+dependencies = [
+ "anyhow",
+ "reqwest",
+ "serde",
+ "tokio",
+ "toml 0.8.8",
+]
+
+[[package]]
 name = "brack-sdk-rs"
 version = "0.1.0"
 dependencies = [
@@ -281,8 +360,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "brack-sdk-rs"
+version = "0.1.0"
+source = "git+https://github.com/brack-lang/brack#8b1000ce0ddd7cc9446f2210f7474dd2d61d903c"
+dependencies = [
+ "anyhow",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "brack-tokenizer"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "unicode-segmentation",
+]
+
+[[package]]
+name = "brack-tokenizer"
+version = "0.1.0"
+source = "git+https://github.com/brack-lang/brack#8b1000ce0ddd7cc9446f2210f7474dd2d61d903c"
 dependencies = [
  "anyhow",
  "unicode-segmentation",

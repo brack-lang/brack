@@ -7,8 +7,8 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.77"
-brack-parser = { path = "../brack-parser" }
-brack-sdk-rs = { path = "../brack-sdk-rs/" }
+brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
+brack-sdk-rs = { git = "https://github.com/brack-lang/brack", package = "brack-sdk-rs" }
 extism = "^1.0.0-rc3"
 serde = { version = "1.0.195", features = ["derive"] }
 serde_json = "1.0.111"
