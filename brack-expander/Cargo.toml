@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.77"
-brack-sdk-rs = { path = "../brack-sdk-rs" }
-brack-plugin = { path = "../brack-plugin" }
-brack-parser = { path = "../brack-parser" }
+brack-sdk-rs = { git = "https://github.com/brack-lang/brack", package = "brack-sdk-rs" }
+brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
+brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
 extism = "^1.0.0-rc3"

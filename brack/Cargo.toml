@@ -7,13 +7,13 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.79"
-brack-codegen = { path = "../brack-codegen" }
-brack-expander = { path = "../brack-expander" }
-brack-language-server = { path = "../brack-language-server" }
-brack-parser = { path = "../brack-parser" }
-brack-plugin = { path = "../brack-plugin" }
-brack-plugin-manager = { path = "../brack-plugin-manager" }
-brack-tokenizer = { path = "../brack-tokenizer" }
+brack-codegen = { git = "https://github.com/brack-lang/brack", package = "brack-codegen" }
+brack-expander = { git = "https://github.com/brack-lang/brack", package = "brack-expander" }
+brack-language-server = { git = "https://github.com/brack-lang/brack", package = "brack-language-server" }
+brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
+brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
+brack-plugin-manager = { git = "https://github.com/brack-lang/brack", package = "brack-plugin-manager" }
+brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
 tokio = { version = "1", features = ["full"] }
 toml = "0.8.8"
 
