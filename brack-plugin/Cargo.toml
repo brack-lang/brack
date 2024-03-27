@@ -12,7 +12,7 @@ brack-sdk-rs = { git = "https://github.com/brack-lang/brack", package = "brack-s
 extism = "^1.0.0-rc3"
 serde = { version = "1.0.195", features = ["derive"] }
 serde_json = "1.0.111"
-protobuf = "=3.2.0"
+protobuf = "=3.4.0"
 modsurfer-proto = { git = "https://github.com/dylibso/modsurfer", package = "modsurfer-proto" }
 modsurfer-plugins = { git = "https://github.com/dylibso/modsurfer", package = "modsurfer-plugins" }
 extism-convert = { version = "1.0.3", features = ["protobuf"] }

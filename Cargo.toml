@@ -13,3 +13,13 @@ members = [
 ]
 
 resolver = "2"
+
+[patch."https://github.com/brack-lang/brack"]
+brack-codegen = { path = "./brack-codegen" }
+brack-expander = { path = "./brack-expander" }
+brack-language-server = { path = "./brack-language-server" }
+brack-parser = { path = "./brack-parser" }
+brack-plugin = { path = "./brack-plugin" }
+brack-plugin-manager = { path = "./brack-plugin-manager" }
+brack-tokenizer = { path = "./brack-tokenizer" }
+brack-sdk-rs = { path = "./brack-sdk-rs" }
