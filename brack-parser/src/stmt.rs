@@ -11,7 +11,7 @@ use crate::{
 };
 
 // (curly | expr ("\n" expr)*) ("\n"+ | "\n"* EOF)
-pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {
+pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     let new_tokens = tokens.clone();
     let mut result = new_stmt();
 
@@ -23,7 +23,9 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {
         Err(curry_err) => match expr_seq::parse(&new_tokens) {
             Ok((asts, tokens)) => {
                 for ast in asts {
-                    result.add(ast)?;
+                    result
+                        .add(ast)
+                        .map_err(|e| ParserError::new(e.to_string(), tokens[0]))?;
                 }
                 tokens
             }
