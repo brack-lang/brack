@@ -6,16 +6,26 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub struct ParserError {
     message: String,
-    line: usize,
-    column: usize,
+    location: brack_tokenizer::tokens::Location,
+    // line: usize,
+    // column: usize,
 }
 
 impl Display for ParserError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        // write!(
+        //     f,
+        //     "Error at line {}, column {}: {}",
+        //     self.line, self.column, self.message
+        // )
         write!(
             f,
-            "Error at line {}, column {}: {}",
-            self.line, self.column, self.message
+            "Error at line {}, column {} to line {}, column {}: {}",
+            self.location.start.line,
+            self.location.start.character,
+            self.location.end.line,
+            self.location.end.character,
+            self.message
         )
     }
 }
@@ -40,8 +50,9 @@ impl ParserError {
         };
         Self {
             message,
-            line: location.start.line,
-            column: location.start.character,
+            location,
+            // line: location.start.line,
+            // column: location.start.character,
         }
     }
 }
