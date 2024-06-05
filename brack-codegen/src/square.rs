@@ -67,5 +67,5 @@ pub fn generate(ast: &AST, plugins: &mut Plugins2) -> Result<String> {
         args.push(arg);
     }
 
-    Ok(plugin.call::<Json<Vec<Value>>, String>(&ident_name, Json(args))?)
+    Ok(plugin.call::<Json<Vec<Value>>, String>(&plugin_metadata.call_name, Json(args))?)
 }
