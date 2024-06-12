@@ -17,7 +17,9 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
 
     let mut new_tokens = match curly::parse(&new_tokens) {
         Ok((ast, tokens)) => {
-            result.add(ast)?;
+            result
+                .add(ast)
+                .map_err(|e| ParserError::new(e.to_string(), tokens[0].clone()))?;
             tokens
         }
         Err(curry_err) => match expr_seq::parse(&new_tokens) {
@@ -25,7 +27,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
                 for ast in asts {
                     result
                         .add(ast)
-                        .map_err(|e| ParserError::new(e.to_string(), tokens[0]))?;
+                        .map_err(|e| ParserError::new(e.to_string(), tokens[0].clone()))?;
                 }
                 tokens
             }
@@ -52,10 +54,10 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     if check_eof(&new_tokens) {
         new_tokens = new_tokens[1..].to_vec();
     } else if newline_count == 0 {
-        return Err(anyhow::anyhow!(ParserError::new(
+        return Err(ParserError::new(
             "Expected at least one newline after statement.".to_string(),
             new_tokens.first().unwrap().clone(),
-        )));
+        ));
     }
 
     Ok((result, new_tokens))

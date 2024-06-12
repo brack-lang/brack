@@ -4,7 +4,7 @@ use brack_tokenizer::tokens::Token;
 use crate::{angle, ast::new_text, error::ParserError, parser::Parser, square, utils::check_text};
 
 // text | square | angle
-pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {
+pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     if check_text(&tokens) && tokens.len() > 0 {
         if let Token::Text(t, _) = tokens.first().unwrap() {
             return Ok((new_text(t.to_string()), tokens[1..].to_vec()));
@@ -17,8 +17,8 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {
     if let Ok(parser) = square::parse(tokens) {
         return Ok(parser);
     }
-    Err(anyhow::anyhow!(ParserError::new(
+    Err(ParserError::new(
         "Could not parse expr_component.".to_string(),
         tokens.first().unwrap().clone(),
-    )))
+    ))
 }
