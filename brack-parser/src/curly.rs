@@ -6,23 +6,25 @@ use crate::{
 };
 
 // "{" ident (expr ("," expr)*)? "}"
-pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {
+pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     let (mut consumed, mut new_tokens) =
         consume_by_kind(&tokens, Token::CurlyBracketOpen(mock_location()));
     if !consumed {
-        return Err(anyhow::anyhow!(ParserError::new(
+        return Err(ParserError::new(
             "Curly Brackets is not opened.".to_string(),
             tokens.first().unwrap().clone(),
-        )));
+        ));
     }
     let mut result = new_curly();
 
     match surrounded::parse(&new_tokens) {
         Ok((asts, tokens)) => {
-            new_tokens = tokens;
             for ast in asts {
-                result.add(ast)?;
+                result
+                    .add(ast)
+                    .map_err(|e| ParserError::new(e.to_string(), tokens[0].clone()))?;
             }
+            new_tokens = tokens;
         }
         Err(e) => return Err(e),
     }
@@ -30,10 +32,10 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {
     (consumed, new_tokens) =
         consume_by_kind(&new_tokens, Token::CurlyBracketClose(mock_location()));
     if !consumed {
-        return Err(anyhow::anyhow!(ParserError::new(
+        return Err(ParserError::new(
             "Curly Brackets is not closed.".to_string(),
             new_tokens.first().unwrap().clone(),
-        )));
+        ));
     }
 
     Ok((result, new_tokens))
