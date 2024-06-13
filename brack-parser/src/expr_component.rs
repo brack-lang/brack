@@ -1,7 +1,8 @@
 use anyhow::Result;
 use brack_tokenizer::tokens::Token;
 
-use crate::{angle, ast::new_text, error::ParserError, parser::Parser, square, utils::check_text};
+use crate::error::{DocumentError, ParseTerminationError, ParserError};
+use crate::{angle, ast::new_text, parser::Parser, square, utils::check_text};
 
 // text | square | angle
 pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
@@ -11,14 +12,19 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
         }
         unreachable!()
     }
-    if let Ok(parser) = angle::parse(tokens) {
-        return Ok(parser);
+    match square::parse(tokens) {
+        Ok(parser) => return Ok(parser),
+        Err(ParserError::DocumentError(e)) => return Err(e.into()),
+        _ => {}
     }
-    if let Ok(parser) = square::parse(tokens) {
-        return Ok(parser);
+    match angle::parse(tokens) {
+        Ok(parser) => return Ok(parser),
+        Err(ParserError::DocumentError(e)) => return Err(e.into()),
+        _ => {
+            return Err(ParserError::new_parse_termination_error(
+                "Could not parse expr_component.".to_string(),
+                tokens.first().unwrap().clone(),
+            ))
+        }
     }
-    Err(ParserError::new(
-        "Could not parse expr_component.".to_string(),
-        tokens.first().unwrap().clone(),
-    ))
 }

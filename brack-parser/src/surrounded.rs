@@ -17,13 +17,6 @@ pub fn parse(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>), ParserError>
         Err(e) => return Err(e),
     }
 
-    if let Token::CurlyBracketOpen(_) = new_tokens.first().unwrap() {
-        return Err(ParserError::new(
-            "Curly Brackets is not allowed in Square Brackets or Angle Brackets.".to_string(),
-            new_tokens.first().unwrap().clone(),
-        ));
-    }
-
     if let Ok((asts, tokens)) = arguments::parse(&new_tokens) {
         for ast in asts {
             result.push(ast);
