@@ -10,7 +10,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     let (mut consumed, mut new_tokens) =
         consume_by_kind(&tokens, Token::SquareBracketOpen(mock_location()));
     if !consumed {
-        return Err(ParserError::new(
+        return Err(ParserError::new_parse_termination_error(
             "Square Brackets is not opened.".to_string(),
             tokens.first().unwrap().clone(),
         ));
@@ -20,9 +20,9 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     match surrounded::parse(&new_tokens) {
         Ok((asts, tokens)) => {
             for ast in asts {
-                result
-                    .add(ast)
-                    .map_err(|e| ParserError::new(e.to_string(), tokens[0].clone()))?;
+                result.add(ast).map_err(|e| {
+                    ParserError::new_document_error(e.to_string(), tokens[0].clone())
+                })?;
             }
             new_tokens = tokens;
         }
@@ -32,7 +32,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     (consumed, new_tokens) =
         consume_by_kind(&new_tokens, Token::SquareBracketClose(mock_location()));
     if !consumed {
-        return Err(ParserError::new(
+        return Err(ParserError::new_document_error(
             "Square Brackets is not closed.".to_string(),
             tokens.first().unwrap().clone(),
         ));

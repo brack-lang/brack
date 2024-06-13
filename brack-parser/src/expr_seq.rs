@@ -35,6 +35,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>), ParserError>
                     new_tokens = tokens;
                     result.push(ast);
                 }
+                Err(ParserError::DocumentError(e)) => return Err(e.into()),
                 Err(_) => {
                     succeeded_parse_expr = false;
                     break;
