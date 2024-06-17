@@ -67,7 +67,7 @@ fn run_compile(subcommand: SubCommands) -> Result<()> {
         }
     }
 
-    let mut plugins = brack_plugin::plugin::new_plugins2(pathes)?;
+    let mut plugins = brack_plugin::plugin::new_plugins(pathes)?;
 
     if !args.2.ends_with(".[]") {
         anyhow::bail!("Filename must end with .[]");
@@ -132,7 +132,7 @@ fn build() -> Result<()> {
         }
     }
 
-    let mut plugins = brack_plugin::plugin::new_plugins2(pathes)?;
+    let mut plugins = brack_plugin::plugin::new_plugins(pathes)?;
 
     let entries = read_dir("docs")?;
     for entry in entries {
