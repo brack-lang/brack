@@ -1,54 +1,60 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/23.11";
-    fenix = {
-      url = "github:nix-community/fenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    naersk = {
-      url = "github:nix-community/naersk";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     flake-utils.url = "github:numtide/flake-utils";
-    flake-compat = {
-      url = "github:edolstra/flake-compat";
-      flake = false;
-    };
   };
-  outputs = { self, nixpkgs, fenix, naersk, flake-utils, flake-compat, ... }:
+
+  outputs = {
+    self,
+    nixpkgs,
+    rust-overlay,
+    flake-utils,
+  }:
     flake-utils.lib.eachDefaultSystem (
       system: let
-        overlays = [
-          (_: super: let pkgs = fenix.inputs.nixpkgs.legacyPackages.${super.system}; in fenix.overlays.default pkgs pkgs)
-        ];
         pkgs = import nixpkgs {
-          inherit system overlays;
+          inherit system;
+          overlays = [
+            (import rust-overlay)
+          ];
         };
-        naersk' = pkgs.callPackage naersk {};
+        toolchain = pkgs.rust-bin.stable.latest.default;
+        rustPlatform = pkgs.makeRustPlatform {
+          rustc = toolchain;
+          cargo = toolchain;
+        };
       in {
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
+            alejandra
             nil
-            pkg-config
-            openssl
-            glib
-            libiconv
-            darwin.Security
-            darwin.apple_sdk.frameworks.SystemConfiguration
-            (fenix.packages.${system}.complete.withComponents [
-              "cargo"
-              "clippy"
-              "rust-src"
-              "rustc"
-              "rustfmt"
-            ])
-            rust-analyzer-nightly
+            toolchain
+            rust-analyzer
           ];
-          RUST_SRC_PATH = "${fenix.packages.${system}.complete.rust-src}/lib/rustlib/src/rust/library";
-          PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
         };
-        packages.default = naersk'.buildPackage {
+        packages.default = rustPlatform.buildRustPackage {
           src = ./.;
+          copyLibs = true;
+          name = "brack";
+          cargoLock = {
+            lockFile = ./Cargo.lock;
+          };
+          nativeBuildInputs = with pkgs; [
+            pkg-config
+          ];
+          buildInputs = with pkgs;
+            [
+              openssl
+              openssl.dev
+            ]
+            ++ pkgs.lib.optional pkgs.stdenv.isDarwin [
+              darwin.Security
+              darwin.apple_sdk.frameworks.SystemConfiguration
+            ];
         };
         apps.${system}.default = {
           type = "app";
