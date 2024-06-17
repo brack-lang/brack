@@ -43,10 +43,11 @@
           cargoLock = {
             lockFile = ./Cargo.lock;
           };
-          buildInputs = with pkgs; [
-            darwin.Security
-            darwin.apple_sdk.frameworks.SystemConfiguration
-          ];
+          buildInputs = with pkgs.darwin;
+            pkgs.lib.optional pkgs.stdenv.isDarwin [
+              Security
+              apple_sdk.frameworks.SystemConfiguration
+            ];
         };
         apps.${system}.default = {
           type = "app";
