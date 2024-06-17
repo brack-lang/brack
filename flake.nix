@@ -44,7 +44,7 @@
             lockFile = ./Cargo.lock;
           };
           nativeBuildInputs = with pkgs; [
-            pkgs-config
+            pkg-config
           ];
           buildInputs = with pkgs;
             [
