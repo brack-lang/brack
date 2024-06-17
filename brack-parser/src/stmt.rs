@@ -11,28 +11,28 @@ use crate::{
 };
 
 // (curly | expr ("\n" expr)*) ("\n"+ | "\n"* EOF)
-pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {
+pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     let new_tokens = tokens.clone();
     let mut result = new_stmt();
 
     let mut new_tokens = match curly::parse(&new_tokens) {
         Ok((ast, tokens)) => {
-            result.add(ast)?;
+            result
+                .add(ast)
+                .map_err(|e| ParserError::new_document_error(e.to_string(), tokens[0].clone()))?;
             tokens
         }
-        Err(curry_err) => match expr_seq::parse(&new_tokens) {
+        Err(ParserError::DocumentError(curly_err)) => return Err(curly_err.into()),
+        Err(ParserError::ParseTerminationError(_)) => match expr_seq::parse(&new_tokens) {
             Ok((asts, tokens)) => {
                 for ast in asts {
-                    result.add(ast)?;
+                    result.add(ast).map_err(|e| {
+                        ParserError::new_document_error(e.to_string(), tokens[0].clone())
+                    })?;
                 }
                 tokens
             }
-            Err(expr_seq_err) => {
-                if let Token::CurlyBracketOpen(_) = new_tokens.first().unwrap() {
-                    return Err(curry_err);
-                }
-                return Err(expr_seq_err);
-            }
+            Err(e) => return Err(e),
         },
     };
 
@@ -50,10 +50,10 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {
     if check_eof(&new_tokens) {
         new_tokens = new_tokens[1..].to_vec();
     } else if newline_count == 0 {
-        return Err(anyhow::anyhow!(ParserError::new(
+        return Err(ParserError::new_document_error(
             "Expected at least one newline after statement.".to_string(),
             new_tokens.first().unwrap().clone(),
-        )));
+        ));
     }
 
     Ok((result, new_tokens))

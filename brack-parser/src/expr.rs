@@ -1,24 +1,34 @@
 use anyhow::Result;
 use brack_tokenizer::tokens::Token;
 
-use crate::{ast::new_expr, expr_component, parser::Parser};
+use crate::{ast::new_expr, error::ParserError, expr_component, parser::Parser};
 
 // (text | square | angle)+
-pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {
+pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     let mut new_tokens = tokens.clone();
     let mut result = new_expr();
 
     match expr_component::parse(&new_tokens) {
         Ok((ast, tokens)) => {
+            result
+                .add(ast)
+                .map_err(|e| ParserError::new_document_error(e.to_string(), tokens[0].clone()))?;
             new_tokens = tokens;
-            result.add(ast)?;
         }
         Err(e) => return Err(e),
     }
 
-    while let Ok((ast, tokens)) = expr_component::parse(&new_tokens) {
-        new_tokens = tokens;
-        result.add(ast)?;
+    loop {
+        match expr_component::parse(&new_tokens) {
+            Ok((ast, tokens)) => {
+                result.add(ast).map_err(|e| {
+                    ParserError::new_document_error(e.to_string(), tokens[0].clone())
+                })?;
+                new_tokens = tokens;
+            }
+            Err(ParserError::DocumentError(e)) => return Err(e.into()),
+            _ => break,
+        }
     }
 
     Ok((result, new_tokens))

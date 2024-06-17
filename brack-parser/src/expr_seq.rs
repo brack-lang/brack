@@ -2,10 +2,10 @@ use anyhow::Result;
 use brack_sdk_rs::ast::AST;
 use brack_tokenizer::tokens::{mock_location, Token};
 
-use crate::{expr, utils::consume_by_kind};
+use crate::{error::ParserError, expr, utils::consume_by_kind};
 
 // expr ("\n" expr)*
-pub fn parse(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
+pub fn parse(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>), ParserError> {
     let mut new_tokens = tokens.clone();
     let mut result = vec![];
 
@@ -35,6 +35,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
                     new_tokens = tokens;
                     result.push(ast);
                 }
+                Err(ParserError::DocumentError(e)) => return Err(e.into()),
                 Err(_) => {
                     succeeded_parse_expr = false;
                     break;

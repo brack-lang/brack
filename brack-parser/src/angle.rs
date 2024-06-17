@@ -1,28 +1,29 @@
 use anyhow::Result;
 use brack_tokenizer::tokens::{mock_location, Token};
 
-use crate::{
-    ast::new_angle, error::ParserError, parser::Parser, surrounded, utils::consume_by_kind,
-};
+use crate::error::ParserError;
+use crate::{ast::new_angle, parser::Parser, surrounded, utils::consume_by_kind};
 
 // "<" ident (expr ("," expr)*)? ">"
-pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {
+pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     let (mut consumed, mut new_tokens) =
         consume_by_kind(&tokens, Token::AngleBracketOpen(mock_location()));
     if !consumed {
-        return Err(anyhow::anyhow!(ParserError::new(
+        return Err(ParserError::new_parse_termination_error(
             "Angle Brackets is not opened.".to_string(),
             tokens.first().unwrap().clone(),
-        )));
+        ));
     }
     let mut result = new_angle();
 
     match surrounded::parse(&new_tokens) {
         Ok((asts, tokens)) => {
-            new_tokens = tokens;
             for ast in asts {
-                result.add(ast)?;
+                result.add(ast).map_err(|e| {
+                    ParserError::new_document_error(e.to_string(), tokens[0].clone())
+                })?;
             }
+            new_tokens = tokens;
         }
         Err(e) => return Err(e),
     }
@@ -30,10 +31,10 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser> {
     (consumed, new_tokens) =
         consume_by_kind(&new_tokens, Token::AngleBracketClose(mock_location()));
     if !consumed {
-        return Err(anyhow::anyhow!(ParserError::new(
+        return Err(ParserError::new_document_error(
             "Angle Brackets is not closed.".to_string(),
             tokens.first().unwrap().clone(),
-        )));
+        ));
     }
 
     Ok((result, new_tokens))
