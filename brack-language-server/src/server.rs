@@ -145,25 +145,7 @@ impl LanguageServer {
         let file_path = parms.text_document.uri.to_file_path().unwrap();
         let uri = file_path.to_str().unwrap();
 
-        self.log_message(&format!("Did change {}", uri)).await?;
-
-        let diagnostics = vec![Diagnostic {
-            range: Range {
-                start: Position {
-                    line: 0,
-                    character: 0,
-                },
-                end: Position {
-                    line: 0,
-                    character: 3,
-                },
-            },
-            message: "This is a test diagnostic message 2!".to_string(),
-            ..Default::default()
-        }];
-        self.log_message(&format!("{:?}", diagnostics)).await?;
-        self.send_publish_diagnostics(&uri.to_string(), &diagnostics)
-            .await
+        self.log_message(&format!("Did change {}", uri)).await
     }
 
     async fn handle_notification_text_document_did_save(&self, msg: &Value) -> Result<()> {
@@ -180,14 +162,36 @@ impl LanguageServer {
             Err(e) => return self.log_message(&format!("Error: {:?}", e)).await,
         };
 
-        let ast = match brack_parser::parse::parse(&tokens) {
-            Ok(ast) => ast,
-            Err(e) => return self.log_message(&format!("Error: {:?}", e)).await,
+        match brack_parser::parse::parse(&tokens) {
+            Ok(ast) => {
+                self.log_message(&format!("AST: {:?}", ast)).await?;
+                let diagnostics: Vec<Diagnostic> = vec![];
+                return self
+                    .send_publish_diagnostics(&uri.to_string(), &diagnostics)
+                    .await;
+            }
+            Err(parser_error) => {
+                let location = parser_error.get_location();
+                let message = parser_error.get_message();
+                let diagnostics = vec![Diagnostic {
+                    range: Range {
+                        start: Position {
+                            line: location.start.line as u32,
+                            character: location.end.character as u32,
+                        },
+                        end: Position {
+                            line: location.end.line as u32,
+                            character: location.end.character as u32,
+                        },
+                    },
+                    message,
+                    ..Default::default()
+                }];
+                return self
+                    .send_publish_diagnostics(&uri.to_string(), &diagnostics)
+                    .await;
+            }
         };
-
-        self.log_message(&format!("{:?}", ast)).await?;
-
-        Ok(())
     }
 
     async fn handle_notification(&mut self, msg: &Value, method: &str) -> Result<()> {
