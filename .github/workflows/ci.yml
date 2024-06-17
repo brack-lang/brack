@@ -1,10 +1,32 @@
 name: CI
-on: [push, pull_request]
+
+on:
+  push:
+    paths-ignore:
+      - '.vscode/**'
+      - '.gitignore'
+      - 'LICENSE*'
+      - 'brack.ebnf'
+      - '*.md'
+  pull_request:
+    paths-ignore:
+      - '.vscode/**'
+      - '.gitignore'
+      - 'LICENSE*'
+      - 'brack.ebnf'
+      - '*.md'
 
 jobs:
-    test:
-        runs-on: ubuntu-22.04
-        steps:
-        - uses: actions/checkout@v4
-        - uses: dtolnay/rust-toolchain@stable
-        - run: cargo test --all-features
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --all-features
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v27
+      - run: nix build .
+
