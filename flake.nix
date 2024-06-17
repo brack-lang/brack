@@ -43,9 +43,11 @@
           cargoLock = {
             lockFile = ./Cargo.lock;
           };
+          nativeBuildInputs = with pkgs; [
+            pkgs-config
+          ];
           buildInputs = with pkgs;
             [
-              pkg-config
               openssl
               openssl.dev
             ]
