@@ -19,9 +19,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     match surrounded::parse(&new_tokens) {
         Ok((asts, tokens)) => {
             for ast in asts {
-                result.add(ast).map_err(|e| {
-                    ParserError::new_document_error(e.to_string(), tokens[0].clone())
-                })?;
+                result.add(ast).unwrap();
             }
             new_tokens = tokens;
         }

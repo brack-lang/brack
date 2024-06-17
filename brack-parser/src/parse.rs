@@ -11,9 +11,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<AST, ParserError> {
     while new_tokens.len() > 0 {
         match stmt::parse(&new_tokens) {
             Ok((ast, tokens)) => {
-                result.add(ast).map_err(|e| {
-                    ParserError::new_document_error(e.to_string(), new_tokens[0].clone())
-                })?;
+                result.add(ast).unwrap();
                 new_tokens = tokens;
             }
             Err(e) => return Err(e),

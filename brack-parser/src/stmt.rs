@@ -26,9 +26,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
         Err(ParserError::ParseTerminationError(_)) => match expr_seq::parse(&new_tokens) {
             Ok((asts, tokens)) => {
                 for ast in asts {
-                    result.add(ast).map_err(|e| {
-                        ParserError::new_document_error(e.to_string(), tokens[0].clone())
-                    })?;
+                    result.add(ast).unwrap();
                 }
                 tokens
             }
