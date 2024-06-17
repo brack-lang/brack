@@ -1,7 +1,7 @@
 use anyhow::Result;
 use brack_tokenizer::tokens::Token;
 
-use crate::error::{DocumentError, ParseTerminationError, ParserError};
+use crate::error::ParserError;
 use crate::{angle, ast::new_text, parser::Parser, square, utils::check_text};
 
 // text | square | angle

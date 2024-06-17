@@ -23,7 +23,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
             tokens
         }
         Err(ParserError::DocumentError(curly_err)) => return Err(curly_err.into()),
-        Err(ParserError::ParseTerminationError(curly_err)) => match expr_seq::parse(&new_tokens) {
+        Err(ParserError::ParseTerminationError(_)) => match expr_seq::parse(&new_tokens) {
             Ok((asts, tokens)) => {
                 for ast in asts {
                     result.add(ast).map_err(|e| {

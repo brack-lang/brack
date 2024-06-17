@@ -1,7 +1,7 @@
 use anyhow::Result;
 use brack_tokenizer::tokens::{mock_location, Token};
 
-use crate::error::{DocumentError, ParseTerminationError, ParserError};
+use crate::error::ParserError;
 use crate::{ast::new_angle, parser::Parser, surrounded, utils::consume_by_kind};
 
 // "<" ident (expr ("," expr)*)? ">"
