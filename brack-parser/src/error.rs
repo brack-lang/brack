@@ -12,8 +12,8 @@ pub struct DocumentError {
 
 #[derive(Error, Debug)]
 pub struct ParseTerminationError {
-    pub message: String,
-    pub location: Location,
+    message: String,
+    location: Location,
 }
 
 #[derive(Error, Debug)]
@@ -110,6 +110,20 @@ impl ParserError {
 
     pub fn new_parse_termination_error(message: String, token: Token) -> Self {
         Self::ParseTerminationError(ParseTerminationError::new(message, token))
+    }
+
+    pub fn get_location(&self) -> Location {
+        match self {
+            Self::DocumentError(e) => e.location.clone(),
+            Self::ParseTerminationError(e) => e.location.clone(),
+        }
+    }
+
+    pub fn get_message(&self) -> String {
+        match self {
+            Self::DocumentError(e) => e.message.clone(),
+            Self::ParseTerminationError(e) => e.message.clone(),
+        }
     }
 }
 
