@@ -21,10 +21,10 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
         Ok(parser) => return Ok(parser),
         Err(ParserError::DocumentError(e)) => return Err(e.into()),
         _ => {
-            return Err(ParserError::new_parse_termination_error(
-                "Could not parse expr_component.".to_string(),
-                tokens.first().unwrap().clone(),
-            ))
+            return Err(ParseTerminationError::ExprComponentNotFound(
+                tokens.first().unwrap().get_location(),
+            )
+            .into())
         }
     }
 }

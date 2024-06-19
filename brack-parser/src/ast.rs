@@ -126,3 +126,9 @@ pub fn assert_ast_eq(node1: &AST, node2: &AST) {
         ),
     }
 }
+
+pub(crate) fn granteed_safe_add(ast: &mut AST, child: AST) -> () {
+    // Although ast.add returns an Error when an illegal insert is attempted on ast, safety is guaranteed since there is no possibility of an illegal insert during parse.
+    // This function is used when safety is guaranteed.
+    ast.add(child).unwrap();
+}
