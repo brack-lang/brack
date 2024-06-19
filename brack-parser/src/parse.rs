@@ -2,7 +2,7 @@ use anyhow::Result;
 use brack_sdk_rs::ast::AST;
 use brack_tokenizer::tokens::Token;
 
-use crate::{ast::new_document, error::ParserError, stmt};
+use crate::{ast::granteed_safe_add, ast::new_document, error::ParserError, stmt};
 
 pub fn parse(tokens: &Vec<Token>) -> Result<AST, ParserError> {
     let mut new_tokens = tokens.clone();
@@ -11,7 +11,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<AST, ParserError> {
     while new_tokens.len() > 0 {
         match stmt::parse(&new_tokens) {
             Ok((ast, tokens)) => {
-                result.add(ast).unwrap();
+                granteed_safe_add(&mut result, ast);
                 new_tokens = tokens;
             }
             Err(e) => return Err(e),
