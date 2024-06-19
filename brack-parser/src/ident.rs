@@ -3,7 +3,7 @@ use brack_tokenizer::tokens::{mock_location, Token};
 
 use crate::error::{DocumentError, ParseTerminationError, ParserError};
 use crate::{
-    ast::{new_ident, new_text},
+    ast::{granteed_safe_add, new_ident, new_text},
     parser::Parser,
     utils::consume_by_kind,
 };
@@ -16,7 +16,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
         .first()
         .ok_or_else(|| ParseTerminationError::TokenNotFound(mock_location()))?
     {
-        result.add(new_text(i.to_string())).unwrap();
+        granteed_safe_add(&mut result, new_text(i.to_string()));
         tokens[1..].to_vec()
     } else {
         return Err(
@@ -36,7 +36,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
         .first()
         .ok_or_else(|| DocumentError::IdentifierNotFound(mock_location()))?
     {
-        result.add(new_text(i.to_string())).unwrap();
+        granteed_safe_add(&mut result, new_text(i.to_string()));
         (new_tokens.clone())[1..].to_vec()
     } else {
         return Err(

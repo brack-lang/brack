@@ -3,7 +3,7 @@ use brack_tokenizer::tokens::{mock_location, Token};
 
 use crate::error::{DocumentError, ParseTerminationError, ParserError};
 use crate::{
-    ast::new_stmt,
+    ast::{granteed_safe_add, new_stmt},
     curly, expr_seq,
     parser::Parser,
     utils::{check_eof, consume_by_kind},
@@ -16,14 +16,14 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
 
     let mut new_tokens = match curly::parse(&new_tokens) {
         Ok((ast, tokens)) => {
-            result.add(ast).unwrap();
+            granteed_safe_add(&mut result, ast);
             tokens
         }
         Err(ParserError::DocumentError(curly_err)) => return Err(curly_err.into()),
         Err(ParserError::ParseTerminationError(_)) => match expr_seq::parse(&new_tokens) {
             Ok((asts, tokens)) => {
                 for ast in asts {
-                    result.add(ast).unwrap();
+                    granteed_safe_add(&mut result, ast);
                 }
                 tokens
             }

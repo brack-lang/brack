@@ -126,3 +126,18 @@ pub fn assert_ast_eq(node1: &AST, node2: &AST) {
         ),
     }
 }
+
+pub(crate) fn granteed_safe_add(ast: &mut AST, child: AST) -> () {
+    // Although ast.add returns an Error when an illegal insert is attempted on ast, safety is guaranteed since there is no possibility of an illegal insert during parse.
+    // This function is used when safety is guaranteed.
+    match ast {
+        AST::Document(inner) => inner.children.push(child),
+        AST::Stmt(inner) => inner.children.push(child),
+        AST::Expr(inner) => inner.children.push(child),
+        AST::Angle(inner) => inner.children.push(child),
+        AST::Square(inner) => inner.children.push(child),
+        AST::Curly(inner) => inner.children.push(child),
+        AST::Identifier(inner) => inner.children.push(child),
+        _ => panic!("Unexpected AST node type: {:?}", ast),
+    }
+}

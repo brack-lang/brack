@@ -2,7 +2,9 @@ use anyhow::Result;
 use brack_tokenizer::tokens::{mock_location, Token};
 
 use crate::error::{DocumentError, ParseTerminationError, ParserError};
-use crate::{ast::new_angle, parser::Parser, surrounded, utils::consume_by_kind};
+use crate::{
+    ast::granteed_safe_add, ast::new_angle, parser::Parser, surrounded, utils::consume_by_kind,
+};
 
 // "<" ident (expr ("," expr)*)? ">"
 pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
@@ -19,7 +21,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     match surrounded::parse(&new_tokens) {
         Ok((asts, tokens)) => {
             for ast in asts {
-                result.add(ast).unwrap(); // This should never fail because it occurs when an invalid AST is inserted by a plugin macro, so it is safe to `parse`.
+                granteed_safe_add(&mut result, ast);
             }
             new_tokens = tokens;
         }
