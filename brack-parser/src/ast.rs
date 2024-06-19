@@ -1,5 +1,117 @@
-use brack_sdk_rs::ast::{InnerNode, LeafNode, AST};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+pub struct InnerNode {
+    pub id: String,
+    pub children: Vec<AST>,
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+pub struct LeafNode {
+    pub id: String,
+    pub value: String,
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+pub enum AST {
+    Document(InnerNode),
+    Stmt(InnerNode),
+    Expr(InnerNode),
+    Angle(InnerNode),
+    Square(InnerNode),
+    Curly(InnerNode),
+    Identifier(InnerNode),
+    Text(LeafNode),
+}
+
+impl AST {
+    pub fn children(&self) -> &Vec<AST> {
+        match self {
+            AST::Document(node)
+            | AST::Stmt(node)
+            | AST::Expr(node)
+            | AST::Angle(node)
+            | AST::Square(node)
+            | AST::Curly(node)
+            | AST::Identifier(node) => &node.children,
+            AST::Text(_) => panic!("Leaf node has no children"),
+        }
+    }
+
+    pub fn value(&self) -> String {
+        match self {
+            AST::Text(leaf) => leaf.value.clone(),
+            AST::Document(_)
+            | AST::Stmt(_)
+            | AST::Expr(_)
+            | AST::Angle(_)
+            | AST::Square(_)
+            | AST::Curly(_)
+            | AST::Identifier(_) => panic!("Inner node has no value"),
+        }
+    }
+
+    pub fn id(&self) -> String {
+        match self {
+            AST::Document(node)
+            | AST::Stmt(node)
+            | AST::Expr(node)
+            | AST::Angle(node)
+            | AST::Square(node)
+            | AST::Curly(node)
+            | AST::Identifier(node) => node.id.clone(),
+            AST::Text(leaf) => leaf.id.clone(),
+        }
+    }
+}
+
+impl AST {
+    pub fn add(&mut self, ast: AST) -> () {
+        match self {
+            AST::Document(node)
+            | AST::Stmt(node)
+            | AST::Expr(node)
+            | AST::Angle(node)
+            | AST::Square(node)
+            | AST::Curly(node)
+            | AST::Identifier(node) => {
+                node.children.push(ast);
+            }
+            AST::Text(_) => {
+                panic!("Cannot add child to leaf node");
+            }
+        }
+    }
+
+    pub fn get(&self, id: &str) -> Option<&AST> {
+        match self {
+            AST::Document(node)
+            | AST::Stmt(node)
+            | AST::Expr(node)
+            | AST::Angle(node)
+            | AST::Square(node)
+            | AST::Curly(node)
+            | AST::Identifier(node) => {
+                if node.id == id {
+                    return Some(self);
+                }
+                for child in &node.children {
+                    if let Some(ast) = child.get(id) {
+                        return Some(ast);
+                    }
+                }
+                None
+            }
+            AST::Text(node) => {
+                if node.id == id {
+                    return Some(self);
+                }
+                None
+            }
+        }
+    }
+}
 
 pub fn new_document() -> AST {
     AST::Document(InnerNode {
@@ -125,10 +237,4 @@ pub fn assert_ast_eq(node1: &AST, node2: &AST) {
             node1, node2
         ),
     }
-}
-
-pub(crate) fn granteed_safe_add(ast: &mut AST, child: AST) -> () {
-    // Although ast.add returns an Error when an illegal insert is attempted on ast, safety is guaranteed since there is no possibility of an illegal insert during parse.
-    // This function is used when safety is guaranteed.
-    ast.add(child).unwrap();
 }

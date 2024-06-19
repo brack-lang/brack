@@ -1,8 +1,7 @@
 use anyhow::Result;
-use brack_sdk_rs::ast::AST;
 use brack_tokenizer::tokens::{mock_location, Token};
 
-use crate::{error::ParserError, expr, utils::consume_by_kind};
+use crate::{ast::AST, error::ParserError, expr, utils::consume_by_kind};
 
 // expr ("," expr)*
 pub fn parse(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>), ParserError> {

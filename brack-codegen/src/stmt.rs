@@ -1,6 +1,6 @@
 use anyhow::Result;
+use brack_parser::ast::AST;
 use brack_plugin::plugin::Plugins;
-use brack_sdk_rs::ast::AST;
 
 use crate::{curly, expr, identifier, square, text};
 

@@ -242,7 +242,6 @@ name = "brack-parser"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "brack-sdk-rs",
  "brack-tokenizer",
  "serde",
  "serde_json",
