@@ -19,7 +19,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     match surrounded::parse(&new_tokens) {
         Ok((asts, tokens)) => {
             for ast in asts {
-                result.add(ast).unwrap();
+                result.add(ast).unwrap(); // This should never fail because it occurs when an invalid AST is inserted by a plugin macro, so it is safe to `parse`.
             }
             new_tokens = tokens;
         }
