@@ -1,11 +1,10 @@
 use anyhow::Result;
 use brack_tokenizer::tokens::{mock_location, Token};
 
+use crate::error::{DocumentError, ParseTerminationError, ParserError};
 use crate::{
     ast::new_stmt,
-    curly,
-    error::ParserError,
-    expr_seq,
+    curly, expr_seq,
     parser::Parser,
     utils::{check_eof, consume_by_kind},
 };
@@ -17,18 +16,14 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
 
     let mut new_tokens = match curly::parse(&new_tokens) {
         Ok((ast, tokens)) => {
-            result
-                .add(ast)
-                .map_err(|e| ParserError::new_document_error(e.to_string(), tokens[0].clone()))?;
+            result.add(ast).unwrap();
             tokens
         }
         Err(ParserError::DocumentError(curly_err)) => return Err(curly_err.into()),
         Err(ParserError::ParseTerminationError(_)) => match expr_seq::parse(&new_tokens) {
             Ok((asts, tokens)) => {
                 for ast in asts {
-                    result.add(ast).map_err(|e| {
-                        ParserError::new_document_error(e.to_string(), tokens[0].clone())
-                    })?;
+                    result.add(ast).unwrap();
                 }
                 tokens
             }
@@ -50,10 +45,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     if check_eof(&new_tokens) {
         new_tokens = new_tokens[1..].to_vec();
     } else if newline_count == 0 {
-        return Err(ParserError::new_document_error(
-            "Expected at least one newline after statement.".to_string(),
-            new_tokens.first().unwrap().clone(),
-        ));
+        return Err(DocumentError::NeedNewLine(new_tokens.first().unwrap().get_location()).into());
     }
 
     Ok((result, new_tokens))

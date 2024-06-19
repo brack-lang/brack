@@ -10,9 +10,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
 
     match expr_component::parse(&new_tokens) {
         Ok((ast, tokens)) => {
-            result
-                .add(ast)
-                .map_err(|e| ParserError::new_document_error(e.to_string(), tokens[0].clone()))?;
+            result.add(ast).unwrap();
             new_tokens = tokens;
         }
         Err(e) => return Err(e),
@@ -21,9 +19,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     loop {
         match expr_component::parse(&new_tokens) {
             Ok((ast, tokens)) => {
-                result.add(ast).map_err(|e| {
-                    ParserError::new_document_error(e.to_string(), tokens[0].clone())
-                })?;
+                result.add(ast).unwrap();
                 new_tokens = tokens;
             }
             Err(ParserError::DocumentError(e)) => return Err(e.into()),

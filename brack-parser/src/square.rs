@@ -1,28 +1,25 @@
 use anyhow::Result;
 use brack_tokenizer::tokens::{mock_location, Token};
 
-use crate::{
-    ast::new_square, error::ParserError, parser::Parser, surrounded, utils::consume_by_kind,
-};
+use crate::error::{DocumentError, ParseTerminationError, ParserError};
+use crate::{ast::new_square, parser::Parser, surrounded, utils::consume_by_kind};
 
 // "[" ident (expr ("," expr)*)? "]"
 pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     let (mut consumed, mut new_tokens) =
         consume_by_kind(&tokens, Token::SquareBracketOpen(mock_location()));
     if !consumed {
-        return Err(ParserError::new_parse_termination_error(
-            "Square Brackets is not opened.".to_string(),
-            tokens.first().unwrap().clone(),
-        ));
+        return Err(ParseTerminationError::SquareNotOpened(
+            new_tokens.first().unwrap().get_location(),
+        )
+        .into());
     }
     let mut result = new_square();
 
     match surrounded::parse(&new_tokens) {
         Ok((asts, tokens)) => {
             for ast in asts {
-                result.add(ast).map_err(|e| {
-                    ParserError::new_document_error(e.to_string(), tokens[0].clone())
-                })?;
+                result.add(ast).unwrap();
             }
             new_tokens = tokens;
         }
@@ -32,10 +29,9 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     (consumed, new_tokens) =
         consume_by_kind(&new_tokens, Token::SquareBracketClose(mock_location()));
     if !consumed {
-        return Err(ParserError::new_document_error(
-            "Square Brackets is not closed.".to_string(),
-            tokens.first().unwrap().clone(),
-        ));
+        return Err(
+            DocumentError::SquareNotClosed(new_tokens.first().unwrap().get_location()).into(),
+        );
     }
 
     Ok((result, new_tokens))
