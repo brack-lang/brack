@@ -12,11 +12,11 @@ use crate::{
 pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     let mut result = new_ident(vec![]);
 
-    let new_tokens = if let Token::Module(i, _) = tokens
+    let new_tokens = if let Token::Module(i, location) = tokens
         .first()
         .ok_or_else(|| ParseTerminationError::TokenNotFound(mock_location()))?
     {
-        result.add(new_text(i.to_string()));
+        result.add(new_text(i.to_string(), location.clone()));
         tokens[1..].to_vec()
     } else {
         return Err(
@@ -32,11 +32,11 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     }
     let new_tokens = new_tokens_from_dot;
 
-    let new_tokens = if let Token::Ident(i, _) = new_tokens
+    let new_tokens = if let Token::Ident(i, location) = new_tokens
         .first()
         .ok_or_else(|| DocumentError::IdentifierNotFound(mock_location()))?
     {
-        result.add(new_text(i.to_string()));
+        result.add(new_text(i.to_string(), location.clone()));
         (new_tokens.clone())[1..].to_vec()
     } else {
         return Err(
