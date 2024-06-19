@@ -1,6 +1,7 @@
 use anyhow::Result;
+use brack_parser::ast::AST;
 use brack_plugin::plugin::Plugins;
-use brack_sdk_rs::{ast::AST, Type};
+use brack_sdk_rs::Type;
 use extism::convert::Json;
 
 fn expand_angle(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<AST> {

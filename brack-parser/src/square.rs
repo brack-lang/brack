@@ -2,9 +2,7 @@ use anyhow::Result;
 use brack_tokenizer::tokens::{mock_location, Token};
 
 use crate::error::{DocumentError, ParseTerminationError, ParserError};
-use crate::{
-    ast::granteed_safe_add, ast::new_square, parser::Parser, surrounded, utils::consume_by_kind,
-};
+use crate::{ast::new_square, parser::Parser, surrounded, utils::consume_by_kind};
 
 // "[" ident (expr ("," expr)*)? "]"
 pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
@@ -21,7 +19,7 @@ pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     match surrounded::parse(&new_tokens) {
         Ok((asts, tokens)) => {
             for ast in asts {
-                granteed_safe_add(&mut result, ast);
+                result.add(ast);
             }
             new_tokens = tokens;
         }
