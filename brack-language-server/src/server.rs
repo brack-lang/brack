@@ -1,7 +1,10 @@
 use std::str::from_utf8;
 
-use anyhow::{anyhow, Result};
-use lsp_types::{ClientCapabilities, Diagnostic, Position, Range};
+use anyhow::Result;
+use lsp_types::{
+    ClientCapabilities, Diagnostic, DidChangeTextDocumentParams, DidOpenTextDocumentParams,
+    DidSaveTextDocumentParams, InitializeParams, Position, Range,
+};
 use serde_json::{from_str, json, Value};
 use tokio::io::{stdin, stdout, AsyncReadExt, AsyncWriteExt};
 
@@ -100,20 +103,10 @@ impl LanguageServer {
             "initialize" => {
                 self.log_message("Brack Language Server is initializing...")
                     .await?;
-                self.client_capabilities = serde_json::from_value(
-                    msg.get("params")
-                        .ok_or_else(|| anyhow!("No params"))?
-                        .get("capabilities")
-                        .ok_or_else(|| anyhow!("No capabilities"))?
-                        .clone(),
-                )?;
 
-                // for debugging
-                // self.log_message(&format!(
-                //     "Client capabilities : {:?}",
-                //     self.client_capabilities
-                // ))
-                // .await?;
+                let parms: InitializeParams =
+                    serde_json::from_value(msg.get("params").unwrap().clone())?;
+                self.client_capabilities = parms.capabilities;
 
                 let response = json!({
                     "jsonrpc": "2.0",
@@ -123,6 +116,7 @@ impl LanguageServer {
                     } }
                 })
                 .to_string();
+
                 self.send_message(&response).await
             }
             _ => self.send_method_not_found_response(id, method).await,
@@ -134,66 +128,70 @@ impl LanguageServer {
     }
 
     async fn handle_notification_text_document_did_open(&self, msg: &Value) -> Result<()> {
-        let text_document = msg
-            .get("params")
-            .ok_or_else(|| anyhow!("No params"))?
-            .get("textDocument")
-            .ok_or_else(|| anyhow!("No textDocument"))?;
-        let uri = text_document
-            .get("uri")
-            .and_then(|uri| uri.as_str())
-            .ok_or_else(|| anyhow!("No uri"))?;
-        let _ = text_document
-            .get("text")
-            .and_then(|text| text.as_str())
-            .ok_or_else(|| anyhow!("No text"))?;
-        self.log_message(&format!("Did open {}", uri)).await?;
+        let parms: DidOpenTextDocumentParams =
+            serde_json::from_value(msg.get("params").unwrap().clone())?;
 
+        let file_path = parms.text_document.uri.to_file_path().unwrap();
+        let uri = file_path.to_str().unwrap();
+
+        self.log_message(&format!("Did open {}", uri)).await?;
         Ok(())
     }
 
     async fn handle_notification_text_document_did_change(&self, msg: &Value) -> Result<()> {
-        let uri = msg
-            .get("params")
-            .ok_or_else(|| anyhow!("No params"))?
-            .get("textDocument")
-            .ok_or_else(|| anyhow!("No textDocument"))?
-            .get("uri")
-            .and_then(|uri| uri.as_str())
-            .ok_or_else(|| anyhow!("No uri"))?;
-        let index = msg
-            .get("params")
-            .ok_or_else(|| anyhow!("No params"))?
-            .get("contentChanges")
-            .and_then(|content_changes| content_changes.as_array())
-            .and_then(|content_changes| content_changes.len().checked_sub(1))
-            .ok_or_else(|| anyhow!("No contentChanges"))?;
-        let _ = msg
-            .get("params")
-            .ok_or_else(|| anyhow!("No params"))?
-            .get("contentChanges")
-            .and_then(|content_changes| content_changes.get(index))
-            .and_then(|content_change| content_change.get("text"))
-            .and_then(|text| text.as_str())
-            .ok_or_else(|| anyhow!("No text"))?;
-        self.log_message(&format!("Did change {}", uri)).await?;
+        let parms: DidChangeTextDocumentParams =
+            serde_json::from_value(msg.get("params").unwrap().clone())?;
 
-        let diagnostics = vec![Diagnostic {
-            range: Range {
-                start: Position {
-                    line: 0,
-                    character: 0,
-                },
-                end: Position {
-                    line: 0,
-                    character: 3,
-                },
-            },
-            message: "This is a test diagnostic message 2!".to_string(),
-            ..Default::default()
-        }];
-        self.log_message(&format!("{:?}", diagnostics)).await?;
-        self.send_publish_diagnostics(uri, &diagnostics).await
+        let file_path = parms.text_document.uri.to_file_path().unwrap();
+        let uri = file_path.to_str().unwrap();
+
+        self.log_message(&format!("Did change {}", uri)).await
+    }
+
+    async fn handle_notification_text_document_did_save(&self, msg: &Value) -> Result<()> {
+        let parms: DidSaveTextDocumentParams =
+            serde_json::from_value(msg.get("params").unwrap().clone())?;
+
+        let file_path = parms.text_document.uri.to_file_path().unwrap();
+        let uri = file_path.to_str().unwrap();
+
+        self.log_message(&format!("Did save {}", uri)).await?;
+
+        let tokens = match brack_tokenizer::tokenize::tokenize(uri) {
+            Ok(tokens) => tokens,
+            Err(e) => return self.log_message(&format!("Error: {:?}", e)).await,
+        };
+
+        match brack_parser::parse::parse(&tokens) {
+            Ok(ast) => {
+                self.log_message(&format!("AST: {:?}", ast)).await?;
+                let diagnostics: Vec<Diagnostic> = vec![];
+                return self
+                    .send_publish_diagnostics(&uri.to_string(), &diagnostics)
+                    .await;
+            }
+            Err(parser_error) => {
+                let location = parser_error.get_location();
+                let message = parser_error.get_message();
+                let diagnostics = vec![Diagnostic {
+                    range: Range {
+                        start: Position {
+                            line: location.start.line as u32,
+                            character: location.end.character as u32,
+                        },
+                        end: Position {
+                            line: location.end.line as u32,
+                            character: location.end.character as u32,
+                        },
+                    },
+                    message,
+                    ..Default::default()
+                }];
+                return self
+                    .send_publish_diagnostics(&uri.to_string(), &diagnostics)
+                    .await;
+            }
+        };
     }
 
     async fn handle_notification(&mut self, msg: &Value, method: &str) -> Result<()> {
@@ -207,6 +205,7 @@ impl LanguageServer {
             "textDocument/didChange" => {
                 self.handle_notification_text_document_did_change(msg).await
             }
+            "textDocument/didSave" => self.handle_notification_text_document_did_save(msg).await,
             _ => Ok(()),
         }
     }

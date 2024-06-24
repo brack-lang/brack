@@ -231,6 +231,8 @@ name = "brack-language-server"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "brack-parser",
+ "brack-tokenizer",
  "lsp-types",
  "serde",
  "serde_json",
