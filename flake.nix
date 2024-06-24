@@ -1,4 +1,6 @@
 {
+  description = "A bracket-based lightweight markup language that extends commands with WebAssembly";
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     rust-overlay = {
@@ -23,39 +25,56 @@
           ];
         };
         toolchain = pkgs.rust-bin.stable.latest.default;
-        rustPlatform = pkgs.makeRustPlatform {
-          rustc = toolchain;
-          cargo = toolchain;
-        };
-      in {
-        devShell = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            alejandra
-            nil
-            toolchain
-            rust-analyzer
+        buildInputsForBuild = with pkgs;
+          [
+            openssl
+            openssl.dev
+          ]
+          ++ pkgs.lib.optional pkgs.stdenv.isDarwin [
+            darwin.Security
+            darwin.apple_sdk.frameworks.SystemConfiguration
           ];
-        };
-        packages.default = rustPlatform.buildRustPackage {
-          src = ./.;
-          copyLibs = true;
-          name = "brack";
-          cargoLock = {
-            lockFile = ./Cargo.lock;
+        nativeBuildInputsForBuild = with pkgs; [pkg-config];
+        customBuildRustCrateForPkgs = pkgs:
+          pkgs.buildRustCrate.override {
+            defaultCrateOverrides =
+              pkgs.defaultCrateOverrides
+              // {
+                brack = attrs: {
+                  buildInputs = buildInputsForBuild;
+                  nativeBuildInputs = nativeBuildInputsForBuild;
+                };
+                brack-plugin-manager = attrs: {
+                  buildInputs = buildInputsForBuild;
+                  nativeBuildInputs = nativeBuildInputsForBuild;
+                };
+              };
           };
-          nativeBuildInputs = with pkgs; [
-            pkg-config
-          ];
+        generatedBuild = pkgs.callPackage ./Cargo.nix {
+          buildRustCrateForPkgs = customBuildRustCrateForPkgs;
+        };
+        workspaceMemberNames = builtins.attrNames generatedBuild.workspaceMembers;
+      in rec {
+        devShells.default = pkgs.mkShell {
           buildInputs = with pkgs;
-            [
-              openssl
-              openssl.dev
-            ]
-            ++ pkgs.lib.optional pkgs.stdenv.isDarwin [
-              darwin.Security
-              darwin.apple_sdk.frameworks.SystemConfiguration
+            buildInputsForBuild
+            ++ nativeBuildInputsForBuild
+            ++ [
+              alejandra
+              nil
+              toolchain
+              rust-analyzer
             ];
         };
+        checks = builtins.listToAttrs (map (name: {
+            name = name;
+            value = generatedBuild.workspaceMembers.${name}.build.override {
+              runTests = true;
+            };
+          })
+          workspaceMemberNames);
+        packages.brack = generatedBuild.workspaceMembers."brack".build;
+        packages.default = packages.brack;
         apps.${system}.default = {
           type = "app";
           program = "${self.packages.default}/bin/brack";
