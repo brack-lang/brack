@@ -8,7 +8,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     flake-utils.url = "github:numtide/flake-utils";
-    crate2nix.url = "github:nix-community/crate2nix";
   };
 
   outputs = {
@@ -16,7 +15,6 @@
     nixpkgs,
     rust-overlay,
     flake-utils,
-    crate2nix,
   }:
     flake-utils.lib.eachDefaultSystem (
       system: let
@@ -27,10 +25,6 @@
           ];
         };
         toolchain = pkgs.rust-bin.stable.latest.default;
-        rustPlatform = pkgs.makeRustPlatform {
-          rustc = toolchain;
-          cargo = toolchain;
-        };
         buildInputsForBuild = with pkgs;
           [
             openssl
@@ -56,7 +50,7 @@
           buildRustCrateForPkgs = customBuildRustCrateForPkgs;
         };
       in rec {
-        devShell = pkgs.mkShell {
+        devShells.default = pkgs.mkShell {
           buildInputs = with pkgs;
             buildInputsForBuild
             ++ nativeBuildInputsForBuild
