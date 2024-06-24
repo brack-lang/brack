@@ -44,11 +44,16 @@
                   buildInputs = buildInputsForBuild;
                   nativeBuildInputs = nativeBuildInputsForBuild;
                 };
+                brack-plugin-manager = attrs: {
+                  buildInputs = buildInputsForBuild;
+                  nativeBuildInputs = nativeBuildInputsForBuild;
+                };
               };
           };
         generatedBuild = pkgs.callPackage ./Cargo.nix {
           buildRustCrateForPkgs = customBuildRustCrateForPkgs;
         };
+        workspaceMemberNames = builtins.attrNames generatedBuild.workspaceMembers;
       in rec {
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs;
@@ -61,11 +66,13 @@
               rust-analyzer
             ];
         };
-        checks = {
-          brack = generatedBuild.workspaceMembers.brack.build.override {
-            runTests = true;
-          };
-        };
+        checks = builtins.listToAttrs (map (name: {
+            name = name;
+            value = generatedBuild.workspaceMembers.${name}.build.override {
+              runTests = true;
+            };
+          })
+          workspaceMemberNames);
         packages.brack = generatedBuild.workspaceMembers."brack".build;
         packages.default = packages.brack;
         apps.${system}.default = {
