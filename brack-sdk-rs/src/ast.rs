@@ -103,13 +103,13 @@ impl AST {
                     }
                 }
                 None
-            },
+            }
             AST::Text(node) => {
                 if node.id == id {
                     return Some(self);
                 }
                 None
-            },
+            }
         }
     }
 }

@@ -1,31 +1,8 @@
 use std::{fs::read_dir, path::Path};
 
 use anyhow::Result;
-use clap::{Parser, Subcommand};
-
-#[derive(Debug, Subcommand)]
-enum SubCommands {
-    #[clap(arg_required_else_help = true)]
-    Compile {
-        #[clap(short, long)]
-        plugins_dir_path: Option<String>,
-
-        #[clap(short, long)]
-        backend: String,
-
-        #[clap(short, long)]
-        filename: String,
-    },
-    Build,
-    LanguageServer,
-    New {
-        #[clap(short, long)]
-        name: String,
-    },
-    Add {
-        schema: String,
-    },
-}
+use brack::sub_commands::SubCommands;
+use clap::Parser;
 
 #[derive(Parser, Debug)]
 struct Args {
