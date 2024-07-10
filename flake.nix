@@ -64,6 +64,7 @@
               nil
               toolchain
               rust-analyzer
+              crate2nix
             ];
         };
         checks = builtins.listToAttrs (map (name: {
