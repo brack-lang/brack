@@ -2,4 +2,3 @@ target*
 .envrc
 .direnv
 result*
-sample-for-debug/*
