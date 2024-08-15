@@ -11,15 +11,7 @@
                     "--features=debug",
                     "--bin=${fileBasenameNoExtension}",
                 ],
-                "filter": {
-                    "name": "debug_compile",
-                    "kind": "bin"
-                }
             },
-            "args": [
-                // Create the document you wish to debug under the sample-for-debug directory.
-                "./sample-for-debug/${input:getFileName}"
-            ],
             "cwd": "${workspaceFolder}"
         },
         {
@@ -194,12 +186,4 @@
             "cwd": "${workspaceFolder}"
         }
     ],
-    "inputs": [
-        {
-            "id": "getFileName",
-            "type": "promptString",
-            "description": "Enter the file name to debug",
-            "default": "main.[]"
-        }
-    ]
 }
