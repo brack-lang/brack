@@ -1,4 +1,4 @@
-# Brack
+# Brack ([EN](./README.md) / JA)
 
 ![](./brack-header.png)
 
@@ -25,13 +25,35 @@ Brackはいくつかのパッケージマネージャを利用してインスト
 
 ### Cargo
 ```sh
-$ cargo install https://github.com/brack-lang/brack
+cargo install --git https://github.com/brack-lang/brack brack
 ```
 
 ### Nix
 ```sh
-$ nix develop github:brack-lang/brack
+nix profile install github:brack-lang/brack
 ```
+
+## ビルド
+BrackをビルドするためにはFlakesを有効にしたNixが必要です。
+
+```sh
+nix build .
+```
+
+## 文法
+3種類のコマンド呼び出し構文が定義されています。
+モジュール名（1つのプラグインに対して1つ定められる）、コマンドの識別子名、引数を用いて、`[module.ident arg1, arg2, ..., argN]`のように記述します。
+`[]`はインラインコマンド、`{}`はブロックコマンドに対応しており、文字列に置換されます。
+また、`<>`はマクロに対応しており、コンパイル時に抽象構文木を異なる抽象構文木に変換することができます。
+
+[std.html](https://github.com/brack-lang/std.html)プラグインを利用して、HTMLに変換されるBrack文章を以下に示します。
+
+```brack
+{std.* Hello, World!}
+こんにちは、これは[std.* Brack]<std.^ WebAssemblyによって拡張可能なマークアップ言語>を使って記述された文章です。
+```
+
+Brackコンパイラ本体には、特定の変換を意味するコマンドは定義されていません。
 
 ## LICENSE
 MIT OR Apache-2.0
