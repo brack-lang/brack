@@ -46,7 +46,7 @@ mod test {
         let parsed = parse(&tokens)?;
         let expected =
             new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
-                vec![new_text("Hello, World!".to_string())],
+                vec![new_text("Hello, World!".to_string(), mock_location())],
             )])]);
         assert_ast_eq(&parsed, &expected);
         Ok(())
@@ -68,10 +68,16 @@ mod test {
         let expected =
             new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
                 vec![
-                    new_text("Hello, ".to_string()),
+                    new_text("Hello, ".to_string(), mock_location()),
                     new_square_with_children(vec![
-                        new_ident(vec![new_text("std".to_string()), new_text("*".to_string())]),
-                        new_expr_with_children(vec![new_text("World!".to_string())]),
+                        new_ident(vec![
+                            new_text("std".to_string(), mock_location()),
+                            new_text("*".to_string(), mock_location()),
+                        ]),
+                        new_expr_with_children(vec![new_text(
+                            "World!".to_string(),
+                            mock_location(),
+                        )]),
                     ]),
                 ],
             )])]);
@@ -95,11 +101,15 @@ mod test {
         let parsed = parse(&tokens)?;
         let expected = new_document_with_children(vec![
             new_stmt_with_children(vec![new_curly_with_children(vec![
-                new_ident(vec![new_text("std".to_string()), new_text("*".to_string())]),
-                new_expr_with_children(vec![new_text("Heading".to_string())]),
+                new_ident(vec![
+                    new_text("std".to_string(), mock_location()),
+                    new_text("*".to_string(), mock_location()),
+                ]),
+                new_expr_with_children(vec![new_text("Heading".to_string(), mock_location())]),
             ])]),
             new_stmt_with_children(vec![new_expr_with_children(vec![new_text(
                 "Hello, World!".to_string(),
+                mock_location(),
             )])]),
         ]);
         assert_ast_eq(&parsed, &expected);
@@ -122,10 +132,16 @@ mod test {
         let expected =
             new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
                 vec![
-                    new_text("Hello, ".to_string()),
+                    new_text("Hello, ".to_string(), mock_location()),
                     new_angle_with_children(vec![
-                        new_ident(vec![new_text("std".to_string()), new_text("*".to_string())]),
-                        new_expr_with_children(vec![new_text("World!".to_string())]),
+                        new_ident(vec![
+                            new_text("std".to_string(), mock_location()),
+                            new_text("*".to_string(), mock_location()),
+                        ]),
+                        new_expr_with_children(vec![new_text(
+                            "World!".to_string(),
+                            mock_location(),
+                        )]),
                     ]),
                 ],
             )])]);
@@ -151,11 +167,20 @@ mod test {
         let expected =
             new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
                 vec![
-                    new_text("Hello, ".to_string()),
+                    new_text("Hello, ".to_string(), mock_location()),
                     new_square_with_children(vec![
-                        new_ident(vec![new_text("std".to_string()), new_text("@".to_string())]),
-                        new_expr_with_children(vec![new_text("World!".to_string())]),
-                        new_expr_with_children(vec![new_text("https://example.com/".to_string())]),
+                        new_ident(vec![
+                            new_text("std".to_string(), mock_location()),
+                            new_text("@".to_string(), mock_location()),
+                        ]),
+                        new_expr_with_children(vec![new_text(
+                            "World!".to_string(),
+                            mock_location(),
+                        )]),
+                        new_expr_with_children(vec![new_text(
+                            "https://example.com/".to_string(),
+                            mock_location(),
+                        )]),
                     ]),
                 ],
             )])]);
@@ -186,14 +211,24 @@ mod test {
         let expected =
             new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
                 vec![
-                    new_text("Hello, ".to_string()),
+                    new_text("Hello, ".to_string(), mock_location()),
                     new_square_with_children(vec![
-                        new_ident(vec![new_text("std".to_string()), new_text("*".to_string())]),
+                        new_ident(vec![
+                            new_text("std".to_string(), mock_location()),
+                            new_text("*".to_string(), mock_location()),
+                        ]),
                         new_expr_with_children(vec![new_square_with_children(vec![
-                            new_ident(vec![new_text("std".to_string()), new_text("@".to_string())]),
-                            new_expr_with_children(vec![new_text("World!".to_string())]),
+                            new_ident(vec![
+                                new_text("std".to_string(), mock_location()),
+                                new_text("@".to_string(), mock_location()),
+                            ]),
+                            new_expr_with_children(vec![new_text(
+                                "World!".to_string(),
+                                mock_location(),
+                            )]),
                             new_expr_with_children(vec![new_text(
                                 "https://example.com/".to_string(),
+                                mock_location(),
                             )]),
                         ])]),
                     ]),
@@ -234,25 +269,35 @@ mod test {
         let parsed = parse(&tokens)?;
         let expected = new_document_with_children(vec![
             new_stmt_with_children(vec![
-                new_expr_with_children(vec![new_text("Hello,".to_string())]),
-                new_expr_with_children(vec![new_text("World,".to_string())]),
+                new_expr_with_children(vec![new_text("Hello,".to_string(), mock_location())]),
+                new_expr_with_children(vec![new_text("World,".to_string(), mock_location())]),
             ]),
             new_stmt_with_children(vec![new_curly_with_children(vec![
                 new_ident(vec![
-                    new_text("std".to_string()),
-                    new_text("**".to_string()),
+                    new_text("std".to_string(), mock_location()),
+                    new_text("**".to_string(), mock_location()),
                 ]),
-                new_expr_with_children(vec![new_text("Contact".to_string())]),
+                new_expr_with_children(vec![new_text("Contact".to_string(), mock_location())]),
             ])]),
             new_stmt_with_children(vec![new_expr_with_children(vec![
                 new_square_with_children(vec![
-                    new_ident(vec![new_text("std".to_string()), new_text("@".to_string())]),
-                    new_expr_with_children(vec![new_text("My website".to_string())]),
-                    new_expr_with_children(vec![new_text("https://example.com/".to_string())]),
+                    new_ident(vec![
+                        new_text("std".to_string(), mock_location()),
+                        new_text("@".to_string(), mock_location()),
+                    ]),
+                    new_expr_with_children(vec![new_text(
+                        "My website".to_string(),
+                        mock_location(),
+                    )]),
+                    new_expr_with_children(vec![new_text(
+                        "https://example.com/".to_string(),
+                        mock_location(),
+                    )]),
                 ]),
             ])]),
             new_stmt_with_children(vec![new_expr_with_children(vec![new_text(
                 "2023.12.28".to_string(),
+                mock_location(),
             )])]),
         ]);
         assert_ast_eq(&parsed, &expected);

@@ -1,3 +1,4 @@
+use brack_tokenizer::tokens::{marge_location, mock_location, Location};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -5,12 +6,14 @@ use uuid::Uuid;
 pub struct InnerNode {
     pub id: String,
     pub children: Vec<AST>,
+    pub location: Location,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct LeafNode {
     pub id: String,
     pub value: String,
+    pub location: Location,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
@@ -64,9 +67,7 @@ impl AST {
             AST::Text(leaf) => leaf.id.clone(),
         }
     }
-}
 
-impl AST {
     pub fn add(&mut self, ast: AST) -> () {
         match self {
             AST::Document(node)
@@ -76,7 +77,18 @@ impl AST {
             | AST::Square(node)
             | AST::Curly(node)
             | AST::Identifier(node) => {
-                node.children.push(ast);
+                node.children.push(ast.clone());
+                let location_children = match ast {
+                    AST::Document(inner)
+                    | AST::Stmt(inner)
+                    | AST::Expr(inner)
+                    | AST::Angle(inner)
+                    | AST::Square(inner)
+                    | AST::Curly(inner)
+                    | AST::Identifier(inner) => inner.location,
+                    AST::Text(leaf) => leaf.location,
+                };
+                node.location = marge_location(&node.location, &location_children);
             }
             AST::Text(_) => {
                 panic!("Cannot add child to leaf node");
@@ -113,17 +125,41 @@ impl AST {
     }
 }
 
+fn marge_all_locations(asts: &Vec<AST>) -> Location {
+    let mut location = mock_location();
+    for ast in asts {
+        match ast {
+            AST::Document(inner)
+            | AST::Stmt(inner)
+            | AST::Expr(inner)
+            | AST::Angle(inner)
+            | AST::Square(inner)
+            | AST::Curly(inner)
+            | AST::Identifier(inner) => {
+                location = marge_location(&location, &inner.location);
+            }
+            AST::Text(leaf) => {
+                location = marge_location(&location, &leaf.location);
+            }
+        }
+    }
+    location
+}
+
 pub fn new_document() -> AST {
     AST::Document(InnerNode {
         id: Uuid::new_v4().to_string(),
         children: vec![],
+        location: mock_location(),
     })
 }
 
 pub fn new_document_with_children(children: Vec<AST>) -> AST {
+    let location = marge_all_locations(&children);
     AST::Document(InnerNode {
         id: Uuid::new_v4().to_string(),
         children,
+        location,
     })
 }
 
@@ -131,13 +167,16 @@ pub fn new_stmt() -> AST {
     AST::Stmt(InnerNode {
         id: Uuid::new_v4().to_string(),
         children: vec![],
+        location: mock_location(),
     })
 }
 
 pub fn new_stmt_with_children(children: Vec<AST>) -> AST {
+    let location = marge_all_locations(&children);
     AST::Stmt(InnerNode {
         id: Uuid::new_v4().to_string(),
         children,
+        location,
     })
 }
 
@@ -145,13 +184,16 @@ pub fn new_expr() -> AST {
     AST::Expr(InnerNode {
         id: Uuid::new_v4().to_string(),
         children: vec![],
+        location: mock_location(),
     })
 }
 
 pub fn new_expr_with_children(children: Vec<AST>) -> AST {
+    let location = marge_all_locations(&children);
     AST::Expr(InnerNode {
         id: Uuid::new_v4().to_string(),
         children,
+        location,
     })
 }
 
@@ -159,13 +201,16 @@ pub fn new_angle() -> AST {
     AST::Angle(InnerNode {
         id: Uuid::new_v4().to_string(),
         children: vec![],
+        location: mock_location(),
     })
 }
 
 pub fn new_angle_with_children(children: Vec<AST>) -> AST {
+    let location = marge_all_locations(&children);
     AST::Angle(InnerNode {
         id: Uuid::new_v4().to_string(),
         children,
+        location,
     })
 }
 
@@ -173,13 +218,16 @@ pub fn new_curly() -> AST {
     AST::Curly(InnerNode {
         id: Uuid::new_v4().to_string(),
         children: vec![],
+        location: mock_location(),
     })
 }
 
 pub fn new_curly_with_children(children: Vec<AST>) -> AST {
+    let location = marge_all_locations(&children);
     AST::Curly(InnerNode {
         id: Uuid::new_v4().to_string(),
         children,
+        location,
     })
 }
 
@@ -187,27 +235,33 @@ pub fn new_square() -> AST {
     AST::Square(InnerNode {
         id: Uuid::new_v4().to_string(),
         children: vec![],
+        location: mock_location(),
     })
 }
 
 pub fn new_square_with_children(children: Vec<AST>) -> AST {
+    let location = marge_all_locations(&children);
     AST::Square(InnerNode {
         id: Uuid::new_v4().to_string(),
         children,
+        location,
     })
 }
 
 pub fn new_ident(children: Vec<AST>) -> AST {
+    let location = marge_all_locations(&children);
     AST::Identifier(InnerNode {
         id: Uuid::new_v4().to_string(),
         children,
+        location,
     })
 }
 
-pub fn new_text(value: String) -> AST {
+pub fn new_text(value: String, location: Location) -> AST {
     AST::Text(LeafNode {
         id: Uuid::new_v4().to_string(),
         value,
+        location,
     })
 }
 
