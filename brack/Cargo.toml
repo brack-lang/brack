@@ -19,6 +19,4 @@ toml = "0.8.14"
 
 [dependencies.clap]
 version = "4.5.7"
-features = [
-    "derive",
-]
+features = ["derive"]
