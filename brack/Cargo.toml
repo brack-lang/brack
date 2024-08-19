@@ -12,7 +12,7 @@ brack-expander = { git = "https://github.com/brack-lang/brack", package = "brack
 brack-language-server = { git = "https://github.com/brack-lang/brack", package = "brack-language-server" }
 brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
 brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
-brack-plugin-manager = { git = "https://github.com/brack-lang/brack", package = "brack-plugin-manager" }
+brack-project-manager = { git = "https://github.com/brack-lang/brack", package = "brack-project-manager" }
 brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
 tokio = { version = "1", features = ["full"] }
 toml = "0.8.14"

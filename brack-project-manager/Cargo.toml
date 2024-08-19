@@ -1,5 +1,5 @@
 [package]
-name = "brack-plugin-manager"
+name = "brack-project-manager"
 version = "0.1.0"
 edition = "2021"
 

@@ -204,7 +204,7 @@ dependencies = [
  "brack-language-server",
  "brack-parser",
  "brack-plugin",
- "brack-plugin-manager",
+ "brack-project-manager",
  "brack-tokenizer",
  "clap",
  "extism",
@@ -275,7 +275,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "brack-plugin-manager"
+name = "brack-project-manager"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -1069,26 +1069,7 @@ dependencies = [
  "futures-core",
  "futures-sink",
  "futures-util",
- "http 0.2.12",
- "indexmap 2.4.0",
- "slab",
- "tokio",
- "tokio-util",
- "tracing",
-]
-
-[[package]]
-name = "h2"
-version = "0.4.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa82e28a107a8cc405f0839610bdc9b15f1e25ec7d696aa5cf173edbcb1486ab"
-dependencies = [
- "atomic-waker",
- "bytes",
- "fnv",
- "futures-core",
- "futures-sink",
- "http 1.1.0",
+ "http",
  "indexmap 2.4.0",
  "slab",
  "tokio",
@@ -2689,21 +2670,6 @@ dependencies = [
  "serde_spanned",
  "toml_datetime",
  "winnow 0.6.18",
-]
-
-[[package]]
-name = "tower"
-version = "0.4.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8fa9be0de6cf49e536ce1851f987bd21a43b771b09473c3549a6c853db37c1c"
-dependencies = [
- "futures-core",
- "futures-util",
- "pin-project",
- "pin-project-lite",
- "tokio",
- "tower-layer",
- "tower-service",
 ]
 
 [[package]]

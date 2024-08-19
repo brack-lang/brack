@@ -1,6 +1,6 @@
 use anyhow::Result;
 use brack_plugin::plugin::Plugins;
-use brack_plugin_manager::add_plugin::{Config, Plugin};
+use brack_project_manager::add_plugin::{Config, Plugin};
 use futures::future::join_all;
 use reqwest;
 use std::fs;
