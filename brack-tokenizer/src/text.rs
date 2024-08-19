@@ -10,7 +10,7 @@ pub fn tokenize(t: &Tokenizer) -> Vec<Token> {
     let (_, tail) = separate(&s);
 
     let mut tokens = t.tokens.clone().unwrap_or_default();
-    tokens.push(Token::AngleBracketOpen(Location {
+    tokens.push(Token::Dot(Location {
         start: LocationData {
             line: t.line.unwrap_or_default(),
             character: t.column.unwrap_or_default(),

@@ -7,11 +7,13 @@ use crate::{
 
 pub fn tokenize(t: &Tokenizer) -> Vec<Token> {
     let s = t.untreated.clone().unwrap_or_default();
-    let (_, tail) = separate(&s);
+    let (head, _) = separate(&s);
+    let mut pool = t.pool.clone().unwrap_or_default();
+    pool.push_str(&head);
 
     let mut tokens = t.tokens.clone().unwrap_or_default();
     tokens.push(Token::Ident(
-        t.pool.clone().unwrap_or_default(),
+        pool,
         Location {
             start: LocationData {
                 line: t.token_start_line.unwrap_or_default(),
@@ -26,9 +28,8 @@ pub fn tokenize(t: &Tokenizer) -> Vec<Token> {
 
     let column = t.column.unwrap_or_default();
     let t2 = Tokenizer {
-        column: Some(column + 1),
-        token_start_column: Some(column + 1),
-        untreated: Some(tail),
+        column: Some(column),
+        token_start_column: Some(column),
         pool: Some(String::new()),
         tokens: Some(tokens),
         looking_for_identifier: Some(false),
