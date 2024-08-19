@@ -3,14 +3,20 @@ use crate::{
     tokens::{Location, LocationData, Token},
 };
 
-pub fn separate(s: &str) -> (char, String) {
-    if s == "" {
-        return ('\0', String::new());
+use unicode_segmentation::UnicodeSegmentation;
+
+pub fn separate(s: &str) -> (String, String) {
+    let graphemes = s.graphemes(true);
+    match graphemes.count() {
+        0 => ('\0'.to_string(), String::new()),
+        1 => (s.graphemes(true).nth(0).unwrap().to_string(), String::new()),
+        _ => {
+            let mut graphemes = s.graphemes(true);
+            let head = graphemes.next().unwrap().to_string();
+            let tail = graphemes.collect::<String>();
+            (head, tail)
+        }
     }
-    if s.len() == 1 {
-        return (s.chars().next().unwrap(), String::new());
-    }
-    return (s.chars().next().unwrap(), s[1..].to_string());
 }
 
 pub fn take_text_token_from_pool(t: &Tokenizer, strip: bool) -> Option<(Tokenizer, Token)> {

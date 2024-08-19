@@ -1,31 +1,8 @@
 use std::{fs::read_dir, path::Path};
 
 use anyhow::Result;
-use clap::{Parser, Subcommand};
-
-#[derive(Debug, Subcommand)]
-enum SubCommands {
-    #[clap(arg_required_else_help = true)]
-    Compile {
-        #[clap(short, long)]
-        plugins_dir_path: Option<String>,
-
-        #[clap(short, long)]
-        backend: String,
-
-        #[clap(short, long)]
-        filename: String,
-    },
-    Build,
-    LanguageServer,
-    New {
-        #[clap(short, long)]
-        name: String,
-    },
-    Add {
-        schema: String,
-    },
-}
+use brack::sub_commands::SubCommands;
+use clap::Parser;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -73,7 +50,7 @@ fn run_compile(subcommand: SubCommands) -> Result<()> {
         anyhow::bail!("Filename must end with .[]");
     }
 
-    let tokenized = brack_tokenizer::tokenize::tokenize(args.2)?;
+    let tokenized = brack_tokenizer::tokenize::tokenize(&args.2)?;
     let parsed = brack_parser::parse::parse(&tokenized)?;
     let expanded = brack_expander::expand::expander(&parsed, &mut plugins)?;
     let gen = brack_codegen::generate::generate(&expanded, &mut plugins)?;
@@ -176,7 +153,10 @@ async fn main() -> Result<()> {
     match args.subcommand {
         SubCommands::Build => build()?,
         SubCommands::Compile { .. } => run_compile(args.subcommand)?,
-        SubCommands::LanguageServer => brack_language_server::server::run().await?,
+        SubCommands::LanguageServer => {
+            let mut language_server = brack_language_server::server::LanguageServer::new();
+            language_server.run().await?;
+        }
         SubCommands::New { name } => new_project(&name)?,
         SubCommands::Add { schema } => {
             brack_plugin_manager::add_plugin::add_plugin(&schema).await?

@@ -1,10 +1,10 @@
 use anyhow::Result;
 use brack_tokenizer::tokens::{mock_location, Token};
 
-use crate::{ast::AST, expr, utils::consume_by_kind};
+use crate::{ast::AST, error::ParserError, expr, utils::consume_by_kind};
 
 // expr ("," expr)*
-pub fn parse(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
+pub fn parse(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>), ParserError> {
     let mut new_tokens = tokens.clone();
     let mut result = vec![];
 

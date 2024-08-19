@@ -1,55 +1,80 @@
 {
+  description = "A bracket-based lightweight markup language that extends commands with WebAssembly";
+
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/23.11";
-    fenix = {
-      url = "github:nix-community/fenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    naersk = {
-      url = "github:nix-community/naersk";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     flake-utils.url = "github:numtide/flake-utils";
-    flake-compat = {
-      url = "github:edolstra/flake-compat";
-      flake = false;
-    };
   };
-  outputs = { self, nixpkgs, fenix, naersk, flake-utils, flake-compat, ... }:
+
+  outputs = {
+    self,
+    nixpkgs,
+    rust-overlay,
+    flake-utils,
+  }:
     flake-utils.lib.eachDefaultSystem (
       system: let
-        overlays = [
-          (_: super: let pkgs = fenix.inputs.nixpkgs.legacyPackages.${super.system}; in fenix.overlays.default pkgs pkgs)
-        ];
         pkgs = import nixpkgs {
-          inherit system overlays;
+          inherit system;
+          overlays = [
+            (import rust-overlay)
+          ];
         };
-        naersk' = pkgs.callPackage naersk {};
-      in {
-        devShell = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            nil
-            pkg-config
+        toolchain = pkgs.rust-bin.stable.latest.default;
+        buildInputsForBuild = with pkgs;
+          [
             openssl
-            glib
-            libiconv
+            openssl.dev
+          ]
+          ++ pkgs.lib.optional pkgs.stdenv.isDarwin [
             darwin.Security
             darwin.apple_sdk.frameworks.SystemConfiguration
-            (fenix.packages.${system}.complete.withComponents [
-              "cargo"
-              "clippy"
-              "rust-src"
-              "rustc"
-              "rustfmt"
-            ])
-            rust-analyzer-nightly
           ];
-          RUST_SRC_PATH = "${fenix.packages.${system}.complete.rust-src}/lib/rustlib/src/rust/library";
-          PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
+        nativeBuildInputsForBuild = with pkgs; [pkg-config];
+        customBuildRustCrateForPkgs = pkgs:
+          pkgs.buildRustCrate.override {
+            defaultCrateOverrides =
+              pkgs.defaultCrateOverrides
+              // {
+                brack = attrs: {
+                  buildInputs = buildInputsForBuild;
+                  nativeBuildInputs = nativeBuildInputsForBuild;
+                };
+                brack-plugin-manager = attrs: {
+                  buildInputs = buildInputsForBuild;
+                  nativeBuildInputs = nativeBuildInputsForBuild;
+                };
+              };
+          };
+        generatedBuild = pkgs.callPackage ./Cargo.nix {
+          buildRustCrateForPkgs = customBuildRustCrateForPkgs;
         };
-        packages.default = naersk'.buildPackage {
-          src = ./.;
+        workspaceMemberNames = builtins.attrNames generatedBuild.workspaceMembers;
+      in rec {
+        devShells.default = pkgs.mkShell {
+          buildInputs = with pkgs;
+            buildInputsForBuild
+            ++ nativeBuildInputsForBuild
+            ++ [
+              alejandra
+              nil
+              toolchain
+              rust-analyzer
+            ];
         };
+        checks = builtins.listToAttrs (map (name: {
+            name = name;
+            value = generatedBuild.workspaceMembers.${name}.build.override {
+              runTests = true;
+            };
+          })
+          workspaceMemberNames);
+        packages.brack = generatedBuild.workspaceMembers."brack".build;
+        packages.default = packages.brack;
         apps.${system}.default = {
           type = "app";
           program = "${self.packages.default}/bin/brack";

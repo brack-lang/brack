@@ -6,19 +6,17 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.79"
-brack-codegen = { path = "../brack-codegen" }
-brack-expander = { path = "../brack-expander" }
-brack-language-server = { path = "../brack-language-server" }
-brack-parser = { path = "../brack-parser" }
-brack-plugin = { path = "../brack-plugin" }
-brack-plugin-manager = { path = "../brack-plugin-manager" }
-brack-tokenizer = { path = "../brack-tokenizer" }
+anyhow = "1.0.86"
+brack-codegen = { git = "https://github.com/brack-lang/brack", package = "brack-codegen" }
+brack-expander = { git = "https://github.com/brack-lang/brack", package = "brack-expander" }
+brack-language-server = { git = "https://github.com/brack-lang/brack", package = "brack-language-server" }
+brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
+brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
+brack-plugin-manager = { git = "https://github.com/brack-lang/brack", package = "brack-plugin-manager" }
+brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
 tokio = { version = "1", features = ["full"] }
-toml = "0.8.8"
+toml = "0.8.14"
 
 [dependencies.clap]
-version = "4.4.12"
-features = [
-    "derive",
-]
+version = "4.5.7"
+features = ["derive"]

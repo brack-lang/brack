@@ -1,6 +1,7 @@
 use anyhow::Result;
 use brack_parser::ast::AST;
-use brack_plugin::plugin::{PluginMacroArgument, Plugins};
+use brack_plugin::plugin::Plugins;
+use brack_sdk_rs::Type;
 use extism::convert::Json;
 
 fn expand_angle(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<AST> {
@@ -31,17 +32,18 @@ fn expand_angle(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<A
         break;
     }
 
-    let plugin_argument = PluginMacroArgument {
-        ast: overall_ast.clone(),
-        uuid: ast.id(),
-    };
-    let plugin = plugins.get_mut(&module_name).ok_or_else(|| {
-        anyhow::anyhow!("Module '{}' not found during angle expansion.", module_name)
-    })?;
-    let res =
-        plugin.call::<Json<PluginMacroArgument>, Json<AST>>(&ident_name, Json(plugin_argument))?;
+    let (plugin, plugin_metadata_map) = plugins
+        .get_mut(&module_name)
+        .ok_or_else(|| anyhow::anyhow!("Module {} not found", module_name))?;
+    let plugin_metadata = plugin_metadata_map
+        .get(&(ident_name.clone(), Type::TAST))
+        .ok_or_else(|| anyhow::anyhow!("Command {} not found", ident_name))?;
+    let Json(res) = plugin.call::<Json<(AST, String)>, Json<AST>>(
+        &plugin_metadata.call_name,
+        Json((overall_ast.clone(), ast.id())),
+    )?;
 
-    Ok(res.0)
+    Ok(res)
 }
 
 fn expand_other(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<AST> {

@@ -6,17 +6,21 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.79"
-brack-tokenizer = { path = "../brack-tokenizer" }
-serde = { versopm = "1.0.195", features = ["derive"] }
-serde_json = "1.0.111"
-thiserror = "1.0.56"
+anyhow = "1.0.86"
+brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
+serde = { version = "1.0.203", features = ["derive"] }
+serde_json = "1.0.117"
+thiserror = "1.0.61"
 
 [dependencies.uuid]
-version = "1.6.1"
-features = [
-    "v4",
-    "fast-rng",
-    "macro-diagnostics",
-    "serde",
-]
+version = "1.9.0"
+features = ["v4", "fast-rng", "macro-diagnostics", "serde"]
+
+[features]
+default = []
+debug = []
+
+[[bin]]
+name = "debug_compile"
+path = "src/debug/debug_compile.rs"
+required-features = ["debug"]

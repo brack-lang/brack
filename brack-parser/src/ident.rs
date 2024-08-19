@@ -1,53 +1,47 @@
 use anyhow::Result;
 use brack_tokenizer::tokens::{mock_location, Token};
 
+use crate::error::{DocumentError, ParseTerminationError, ParserError};
 use crate::{
-    ast::{new_ident, new_text, AST},
-    error::ParserError,
+    ast::{new_ident, new_text},
+    parser::Parser,
     utils::consume_by_kind,
 };
 
 // text "." text
-pub fn parse(tokens: &Vec<Token>) -> Result<(AST, Vec<Token>)> {
+pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
     let mut result = new_ident(vec![]);
 
-    let new_tokens = if let Token::Module(i, _) = tokens.first().ok_or_else(|| {
-        anyhow::anyhow!(ParserError::new(
-            "Could not parse ident.".to_string(),
-            tokens.first().unwrap().clone(),
-        ))
-    })? {
-        result.add(new_text(i.to_string()))?;
+    let new_tokens = if let Token::Module(i, location) = tokens
+        .first()
+        .ok_or_else(|| ParseTerminationError::TokenNotFound(mock_location()))?
+    {
+        result.add(new_text(i.to_string(), location.clone()));
         tokens[1..].to_vec()
     } else {
-        return Err(anyhow::anyhow!(ParserError::new(
-            "Could not parse ident.".to_string(),
-            tokens.first().unwrap().clone(),
-        )));
+        return Err(
+            ParseTerminationError::MokuleNotFound(tokens.first().unwrap().get_location()).into(),
+        );
     };
 
     let (consumed, new_tokens_from_dot) = consume_by_kind(&new_tokens, Token::Dot(mock_location()));
     if !consumed {
-        return Err(anyhow::anyhow!(ParserError::new(
-            "".to_string(),
-            new_tokens.first().unwrap().clone(),
-        )));
+        return Err(
+            ParseTerminationError::DotNotFound(new_tokens.first().unwrap().get_location()).into(),
+        );
     }
     let new_tokens = new_tokens_from_dot;
 
-    let new_tokens = if let Token::Ident(i, _) = new_tokens.first().ok_or_else(|| {
-        anyhow::anyhow!(ParserError::new(
-            "Could not parse ident.".to_string(),
-            new_tokens.first().unwrap().clone(),
-        ))
-    })? {
-        result.add(new_text(i.to_string()))?;
+    let new_tokens = if let Token::Ident(i, location) = new_tokens
+        .first()
+        .ok_or_else(|| DocumentError::IdentifierNotFound(mock_location()))?
+    {
+        result.add(new_text(i.to_string(), location.clone()));
         (new_tokens.clone())[1..].to_vec()
     } else {
-        return Err(anyhow::anyhow!(ParserError::new(
-            "Could not parse ident.".to_string(),
-            new_tokens.first().unwrap().clone(),
-        )));
+        return Err(
+            DocumentError::IdentifierNotFound(new_tokens.first().unwrap().get_location()).into(),
+        );
     };
 
     Ok((result, new_tokens))

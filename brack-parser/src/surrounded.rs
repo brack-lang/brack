@@ -1,10 +1,11 @@
+use crate::ast::AST;
 use anyhow::Result;
 use brack_tokenizer::tokens::Token;
 
-use crate::{arguments, ast::AST, error::ParserError, ident};
+use crate::{arguments, error::ParserError, ident};
 
 // ident (expr ("," expr)*)?
-pub fn parse(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
+pub fn parse(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>), ParserError> {
     let mut new_tokens = tokens.clone();
     let mut result = vec![];
 
@@ -14,13 +15,6 @@ pub fn parse(tokens: &Vec<Token>) -> Result<(Vec<AST>, Vec<Token>)> {
             new_tokens = tokens;
         }
         Err(e) => return Err(e),
-    }
-
-    if let Token::CurlyBracketOpen(_) = new_tokens.first().unwrap() {
-        return Err(anyhow::anyhow!(ParserError::new(
-            "Curly Brackets is not allowed in Square Brackets or Angle Brackets.".to_string(),
-            new_tokens.first().unwrap().clone(),
-        )));
     }
 
     if let Ok((asts, tokens)) = arguments::parse(&new_tokens) {
