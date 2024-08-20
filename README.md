@@ -56,5 +56,5 @@ Hello, this is a document written using [std.* Brack]<std.^ a markup language ex
 No commands for specific transformations are defined in the core Brack compiler.
 
 ## License
-MIR OR Apache-2.0
+MIT OR Apache-2.0
 
