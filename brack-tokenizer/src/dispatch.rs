@@ -29,29 +29,45 @@ pub fn dispatch(t: &Tokenizer) -> Result<Vec<Token>> {
             .tokens
             .clone()
             .ok_or_else(|| anyhow::anyhow!("`t.tokens` is not set"))?;
+        let line = t
+            .line
+            .ok_or_else(|| anyhow::anyhow!("`t.line` is not set"))?;
+        let column = t
+            .column
+            .ok_or_else(|| anyhow::anyhow!("`t.column` is not set"))?;
         tokens.push(Token::EOF(Location {
             start: LocationData {
-                line: t.line.unwrap_or_default(),
-                character: t.column.unwrap_or_default(),
+                line,
+                character: column,
             },
             end: LocationData {
-                line: t.line.unwrap_or_default(),
-                character: t.column.unwrap_or_default(),
+                line,
+                character: column,
             },
         }));
         return Ok(tokens);
     }
 
-    if t.escaped.unwrap_or_default() {
+    if t.escaped
+        .ok_or_else(|| anyhow::anyhow!("`t.escaped` is not set"))?
+    {
         return escape::tokenize(t);
     }
 
     let (head2, _) = separate(&tail);
 
-    let angle_c = t.angle_nest_count.unwrap_or_default();
-    let curly_c = t.curly_nest_count.unwrap_or_default();
-    let square_c = t.square_nest_count.unwrap_or_default();
-    let look_for_ident = t.looking_for_identifier.unwrap_or_default();
+    let angle_c = t
+        .angle_nest_count
+        .ok_or_else(|| anyhow::anyhow!("`t.angle_nest_count` is not set"))?;
+    let curly_c = t
+        .curly_nest_count
+        .ok_or_else(|| anyhow::anyhow!("`t.curly_nest_count` is not set"))?;
+    let square_c = t
+        .square_nest_count
+        .ok_or_else(|| anyhow::anyhow!("`t.square_nest_count` is not set"))?;
+    let look_for_ident = t
+        .looking_for_identifier
+        .ok_or_else(|| anyhow::anyhow!("`t.looking_for_identifier` is not set"))?;
     let nested = (angle_c + curly_c + square_c) > 0;
     match (&head[..], &head2[..]) {
         ("\\", _) => backslash::tokenize(t),
