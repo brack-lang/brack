@@ -1,4 +1,5 @@
-use crate::add_plugin::{Config, Plugin};
+use crate::config::Config;
+use crate::plugin::Plugin;
 use anyhow::Result;
 use brack_plugin::plugin::Plugins;
 use futures::future::join_all;

@@ -1,3 +1,4 @@
+use crate::config::Config;
 use core::fmt;
 use std::{collections::HashMap, fs::File, io, path::Path};
 
@@ -7,19 +8,6 @@ use serde::{
     ser::SerializeStruct,
     Deserialize, Deserializer, Serialize, Serializer,
 };
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Config {
-    pub document: Document,
-    pub plugins: Option<HashMap<String, Plugin>>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Document {
-    pub name: String,
-    pub version: String,
-    pub backend: String,
-}
 
 #[derive(Debug)]
 pub enum Plugin {

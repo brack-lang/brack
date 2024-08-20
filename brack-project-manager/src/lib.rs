@@ -1,2 +1,4 @@
-pub mod add_plugin;
+pub mod config;
+pub mod document;
+pub mod plugin;
 pub mod project;

@@ -90,7 +90,7 @@ fn build() -> Result<()> {
         anyhow::bail!("Brack.toml is not found.");
     }
 
-    let config: brack_project_manager::add_plugin::Config =
+    let config: brack_project_manager::config::Config =
         toml::from_str(&std::fs::read_to_string("Brack.toml")?)?;
     let backend = config.document.backend;
 
@@ -158,9 +158,7 @@ async fn main() -> Result<()> {
             language_server.run().await?;
         }
         SubCommands::New { name } => new_project(&name)?,
-        SubCommands::Add { schema } => {
-            brack_project_manager::add_plugin::add_plugin(&schema).await?
-        }
+        SubCommands::Add { schema } => brack_project_manager::plugin::add_plugin(&schema).await?,
     }
     Ok(())
 }
