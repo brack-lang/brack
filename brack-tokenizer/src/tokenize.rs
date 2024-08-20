@@ -28,7 +28,7 @@ mod tests {
     fn test_split_no_commands() -> Result<()> {
         let pwd = std::env::current_dir()?;
         let uri = pwd
-            .join("text/split_no_commands.[]")
+            .join("../assets/split_no_commands.[]")
             .to_string_lossy()
             .to_string();
         let tokens = tokenize(uri.clone())?;
@@ -67,7 +67,7 @@ mod tests {
     fn test_split_commands_with_an_argument_includes_square_brackets() -> Result<()> {
         let pwd = std::env::current_dir()?;
         let uri = pwd
-            .join("text/split_commands_with_an_argument_includes_square_brackets.[]")
+            .join("../assets/split_commands_with_an_argument_includes_square_brackets.[]")
             .to_string_lossy()
             .to_string();
         let tokens = tokenize(uri.clone())?;
@@ -175,7 +175,7 @@ mod tests {
     fn test_split_commands_with_an_argument_includes_curly_brackets() -> Result<()> {
         let pwd = std::env::current_dir()?;
         let uri = pwd
-            .join("text/split_commands_with_an_argument_includes_curly_brackets.[]")
+            .join("../assets/split_commands_with_an_argument_includes_curly_brackets.[]")
             .to_string_lossy()
             .to_string();
         let tokens = tokenize(uri.clone())?;
@@ -283,7 +283,7 @@ mod tests {
     fn test_split_commands_with_an_argument_includes_angle_brackets() -> Result<()> {
         let pwd = std::env::current_dir()?;
         let uri = pwd
-            .join("text/split_commands_with_an_argument_includes_angle_brackets.[]")
+            .join("../assets/split_commands_with_an_argument_includes_angle_brackets.[]")
             .to_string_lossy()
             .to_string();
         let tokens = tokenize(uri.clone())?;
@@ -368,7 +368,7 @@ mod tests {
     fn test_split_commands_with_two_arguments_includes_square_brackets() -> Result<()> {
         let pwd = std::env::current_dir()?;
         let uri = pwd
-            .join("text/split_commands_with_two_arguments_includes_square_brackets.[]")
+            .join("../assets/split_commands_with_two_arguments_includes_square_brackets.[]")
             .to_string_lossy()
             .to_string();
         let tokens = tokenize(uri.clone())?;
@@ -499,7 +499,7 @@ mod tests {
     fn test_split_nesting_commands() -> Result<()> {
         let pwd = std::env::current_dir()?;
         let uri = pwd
-            .join("text/split_nesting_commands.[]")
+            .join("../assets/split_nesting_commands.[]")
             .to_string_lossy()
             .to_string();
         let tokens = tokenize(uri.clone())?;
@@ -686,7 +686,7 @@ mod tests {
     fn test_split_newlines() -> Result<()> {
         let pwd = std::env::current_dir()?;
         let uri = pwd
-            .join("text/split_newlines.[]")
+            .join("../assets/split_newlines.[]")
             .to_string_lossy()
             .to_string();
         let tokens = tokenize(uri.clone())?;
@@ -973,7 +973,7 @@ mod tests {
     fn test_split_japanese_and_emoji() -> Result<()> {
         let pwd = std::env::current_dir()?;
         let uri = pwd
-            .join("text/split_japanese_and_emoji.[]")
+            .join("../assets/split_japanese_and_emoji.[]")
             .to_string_lossy()
             .to_string();
         let tokens = tokenize(uri.clone())?;
