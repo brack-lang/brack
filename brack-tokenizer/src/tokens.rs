@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     Empty(Location),
@@ -17,13 +19,13 @@ pub enum Token {
     EOF(Location),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct LocationData {
     pub line: usize,
     pub character: usize,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Location {
     pub start: LocationData,
     pub end: LocationData,
@@ -40,6 +42,33 @@ pub fn mock_location() -> Location {
             character: 0,
         },
     }
+}
+
+pub fn marge_location(location1: &Location, location2: &Location) -> Location {
+    let start = if location1.start.line < location2.start.line {
+        location1.start.clone()
+    } else if location1.start.line == location2.start.line {
+        if location1.start.character < location2.start.character {
+            location1.start.clone()
+        } else {
+            location2.start.clone()
+        }
+    } else {
+        location2.start.clone()
+    };
+    let end = if location1.end.line > location2.end.line {
+        location1.end.clone()
+    } else if location1.end.line == location2.end.line {
+        if location1.end.character > location2.end.character {
+            location1.end.clone()
+        } else {
+            location2.end.clone()
+        }
+    } else {
+        location2.end.clone()
+    };
+
+    Location { start, end }
 }
 
 impl Token {
