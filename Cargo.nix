@@ -721,7 +721,7 @@ rec {
           }
           {
             name = "reqwest";
-            packageId = "reqwest 0.12.5";
+            packageId = "reqwest 0.12.7";
           }
           {
             name = "tokio";
@@ -939,6 +939,15 @@ rec {
           {
             name = "anyhow";
             packageId = "anyhow";
+          }
+          {
+            name = "brack-plugin";
+            packageId = "brack-plugin";
+            rename = "brack-plugin";
+          }
+          {
+            name = "futures";
+            packageId = "futures";
           }
           {
             name = "reqwest";
@@ -2230,7 +2239,7 @@ rec {
         };
         resolvedDefaultFeatures = [ "use_std" ];
       };
-      "embedded-io" = rec {
+      "embedded-io 0.4.0" = rec {
         crateName = "embedded-io";
         version = "0.4.0";
         edition = "2021";
@@ -2242,6 +2251,18 @@ rec {
           "log" = [ "dep:log" ];
           "std" = [ "alloc" "futures?/std" ];
           "tokio" = [ "std" "async" "dep:tokio" ];
+        };
+        resolvedDefaultFeatures = [ "alloc" ];
+      };
+      "embedded-io 0.6.1" = rec {
+        crateName = "embedded-io";
+        version = "0.6.1";
+        edition = "2021";
+        sha256 = "0v901xykajh3zffn6x4cnn4fhgfw3c8qpjwbsk6gai3gaccg3l7d";
+        libName = "embedded_io";
+        features = {
+          "defmt-03" = [ "dep:defmt-03" ];
+          "std" = [ "alloc" ];
         };
         resolvedDefaultFeatures = [ "alloc" ];
       };
@@ -3276,11 +3297,11 @@ rec {
         features = {
         };
       };
-      "h2 0.4.5" = rec {
+      "h2 0.4.6" = rec {
         crateName = "h2";
-        version = "0.4.5";
+        version = "0.4.6";
         edition = "2021";
-        sha256 = "1aw62k5xnghpryjnlsbxxhjiwpxir6yi15l3y02w933s225f50ps";
+        sha256 = "01cjblya9zxyadvxcmgcv2bk9r9pyc8l8bbchjdg88clk738lkjj";
         authors = [
           "Carl Lerche <me@carllerche.com>"
           "Sean McArthur <sean@seanmonstar.com>"
@@ -3772,7 +3793,7 @@ rec {
           }
           {
             name = "h2";
-            packageId = "h2 0.4.5";
+            packageId = "h2 0.4.6";
             optional = true;
           }
           {
@@ -5443,9 +5464,9 @@ rec {
       };
       "postcard" = rec {
         crateName = "postcard";
-        version = "1.0.8";
+        version = "1.0.9";
         edition = "2018";
-        sha256 = "1y106iwjv6vm7s4zkszgxlhacca1xbw6qcwf8il7xc0ddkp52p55";
+        sha256 = "083jlv99bjkrp29z9mg3f5rznwfan5frzf9cmj4s2350k6wi1vi0";
         authors = [
           "James Munns <james@onevariable.com>"
         ];
@@ -5457,7 +5478,14 @@ rec {
           }
           {
             name = "embedded-io";
-            packageId = "embedded-io";
+            packageId = "embedded-io 0.4.0";
+            rename = "embedded-io-04";
+            optional = true;
+          }
+          {
+            name = "embedded-io";
+            packageId = "embedded-io 0.6.1";
+            rename = "embedded-io-06";
             optional = true;
           }
           {
@@ -5468,13 +5496,14 @@ rec {
           }
         ];
         features = {
-          "alloc" = [ "serde/alloc" "embedded-io/alloc" ];
-          "const_format" = [ "dep:const_format" ];
+          "alloc" = [ "serde/alloc" "embedded-io-04?/alloc" "embedded-io-06?/alloc" ];
           "crc" = [ "dep:crc" ];
           "default" = [ "heapless-cas" ];
           "defmt" = [ "dep:defmt" ];
-          "embedded-io" = [ "dep:embedded-io" ];
-          "experimental-derive" = [ "postcard-derive" "const_format" ];
+          "embedded-io" = [ "dep:embedded-io-04" ];
+          "embedded-io-04" = [ "dep:embedded-io-04" ];
+          "embedded-io-06" = [ "dep:embedded-io-06" ];
+          "experimental-derive" = [ "postcard-derive" ];
           "heapless" = [ "dep:heapless" ];
           "heapless-cas" = [ "heapless" "heapless/cas" ];
           "paste" = [ "dep:paste" ];
@@ -5483,7 +5512,7 @@ rec {
           "use-defmt" = [ "defmt" ];
           "use-std" = [ "serde/std" "alloc" ];
         };
-        resolvedDefaultFeatures = [ "alloc" "embedded-io" "use-std" ];
+        resolvedDefaultFeatures = [ "alloc" "use-std" ];
       };
       "ppv-lite86" = rec {
         crateName = "ppv-lite86";
@@ -5859,9 +5888,9 @@ rec {
       };
       "redox_users" = rec {
         crateName = "redox_users";
-        version = "0.4.5";
+        version = "0.4.6";
         edition = "2021";
-        sha256 = "1498qyfyc2k3ih5aaffddvbhzi36na8iqg54hcm4pnpfa6b3sa5x";
+        sha256 = "0hya2cxx6hxmjfxzv9n8rjl5igpychav7zfi1f81pz6i4krry05s";
         authors = [
           "Jose Narvaez <goyox86@gmail.com>"
           "Wesley Hershberger <mggmugginsmc@gmail.com>"
@@ -6241,7 +6270,7 @@ rec {
           }
           {
             name = "system-configuration";
-            packageId = "system-configuration";
+            packageId = "system-configuration 0.5.1";
             target = { target, features }: ("macos" == target."os" or null);
           }
           {
@@ -6283,7 +6312,7 @@ rec {
           }
           {
             name = "winreg";
-            packageId = "winreg 0.50.0";
+            packageId = "winreg";
             target = { target, features }: (target."windows" or false);
           }
         ];
@@ -6370,11 +6399,11 @@ rec {
         };
         resolvedDefaultFeatures = [ "__tls" "default" "default-tls" "hyper-tls" "native-tls-crate" "tokio-native-tls" ];
       };
-      "reqwest 0.12.5" = rec {
+      "reqwest 0.12.7" = rec {
         crateName = "reqwest";
-        version = "0.12.5";
+        version = "0.12.7";
         edition = "2021";
-        sha256 = "0dva5mx1cli19adc9igc81ix4si7yiri24ayxdw8652pgnid5mn7";
+        sha256 = "0qsymmmgam6whjcymnlpf5kvk3ylc4bs92lygz63hp7g95b9bx7q";
         authors = [
           "Sean McArthur <sean@seanmonstar.com>"
         ];
@@ -6405,7 +6434,7 @@ rec {
           }
           {
             name = "h2";
-            packageId = "h2 0.4.5";
+            packageId = "h2 0.4.6";
             optional = true;
             target = { target, features }: (!("wasm32" == target."arch" or null));
           }
@@ -6518,10 +6547,11 @@ rec {
           {
             name = "sync_wrapper";
             packageId = "sync_wrapper 1.0.1";
+            features = [ "futures" ];
           }
           {
             name = "system-configuration";
-            packageId = "system-configuration";
+            packageId = "system-configuration 0.6.0";
             optional = true;
             target = { target, features }: ("macos" == target."os" or null);
           }
@@ -6563,8 +6593,8 @@ rec {
             features = [ "AbortController" "AbortSignal" "Headers" "Request" "RequestInit" "RequestMode" "Response" "Window" "FormData" "Blob" "BlobPropertyBag" "ServiceWorkerGlobalScope" "RequestCredentials" "File" "ReadableStream" ];
           }
           {
-            name = "winreg";
-            packageId = "winreg 0.52.0";
+            name = "windows-registry";
+            packageId = "windows-registry";
             target = { target, features }: (target."windows" or false);
           }
         ];
@@ -7757,12 +7787,21 @@ rec {
         authors = [
           "Actyx AG <developer@actyx.io>"
         ];
+        dependencies = [
+          {
+            name = "futures-core";
+            packageId = "futures-core";
+            optional = true;
+            usesDefaultFeatures = false;
+          }
+        ];
         features = {
           "futures" = [ "futures-core" ];
           "futures-core" = [ "dep:futures-core" ];
         };
+        resolvedDefaultFeatures = [ "futures" "futures-core" ];
       };
-      "system-configuration" = rec {
+      "system-configuration 0.5.1" = rec {
         crateName = "system-configuration";
         version = "0.5.1";
         edition = "2021";
@@ -7782,16 +7821,62 @@ rec {
           }
           {
             name = "system-configuration-sys";
-            packageId = "system-configuration-sys";
+            packageId = "system-configuration-sys 0.5.0";
           }
         ];
 
       };
-      "system-configuration-sys" = rec {
+      "system-configuration 0.6.0" = rec {
+        crateName = "system-configuration";
+        version = "0.6.0";
+        edition = "2021";
+        sha256 = "0hjabiw8k1qwmj1zsf9dq39g85pcjnfq3c79fvszrd5923pcd2v5";
+        libName = "system_configuration";
+        authors = [
+          "Mullvad VPN"
+        ];
+        dependencies = [
+          {
+            name = "bitflags";
+            packageId = "bitflags 2.6.0";
+          }
+          {
+            name = "core-foundation";
+            packageId = "core-foundation";
+          }
+          {
+            name = "system-configuration-sys";
+            packageId = "system-configuration-sys 0.6.0";
+          }
+        ];
+
+      };
+      "system-configuration-sys 0.5.0" = rec {
         crateName = "system-configuration-sys";
         version = "0.5.0";
         edition = "2021";
         sha256 = "1jckxvdr37bay3i9v52izgy52dg690x5xfg3hd394sv2xf4b2px7";
+        libName = "system_configuration_sys";
+        authors = [
+          "Mullvad VPN"
+        ];
+        dependencies = [
+          {
+            name = "core-foundation-sys";
+            packageId = "core-foundation-sys";
+          }
+          {
+            name = "libc";
+            packageId = "libc";
+          }
+        ];
+
+      };
+      "system-configuration-sys 0.6.0" = rec {
+        crateName = "system-configuration-sys";
+        version = "0.6.0";
+        edition = "2021";
+        sha256 = "1i5sqrmgy58l4704hibjbl36hclddglh73fb3wx95jnmrq81n7cf";
         libName = "system_configuration_sys";
         authors = [
           "Mullvad VPN"
@@ -8944,9 +9029,9 @@ rec {
       };
       "unicode-xid" = rec {
         crateName = "unicode-xid";
-        version = "0.2.4";
+        version = "0.2.5";
         edition = "2015";
-        sha256 = "131dfzf7d8fsr1ivch34x42c2d1ik5ig3g78brxncnn0r1sdyqpr";
+        sha256 = "02n96yhcjwx7vphbwf9p7xfqbwvqgzdw2qz4h0x3wd5wgxj315r2";
         libName = "unicode_xid";
         authors = [
           "erick.tryzelaar <erick.tryzelaar@gmail.com>"
@@ -11448,6 +11533,76 @@ rec {
         };
         resolvedDefaultFeatures = [ "default" ];
       };
+      "windows-registry" = rec {
+        crateName = "windows-registry";
+        version = "0.2.0";
+        edition = "2021";
+        sha256 = "1c04923fq0rbvl3z0h67xr6rh2fgwkizhclhqv0j79i0nwdh0074";
+        libName = "windows_registry";
+        authors = [
+          "Microsoft"
+        ];
+        dependencies = [
+          {
+            name = "windows-result";
+            packageId = "windows-result";
+          }
+          {
+            name = "windows-strings";
+            packageId = "windows-strings";
+          }
+          {
+            name = "windows-targets";
+            packageId = "windows-targets 0.52.6";
+          }
+        ];
+
+      };
+      "windows-result" = rec {
+        crateName = "windows-result";
+        version = "0.2.0";
+        edition = "2021";
+        sha256 = "03mf2z1xcy2slhhsm15z24p76qxgm2m74xdjp8bihyag47c4640x";
+        libName = "windows_result";
+        authors = [
+          "Microsoft"
+        ];
+        dependencies = [
+          {
+            name = "windows-targets";
+            packageId = "windows-targets 0.52.6";
+          }
+        ];
+        features = {
+          "default" = [ "std" ];
+        };
+        resolvedDefaultFeatures = [ "default" "std" ];
+      };
+      "windows-strings" = rec {
+        crateName = "windows-strings";
+        version = "0.1.0";
+        edition = "2021";
+        sha256 = "042dxvi3133f7dyi2pgcvknwkikk47k8bddwxbq5s0l6qhjv3nac";
+        libName = "windows_strings";
+        authors = [
+          "Microsoft"
+        ];
+        dependencies = [
+          {
+            name = "windows-result";
+            packageId = "windows-result";
+            usesDefaultFeatures = false;
+          }
+          {
+            name = "windows-targets";
+            packageId = "windows-targets 0.52.6";
+          }
+        ];
+        features = {
+          "default" = [ "std" ];
+        };
+        resolvedDefaultFeatures = [ "default" "std" ];
+      };
       "windows-sys 0.48.0" = rec {
         crateName = "windows-sys";
         version = "0.48.0";
@@ -12544,36 +12699,11 @@ rec {
         };
         resolvedDefaultFeatures = [ "alloc" "default" "std" ];
       };
-      "winreg 0.50.0" = rec {
+      "winreg" = rec {
         crateName = "winreg";
         version = "0.50.0";
         edition = "2018";
         sha256 = "1cddmp929k882mdh6i9f2as848f13qqna6czwsqzkh1pqnr5fkjj";
-        authors = [
-          "Igor Shaula <gentoo90@gmail.com>"
-        ];
-        dependencies = [
-          {
-            name = "cfg-if";
-            packageId = "cfg-if";
-          }
-          {
-            name = "windows-sys";
-            packageId = "windows-sys 0.48.0";
-            features = [ "Win32_Foundation" "Win32_System_Time" "Win32_System_Registry" "Win32_Security" "Win32_Storage_FileSystem" "Win32_System_Diagnostics_Debug" ];
-          }
-        ];
-        features = {
-          "chrono" = [ "dep:chrono" ];
-          "serde" = [ "dep:serde" ];
-          "serialization-serde" = [ "transactions" "serde" ];
-        };
-      };
-      "winreg 0.52.0" = rec {
-        crateName = "winreg";
-        version = "0.52.0";
-        edition = "2018";
-        sha256 = "19gh9vp7mp1ab84kc3ag48nm9y7xgjhh3xa4vxss1gylk1rsaxx2";
         authors = [
           "Igor Shaula <gentoo90@gmail.com>"
         ];
