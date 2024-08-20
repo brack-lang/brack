@@ -7,15 +7,26 @@ pub fn tokenize<P: AsRef<Path>>(path: P) -> Result<Vec<Token>> {
     let mut file = File::open(&path)?;
     let mut text = String::new();
     file.read_to_string(&mut text)?;
+    tokenize_str(&text)
+}
+
+pub fn tokenize_str(text: &str) -> Result<Vec<Token>> {
     let t = Tokenizer {
+        tokens: Some(vec![]),
         line: Some(0),
         column: Some(0),
+        pool: Some(String::new()),
         token_start_line: Some(0),
         token_start_column: Some(0),
-        untreated: Some(text),
+        untreated: Some(text.to_string()),
+        curly_nest_count: Some(0),
+        square_nest_count: Some(0),
+        angle_nest_count: Some(0),
+        looking_for_identifier: Some(false),
+        escaped: Some(false),
         ..Default::default()
     };
-    Ok(dispatch(&t))
+    dispatch(&t)
 }
 
 #[cfg(test)]
@@ -133,6 +144,16 @@ mod tests {
                         },
                     }
                 ),
+                Token::WhiteSpace(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 13,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 14,
+                    },
+                }),
                 Token::Text(
                     "World!".to_string(),
                     Location {
@@ -241,6 +262,16 @@ mod tests {
                         },
                     }
                 ),
+                Token::WhiteSpace(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 13,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 14,
+                    },
+                }),
                 Token::Text(
                     "World!".to_string(),
                     Location {
@@ -326,6 +357,16 @@ mod tests {
                         },
                     }
                 ),
+                Token::WhiteSpace(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 9,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 10,
+                    },
+                }),
                 Token::Text(
                     "World!".to_string(),
                     Location {
@@ -434,6 +475,16 @@ mod tests {
                         },
                     }
                 ),
+                Token::WhiteSpace(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 13,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 14,
+                    },
+                }),
                 Token::Text(
                     "World!".to_string(),
                     Location {
@@ -455,6 +506,16 @@ mod tests {
                     end: LocationData {
                         line: 0,
                         character: 21,
+                    },
+                }),
+                Token::WhiteSpace(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 21,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 22,
                     },
                 }),
                 Token::Text(
@@ -565,6 +626,16 @@ mod tests {
                         },
                     }
                 ),
+                Token::WhiteSpace(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 13,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 14,
+                    },
+                }),
                 Token::SquareBracketOpen(Location {
                     start: LocationData {
                         line: 0,
@@ -611,6 +682,16 @@ mod tests {
                         },
                     }
                 ),
+                Token::WhiteSpace(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 20,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 21,
+                    },
+                }),
                 Token::Text(
                     "World!".to_string(),
                     Location {
@@ -632,6 +713,16 @@ mod tests {
                     end: LocationData {
                         line: 0,
                         character: 28,
+                    },
+                }),
+                Token::WhiteSpace(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 28,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 29,
                     },
                 }),
                 Token::Text(
@@ -786,6 +877,16 @@ mod tests {
                         },
                     }
                 ),
+                Token::WhiteSpace(Location {
+                    start: LocationData {
+                        line: 2,
+                        character: 7,
+                    },
+                    end: LocationData {
+                        line: 2,
+                        character: 8,
+                    },
+                }),
                 Token::Text(
                     "Contact".to_string(),
                     Location {
@@ -865,12 +966,45 @@ mod tests {
                         },
                     }
                 ),
+                Token::WhiteSpace(Location {
+                    start: LocationData {
+                        line: 3,
+                        character: 6,
+                    },
+                    end: LocationData {
+                        line: 3,
+                        character: 7,
+                    },
+                }),
                 Token::Text(
-                    "My website".to_string(),
+                    "My".to_string(),
                     Location {
                         start: LocationData {
                             line: 3,
                             character: 7,
+                        },
+                        end: LocationData {
+                            line: 3,
+                            character: 9,
+                        },
+                    }
+                ),
+                Token::WhiteSpace(Location {
+                    start: LocationData {
+                        line: 3,
+                        character: 9,
+                    },
+                    end: LocationData {
+                        line: 3,
+                        character: 10,
+                    },
+                }),
+                Token::Text(
+                    "website".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 3,
+                            character: 10,
                         },
                         end: LocationData {
                             line: 3,
@@ -886,6 +1020,16 @@ mod tests {
                     end: LocationData {
                         line: 3,
                         character: 18,
+                    },
+                }),
+                Token::WhiteSpace(Location {
+                    start: LocationData {
+                        line: 3,
+                        character: 18,
+                    },
+                    end: LocationData {
+                        line: 3,
+                        character: 19,
                     },
                 }),
                 Token::Text(

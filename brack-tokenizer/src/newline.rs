@@ -4,38 +4,33 @@ use crate::{
     tokens::{Location, LocationData, Token},
     utils::separate,
 };
+use anyhow::Result;
 
-pub fn tokenize(t: &Tokenizer) -> Vec<Token> {
-    let s = t.untreated.clone().unwrap_or_default();
-    let line = t.line.unwrap_or_default();
+pub fn tokenize(t: &Tokenizer) -> Result<Vec<Token>> {
+    let s = t
+        .untreated
+        .clone()
+        .ok_or_else(|| anyhow::anyhow!("`t.untreated` is not set"))?;
+    let line = t
+        .line
+        .ok_or_else(|| anyhow::anyhow!("`t.line` is not set"))?;
+    let column = t
+        .column
+        .ok_or_else(|| anyhow::anyhow!("`t.column` is not set"))?;
     let (_, tail) = separate(&s);
-    let pool = t.pool.clone().unwrap_or_default();
-    let mut new_tokens = t.tokens.clone().unwrap_or_default();
+    let mut tokens = t
+        .tokens
+        .clone()
+        .ok_or_else(|| anyhow::anyhow!("`t.tokens` is not set"))?;
 
-    if !pool.trim().is_empty() {
-        new_tokens.push(Token::Text(
-            pool,
-            Location {
-                start: LocationData {
-                    line: t.token_start_line.unwrap_or_default(),
-                    character: t.token_start_column.unwrap_or_default(),
-                },
-                end: LocationData {
-                    line: t.line.unwrap_or_default(),
-                    character: t.column.unwrap_or_default(),
-                },
-            },
-        ));
-    }
-
-    new_tokens.push(Token::NewLine(Location {
+    tokens.push(Token::NewLine(Location {
         start: LocationData {
-            line: t.line.unwrap_or_default(),
-            character: t.column.unwrap_or_default(),
+            line,
+            character: column,
         },
         end: LocationData {
-            line: t.line.unwrap_or_default(),
-            character: t.column.unwrap_or_default() + 1,
+            line,
+            character: column + 1,
         },
     }));
 
@@ -46,7 +41,7 @@ pub fn tokenize(t: &Tokenizer) -> Vec<Token> {
         token_start_column: Some(0),
         untreated: Some(tail),
         pool: Some(String::new()),
-        tokens: Some(new_tokens),
+        tokens: Some(tokens),
         ..Default::default()
     };
     dispatch(&t.merge(&t2))

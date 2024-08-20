@@ -2,45 +2,50 @@ use crate::{
     dispatch::dispatch,
     tokenizer::Tokenizer,
     tokens::{Location, LocationData, Token},
-    utils::{separate, take_text_token_from_pool},
+    utils::separate,
 };
+use anyhow::Result;
 
-pub fn tokenize(t: &Tokenizer) -> Vec<Token> {
-    let mut t = t.clone();
-
-    let s = t.untreated.clone().unwrap_or_default();
+pub fn tokenize(t: &Tokenizer) -> Result<Vec<Token>> {
+    let s = t
+        .untreated
+        .clone()
+        .ok_or_else(|| anyhow::anyhow!("`t.untreated` is not set"))?;
     let (_, tail) = separate(&s);
 
-    let mut tokens = t.tokens.clone().unwrap_or_default();
-    let took_text_token = take_text_token_from_pool(&t, true);
-    if let Some((t2, text_token)) = took_text_token {
-        tokens.push(text_token);
-        t = t2;
-    }
+    let mut tokens = t
+        .tokens
+        .clone()
+        .ok_or_else(|| anyhow::anyhow!("`t.tokens` is not set"))?;
+    let line = t
+        .line
+        .ok_or_else(|| anyhow::anyhow!("`t.line` is not set"))?;
+    let column = t
+        .column
+        .ok_or_else(|| anyhow::anyhow!("`t.column` is not set"))?;
+    let square_nest_count = t
+        .square_nest_count
+        .ok_or_else(|| anyhow::anyhow!("`t.square_nest_count` is not set"))?;
 
     tokens.push(Token::SquareBracketClose(Location {
         start: LocationData {
-            line: t.line.unwrap_or_default(),
-            character: t.column.unwrap_or_default(),
+            line,
+            character: column,
         },
         end: LocationData {
-            line: t.line.unwrap_or_default(),
-            character: t.column.unwrap_or_default() + 1,
+            line,
+            character: column + 1,
         },
     }));
 
-    let column = t.column.unwrap_or_default();
-    let mut t2 = Tokenizer {
+    let  t2 = Tokenizer {
         column: Some(column + 1),
         token_start_column: Some(column + 1),
         untreated: Some(tail),
         pool: Some(String::new()),
         tokens: Some(tokens),
-        square_nest_count: Some(t.square_nest_count.unwrap_or_default() - 1),
+        square_nest_count: Some(square_nest_count - 1),
         ..Default::default()
     };
-    if t.looking_for_identifier.unwrap_or_default() {
-        t2.looking_for_identifier = Some(false)
-    }
     dispatch(&t.merge(&t2))
 }

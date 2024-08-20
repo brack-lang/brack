@@ -4,20 +4,32 @@ use crate::{
     square_bracket_open, text,
     tokenizer::Tokenizer,
     tokens::{Location, LocationData, Token},
-    utils::{separate, update_tokens},
+    utils::separate,
     whitespace,
 };
+use anyhow::Result;
 
-pub fn dispatch(t: &Tokenizer) -> Vec<Token> {
-    let s = t.untreated.clone().unwrap_or_default();
-    let pool = t.pool.clone().unwrap_or_default();
-    let column = t.column.unwrap_or_default();
+pub fn dispatch(t: &Tokenizer) -> Result<Vec<Token>> {
+    let s = t
+        .untreated
+        .clone()
+        .ok_or_else(|| anyhow::anyhow!("`t.untreated` is not set"))?;
+    let pool = t
+        .pool
+        .clone()
+        .ok_or_else(|| anyhow::anyhow!("`t.pool` is not set"))?;
+    let column = t
+        .column
+        .ok_or_else(|| anyhow::anyhow!("`t.column` is not set"))?;
 
     let (head, tail) = separate(&s);
 
     if head == "\0" {
-        let mut updated = update_tokens(t, false);
-        updated.push(Token::EOF(Location {
+        let mut tokens = t
+            .tokens
+            .clone()
+            .ok_or_else(|| anyhow::anyhow!("`t.tokens` is not set"))?;
+        tokens.push(Token::EOF(Location {
             start: LocationData {
                 line: t.line.unwrap_or_default(),
                 character: t.column.unwrap_or_default(),
@@ -27,7 +39,7 @@ pub fn dispatch(t: &Tokenizer) -> Vec<Token> {
                 character: t.column.unwrap_or_default(),
             },
         }));
-        return updated;
+        return Ok(tokens);
     }
 
     if t.escaped.unwrap_or_default() {
@@ -49,13 +61,14 @@ pub fn dispatch(t: &Tokenizer) -> Vec<Token> {
         ("}", _) if curly_c > 0 => curly_bracket_close::tokenize(t),
         ("[", _) => square_bracket_open::tokenize(t),
         ("]", _) if square_c > 0 => square_bracket_close::tokenize(t),
-        (".", _) if nested => dot::tokenize(t),
+        (".", _) if look_for_ident => dot::tokenize(t),
         (",", _) if nested => comma::tokenize(t),
         (" ", _) if nested => whitespace::tokenize(t),
         ("\n", _) => newline::tokenize(t),
         (_, " ") if look_for_ident => identifier::tokenize(t),
         (_, ".") if look_for_ident => module::tokenize(t),
-        (_, "<") | (_, "{") | (_, "[") | (_, "\n") => text::tokenize(t),
+        (_, "<") | (_, "{") | (_, "[") | (_, "\n") | (_, "\0") => text::tokenize(t),
+        (_, " ") if nested => text::tokenize(t),
         (_, ",") if nested => text::tokenize(t),
         (_, ">") if angle_c > 0 => text::tokenize(t),
         (_, "]") if square_c > 0 => text::tokenize(t),
