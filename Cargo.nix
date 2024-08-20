@@ -14,8 +14,6 @@
 , rootFeatures ? [ "default" ]
   # If true, throw errors instead of issueing deprecation warnings.
 , strictDeprecation ? false
-  # Elements to add to the `-C target-feature=` argument passed to `rustc`
-  # (separated by `,`, prefixed with `+`).
   # Used for conditional compilation based on CPU feature detection.
 , targetFeatures ? []
   # Whether to perform release builds: longer compile times, faster binaries.
@@ -466,9 +464,9 @@ rec {
       };
       "async-trait" = rec {
         crateName = "async-trait";
-        version = "0.1.80";
+        version = "0.1.81";
         edition = "2021";
-        sha256 = "1jip2xkv8l67bbg6jrz3b1sdb7api77vy38wrjl7sfkmya3j1yn6";
+        sha256 = "01w10ad3984czxrmc8ckdrabhmsv80aynfxibjnqwz1dr3f2h33f";
         procMacro = true;
         libName = "async_trait";
         authors = [
@@ -485,8 +483,9 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
-            features = [ "full" "visit-mut" ];
+            packageId = "syn 2.0.69";
+            usesDefaultFeatures = false;
+            features = [ "full" "visit-mut" "parsing" "printing" "proc-macro" ];
           }
         ];
 
@@ -534,7 +533,7 @@ rec {
           }
           {
             name = "object";
-            packageId = "object 0.36.0";
+            packageId = "object 0.36.1";
             usesDefaultFeatures = false;
             target = { target, features }: (!((target."windows" or false) && ("msvc" == target."env" or null) && (!("uwp" == target."vendor" or null))));
             features = [ "read_core" "elf" "macho" "pe" "xcoff" "unaligned" "archive" ];
@@ -604,11 +603,11 @@ rec {
         };
         resolvedDefaultFeatures = [ "default" ];
       };
-      "bitflags 2.5.0" = rec {
+      "bitflags 2.6.0" = rec {
         crateName = "bitflags";
-        version = "2.5.0";
+        version = "2.6.0";
         edition = "2021";
-        sha256 = "1h91vdx1il069vdiiissj8ymzj130rbiic0dbs77yxjgjim9sjyg";
+        sha256 = "1pkidwzn3hnxlsl8zizh0bncgbjnw7c41cx7bby26ncbzmiznj5h";
         authors = [
           "The Rust Project Developers"
         ];
@@ -650,7 +649,11 @@ rec {
             requiredFeatures = [ ];
           }
         ];
-        src = lib.cleanSourceWith { filter = sourceFilter;  src = ./brack; };
+        # We can't filter paths with references in Nix 2.4
+        # See https://github.com/NixOS/nix/issues/5410
+        src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack; }
+          else ./brack;
         dependencies = [
           {
             name = "anyhow";
@@ -712,7 +715,11 @@ rec {
         crateName = "brack-codegen";
         version = "0.1.0";
         edition = "2021";
-        src = lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-codegen; };
+        # We can't filter paths with references in Nix 2.4
+        # See https://github.com/NixOS/nix/issues/5410
+        src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-codegen; }
+          else ./brack-codegen;
         libName = "brack_codegen";
         dependencies = [
           {
@@ -745,7 +752,11 @@ rec {
         crateName = "brack-expander";
         version = "0.1.0";
         edition = "2021";
-        src = lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-expander; };
+        # We can't filter paths with references in Nix 2.4
+        # See https://github.com/NixOS/nix/issues/5410
+        src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-expander; }
+          else ./brack-expander;
         libName = "brack_expander";
         dependencies = [
           {
@@ -778,7 +789,11 @@ rec {
         crateName = "brack-language-server";
         version = "0.1.0";
         edition = "2021";
-        src = lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-language-server; };
+        # We can't filter paths with references in Nix 2.4
+        # See https://github.com/NixOS/nix/issues/5410
+        src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-language-server; }
+          else ./brack-language-server;
         libName = "brack_language_server";
         dependencies = [
           {
@@ -819,7 +834,11 @@ rec {
         crateName = "brack-parser";
         version = "0.1.0";
         edition = "2021";
-        src = lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-parser; };
+        # We can't filter paths with references in Nix 2.4
+        # See https://github.com/NixOS/nix/issues/5410
+        src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-parser; }
+          else ./brack-parser;
         libName = "brack_parser";
         dependencies = [
           {
@@ -856,7 +875,11 @@ rec {
         crateName = "brack-plugin";
         version = "0.1.0";
         edition = "2021";
-        src = lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-plugin; };
+        # We can't filter paths with references in Nix 2.4
+        # See https://github.com/NixOS/nix/issues/5410
+        src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-plugin; }
+          else ./brack-plugin;
         libName = "brack_plugin";
         dependencies = [
           {
@@ -897,7 +920,11 @@ rec {
         crateName = "brack-plugin-manager";
         version = "0.1.0";
         edition = "2021";
-        src = lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-plugin-manager; };
+        # We can't filter paths with references in Nix 2.4
+        # See https://github.com/NixOS/nix/issues/5410
+        src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-plugin-manager; }
+          else ./brack-plugin-manager;
         libName = "brack_plugin_manager";
         dependencies = [
           {
@@ -929,7 +956,11 @@ rec {
         crateName = "brack-sdk-rs";
         version = "0.1.0";
         edition = "2021";
-        src = lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-sdk-rs; };
+        # We can't filter paths with references in Nix 2.4
+        # See https://github.com/NixOS/nix/issues/5410
+        src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-sdk-rs; }
+          else ./brack-sdk-rs;
         libName = "brack_sdk_rs";
         dependencies = [
           {
@@ -952,12 +983,21 @@ rec {
         crateName = "brack-tokenizer";
         version = "0.1.0";
         edition = "2021";
-        src = lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-tokenizer; };
+        # We can't filter paths with references in Nix 2.4
+        # See https://github.com/NixOS/nix/issues/5410
+        src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-tokenizer; }
+          else ./brack-tokenizer;
         libName = "brack_tokenizer";
         dependencies = [
           {
             name = "anyhow";
             packageId = "anyhow";
+          }
+          {
+            name = "serde";
+            packageId = "serde";
+            features = [ "derive" ];
           }
           {
             name = "unicode-segmentation";
@@ -1296,9 +1336,9 @@ rec {
       };
       "cc" = rec {
         crateName = "cc";
-        version = "1.0.100";
+        version = "1.0.105";
         edition = "2018";
-        sha256 = "0yrcs6pw7gs9wc5k2332p2z8n6arbq4r0rfy927i4cmj7xf1g4f8";
+        sha256 = "0dvlkl83xdx52rba2vgf7fsc5b79wz467860bjqbd0wdarg9f22j";
         authors = [
           "Alex Crichton <alex@alexcrichton.com>"
         ];
@@ -1344,10 +1384,10 @@ rec {
       };
       "clap" = rec {
         crateName = "clap";
-        version = "4.5.7";
+        version = "4.5.8";
         edition = "2021";
         crateBin = [];
-        sha256 = "0gs31zd9gma5vwdyvb4y4gfqnnd9zvbm1wir9x3ssf26sg73vf2x";
+        sha256 = "03cpm3rqi892lwwjk6jyvjjxydn0k7fk3an9bdcdzx1nhfqyvcw4";
         dependencies = [
           {
             name = "clap_builder";
@@ -1384,9 +1424,9 @@ rec {
       };
       "clap_builder" = rec {
         crateName = "clap_builder";
-        version = "4.5.7";
+        version = "4.5.8";
         edition = "2021";
-        sha256 = "0py0m2ixnrjc0vssj59ypicz27ajj4hn2wgq52zkzsw54ibh9qpp";
+        sha256 = "026prqs41ahs5zmwhv1d3rjq100dz6ihvzfnfn0cgim6mparvh61";
         dependencies = [
           {
             name = "anstream";
@@ -1423,9 +1463,9 @@ rec {
       };
       "clap_derive" = rec {
         crateName = "clap_derive";
-        version = "4.5.5";
+        version = "4.5.8";
         edition = "2021";
-        sha256 = "1ih6pwg3h74gjjjjyc7csgqi7lffd0g0i8d7p8lndcjgrw62k067";
+        sha256 = "11bh9ybcslr1psl06y9jlq9pr4cpmvzs9nbmsba0y1pvvb33bb1b";
         procMacro = true;
         dependencies = [
           {
@@ -1442,7 +1482,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             features = [ "full" ];
           }
         ];
@@ -1563,7 +1603,7 @@ rec {
           {
             name = "libc";
             packageId = "libc";
-            target = { target, features }: (stdenv.hostPlatform.rust.rustcTarget == "aarch64-linux-android");
+            target = { target, features }: (pkgs.rust.lib.toRustTarget stdenv.hostPlatform == "aarch64-linux-android");
           }
           {
             name = "libc";
@@ -2177,9 +2217,9 @@ rec {
       };
       "either" = rec {
         crateName = "either";
-        version = "1.12.0";
+        version = "1.13.0";
         edition = "2018";
-        sha256 = "12xmhlrv5gfsraimh6xaxcmb0qh6cc7w7ap4sw40ky9wfm095jix";
+        sha256 = "1w2c1mybrd7vljyxk77y9f4w9dyjrmp3yp82mk7bcm8848fazcb0";
         authors = [
           "bluss"
         ];
@@ -2466,7 +2506,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             features = [ "derive" ];
           }
         ];
@@ -2842,7 +2882,7 @@ rec {
         dependencies = [
           {
             name = "bitflags";
-            packageId = "bitflags 2.5.0";
+            packageId = "bitflags 2.6.0";
           }
           {
             name = "debugid";
@@ -3848,7 +3888,7 @@ rec {
         dependencies = [
           {
             name = "bitflags";
-            packageId = "bitflags 2.5.0";
+            packageId = "bitflags 2.6.0";
           }
           {
             name = "libc";
@@ -3910,9 +3950,9 @@ rec {
       };
       "log" = rec {
         crateName = "log";
-        version = "0.4.21";
+        version = "0.4.22";
         edition = "2021";
-        sha256 = "074hldq1q8rlzq2s2qa8f25hj4s3gpw71w64vdwzjd01a4g8rvch";
+        sha256 = "093vs0wkm1rgyykk7fjbqp2lwizbixac1w52gv109p5r4jh0p9x7";
         authors = [
           "The Rust Project Developers"
         ];
@@ -4008,7 +4048,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             rename = "syn2";
             optional = true;
             usesDefaultFeatures = false;
@@ -4023,7 +4063,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             rename = "syn2";
             features = [ "full" ];
           }
@@ -4419,11 +4459,11 @@ rec {
         };
         resolvedDefaultFeatures = [ "coff" "elf" "macho" "pe" "read_core" "std" "write" "write_core" "write_std" "xcoff" ];
       };
-      "object 0.36.0" = rec {
+      "object 0.36.1" = rec {
         crateName = "object";
-        version = "0.36.0";
+        version = "0.36.1";
         edition = "2018";
-        sha256 = "0d3l415005kqs1xamy7va1vnyiyh55x7d78mpd531pzrr0gzwvap";
+        sha256 = "1kng5iqp4az48kn2vfd1irv12yp0yvj25agizlcgrpan3mnq86q8";
         dependencies = [
           {
             name = "memchr";
@@ -4483,7 +4523,7 @@ rec {
         dependencies = [
           {
             name = "bitflags";
-            packageId = "bitflags 2.5.0";
+            packageId = "bitflags 2.6.0";
           }
           {
             name = "cfg-if";
@@ -4536,7 +4576,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             features = [ "full" ];
           }
         ];
@@ -4659,7 +4699,7 @@ rec {
           }
           {
             name = "windows-targets";
-            packageId = "windows-targets 0.52.5";
+            packageId = "windows-targets 0.52.6";
             target = { target, features }: (target."windows" or false);
           }
         ];
@@ -4925,7 +4965,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             features = [ "extra-traits" ];
           }
         ];
@@ -5127,7 +5167,7 @@ rec {
         dependencies = [
           {
             name = "bitflags";
-            packageId = "bitflags 2.5.0";
+            packageId = "bitflags 2.6.0";
           }
         ];
         features = {
@@ -5816,7 +5856,7 @@ rec {
         dependencies = [
           {
             name = "bitflags";
-            packageId = "bitflags 2.5.0";
+            packageId = "bitflags 2.6.0";
             usesDefaultFeatures = false;
           }
           {
@@ -5926,14 +5966,20 @@ rec {
       };
       "rustls" = rec {
         crateName = "rustls";
-        version = "0.22.4";
+        version = "0.23.10";
         edition = "2021";
-        sha256 = "0cl4q6w0x1cl5ldjsgbbiiqhkz6qg5vxl5dkn9wwsyxc44vzfkmz";
+        sha256 = "00nllkivy9p5pg6yj29jwynblq2jqdvjn61w1x4hzf0dyr8z9kq5";
         dependencies = [
           {
             name = "log";
             packageId = "log";
             optional = true;
+          }
+          {
+            name = "once_cell";
+            packageId = "once_cell";
+            usesDefaultFeatures = false;
+            features = [ "alloc" "race" ];
           }
           {
             name = "ring";
@@ -5944,14 +5990,14 @@ rec {
             name = "rustls-pki-types";
             packageId = "rustls-pki-types";
             rename = "pki-types";
-            features = [ "std" ];
+            features = [ "alloc" ];
           }
           {
             name = "rustls-webpki";
             packageId = "rustls-webpki";
             rename = "webpki";
             usesDefaultFeatures = false;
-            features = [ "std" ];
+            features = [ "alloc" ];
           }
           {
             name = "subtle";
@@ -5970,15 +6016,21 @@ rec {
           }
         ];
         features = {
+          "aws-lc-rs" = [ "aws_lc_rs" ];
           "aws_lc_rs" = [ "dep:aws-lc-rs" "webpki/aws_lc_rs" ];
-          "default" = [ "logging" "ring" "tls12" ];
+          "brotli" = [ "dep:brotli" "dep:brotli-decompressor" "std" ];
+          "default" = [ "aws_lc_rs" "logging" "std" "tls12" ];
+          "fips" = [ "aws_lc_rs" "aws-lc-rs?/fips" ];
+          "hashbrown" = [ "dep:hashbrown" ];
           "log" = [ "dep:log" ];
           "logging" = [ "log" ];
-          "read_buf" = [ "rustversion" ];
+          "read_buf" = [ "rustversion" "std" ];
           "ring" = [ "dep:ring" "webpki/ring" ];
           "rustversion" = [ "dep:rustversion" ];
+          "std" = [ "webpki/std" "pki-types/std" "once_cell/std" ];
+          "zlib" = [ "dep:zlib-rs" ];
         };
-        resolvedDefaultFeatures = [ "default" "log" "logging" "ring" "tls12" ];
+        resolvedDefaultFeatures = [ "log" "logging" "ring" "std" "tls12" ];
       };
       "rustls-pemfile" = rec {
         crateName = "rustls-pemfile";
@@ -6010,9 +6062,9 @@ rec {
       };
       "rustls-webpki" = rec {
         crateName = "rustls-webpki";
-        version = "0.102.4";
+        version = "0.102.5";
         edition = "2021";
-        sha256 = "0gmk2abk7y2cdppqlaqmnhcv690p19af9n66sjvw84z9j9z8yi7z";
+        sha256 = "0y2d2qsx02zbgikr6ibsllxqzzf35gva44xm0p0w4hjag76zr9pr";
         libName = "webpki";
         dependencies = [
           {
@@ -6039,7 +6091,7 @@ rec {
           "ring" = [ "dep:ring" ];
           "std" = [ "alloc" "pki-types/std" ];
         };
-        resolvedDefaultFeatures = [ "alloc" "default" "ring" "std" ];
+        resolvedDefaultFeatures = [ "alloc" "ring" "std" ];
       };
       "ryu" = rec {
         crateName = "ryu";
@@ -6103,7 +6155,7 @@ rec {
         dependencies = [
           {
             name = "bitflags";
-            packageId = "bitflags 2.5.0";
+            packageId = "bitflags 2.6.0";
           }
           {
             name = "core-foundation";
@@ -6183,9 +6235,9 @@ rec {
       };
       "serde" = rec {
         crateName = "serde";
-        version = "1.0.203";
+        version = "1.0.204";
         edition = "2018";
-        sha256 = "1500ghq198n6py5anvz5qbqagd9h1hq04f4qpsvjzrvix56snlvj";
+        sha256 = "04kwpwqz559xlhxkggmm8rjxqgywy5swam3kscwsicnbw1cgaxmw";
         authors = [
           "Erick Tryzelaar <erick.tryzelaar@gmail.com>"
           "David Tolnay <dtolnay@gmail.com>"
@@ -6217,9 +6269,9 @@ rec {
       };
       "serde_derive" = rec {
         crateName = "serde_derive";
-        version = "1.0.203";
+        version = "1.0.204";
         edition = "2015";
-        sha256 = "1fmmqmfza3mwxb1v80737dj01gznrh8mhgqgylkndx5npq7bq32h";
+        sha256 = "08p25262mbmhsr2cg0508d5b1wvljj956rvpg0v3qgg6gc8pxkg0";
         procMacro = true;
         authors = [
           "Erick Tryzelaar <erick.tryzelaar@gmail.com>"
@@ -6240,7 +6292,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             usesDefaultFeatures = false;
             features = [ "clone-impls" "derive" "parsing" "printing" "proc-macro" ];
           }
@@ -6251,9 +6303,9 @@ rec {
       };
       "serde_json" = rec {
         crateName = "serde_json";
-        version = "1.0.117";
+        version = "1.0.120";
         edition = "2021";
-        sha256 = "1hxziifjlc0kn1cci9d4crmjc7qwnfi20lxwyj9lzca2c7m84la5";
+        sha256 = "1idpv3zxcvl76z2z47jgg1f1wjqdnhfc204asmd27qfam34j23af";
         authors = [
           "Erick Tryzelaar <erick.tryzelaar@gmail.com>"
           "David Tolnay <dtolnay@gmail.com>"
@@ -6309,7 +6361,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
           }
         ];
 
@@ -6603,9 +6655,9 @@ rec {
       };
       "subtle" = rec {
         crateName = "subtle";
-        version = "2.6.0";
+        version = "2.6.1";
         edition = "2018";
-        sha256 = "1rfff8wvwgr0clpf3h5j866jd8di5jchdsr6xlbxzhx0id00h0hd";
+        sha256 = "14ijxaymghbl1p0wql9cib5zlwiina7kall6w7g89csprkgbvhhk";
         authors = [
           "Isis Lovecruft <isis@patternsinthevoid.net>"
           "Henry de Valence <hdevalence@hdevalence.ca>"
@@ -6648,11 +6700,11 @@ rec {
         };
         resolvedDefaultFeatures = [ "clone-impls" "extra-traits" "fold" "full" "parsing" "printing" "quote" ];
       };
-      "syn 2.0.68" = rec {
+      "syn 2.0.69" = rec {
         crateName = "syn";
-        version = "2.0.68";
+        version = "2.0.69";
         edition = "2021";
-        sha256 = "1sf1y2hajhjav38ipg63c934xrgkz4v42fz24a0ckmmri06sf7wh";
+        sha256 = "19hmm4j0i3j2isp5c0zwj126j85xy3mvyrnl5hhyh8swhjiws7r0";
         authors = [
           "David Tolnay <dtolnay@gmail.com>"
         ];
@@ -6752,7 +6804,7 @@ rec {
         dependencies = [
           {
             name = "bitflags";
-            packageId = "bitflags 2.5.0";
+            packageId = "bitflags 2.6.0";
           }
           {
             name = "cap-fs-ext";
@@ -6907,7 +6959,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
           }
         ];
 
@@ -6935,9 +6987,9 @@ rec {
       };
       "tinyvec" = rec {
         crateName = "tinyvec";
-        version = "1.6.0";
+        version = "1.7.0";
         edition = "2018";
-        sha256 = "0l6bl2h62a5m44jdnpn7lmj14rd44via8180i7121fvm73mmrk47";
+        sha256 = "08ix7mhjjr53hg3a2k1hfgd46iq2lgxakvzsxfffk1d9ncpnlsyf";
         authors = [
           "Lokathor <zefria@gmail.com>"
         ];
@@ -6952,7 +7004,6 @@ rec {
           "alloc" = [ "tinyvec_macros" ];
           "arbitrary" = [ "dep:arbitrary" ];
           "real_blackbox" = [ "criterion/real_blackbox" ];
-          "rustc_1_55" = [ "rustc_1_40" ];
           "rustc_1_57" = [ "rustc_1_55" ];
           "serde" = [ "dep:serde" ];
           "std" = [ "alloc" ];
@@ -7101,7 +7152,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             features = [ "full" ];
           }
         ];
@@ -7437,7 +7488,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             usesDefaultFeatures = false;
             features = [ "full" "parsing" "printing" "visit-mut" "clone-impls" "extra-traits" "proc-macro" ];
           }
@@ -7758,9 +7809,9 @@ rec {
       };
       "ureq" = rec {
         crateName = "ureq";
-        version = "2.9.7";
+        version = "2.10.0";
         edition = "2018";
-        sha256 = "1kcmac881h6f1v9l5wqphh8kr7kr234ff243l8wf8mhb7hg866ni";
+        sha256 = "1smn0pai6qx0yn5nzrzg76535mgahnpafab2z7ps75szgqj9s4vj";
         authors = [
           "Martin Algesten <martin@algesten.se>"
           "Jacob Hoffman-Andrews <ureq@hoffman-andrews.com>"
@@ -7787,16 +7838,12 @@ rec {
             name = "rustls";
             packageId = "rustls";
             optional = true;
+            usesDefaultFeatures = false;
+            features = [ "ring" "logging" "std" "tls12" ];
           }
           {
             name = "rustls-pki-types";
             packageId = "rustls-pki-types";
-            optional = true;
-          }
-          {
-            name = "rustls-webpki";
-            packageId = "rustls-webpki";
-            rename = "webpki";
             optional = true;
           }
           {
@@ -7813,6 +7860,8 @@ rec {
           {
             name = "rustls";
             packageId = "rustls";
+            usesDefaultFeatures = false;
+            features = [ "std" "ring" ];
           }
         ];
         features = {
@@ -7828,7 +7877,7 @@ rec {
           "native-tls" = [ "dep:native-tls" ];
           "socks-proxy" = [ "dep:socks" ];
           "testdeps" = [ "dep:hootbin" ];
-          "tls" = [ "dep:webpki" "dep:webpki-roots" "dep:rustls" "dep:rustls-pki-types" ];
+          "tls" = [ "dep:webpki-roots" "dep:rustls" "dep:rustls-pki-types" ];
         };
         resolvedDefaultFeatures = [ "default" "gzip" "tls" ];
       };
@@ -7887,9 +7936,9 @@ rec {
       };
       "uuid" = rec {
         crateName = "uuid";
-        version = "1.9.0";
+        version = "1.9.1";
         edition = "2018";
-        sha256 = "1r8dr0025p55fbrycwffy4l9wyc43ldvjxdzvhw5hy17zs8379ry";
+        sha256 = "0fclkhbk1i5kkjsl7kns3l32hnln29p37zsw86c10nfsyz97zqax";
         authors = [
           "Ashley Mannix<ashleymannix@live.com.au>"
           "Dylan DPC<dylan.dpc@gmail.com>"
@@ -7937,16 +7986,16 @@ rec {
           "v4" = [ "rng" ];
           "v5" = [ "sha1" ];
           "v6" = [ "atomic" ];
-          "v7" = [ "atomic" "rng" ];
+          "v7" = [ "rng" ];
           "zerocopy" = [ "dep:zerocopy" ];
         };
         resolvedDefaultFeatures = [ "default" "fast-rng" "macro-diagnostics" "rng" "serde" "std" "v4" ];
       };
       "uuid-macro-internal" = rec {
         crateName = "uuid-macro-internal";
-        version = "1.9.0";
+        version = "1.9.1";
         edition = "2018";
-        sha256 = "0g2lz567wvvsq02h9lpnr82m6w60a1z048h55x647jyi532r9cyd";
+        sha256 = "13767mcmjkjpqgdi1ya4hax5blkbbcirgd5xd19cpqp1rpan9zx3";
         procMacro = true;
         libName = "uuid_macro_internal";
         authors = [
@@ -7964,7 +8013,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
           }
         ];
 
@@ -8053,7 +8102,7 @@ rec {
           }
           {
             name = "bitflags";
-            packageId = "bitflags 2.5.0";
+            packageId = "bitflags 2.6.0";
           }
           {
             name = "cap-fs-ext";
@@ -8229,7 +8278,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             features = [ "full" ];
           }
           {
@@ -8322,7 +8371,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             features = [ "visit" "full" ];
           }
           {
@@ -8371,11 +8420,11 @@ rec {
           "wasmparser" = [ "dep:wasmparser" ];
         };
       };
-      "wasm-encoder 0.211.1" = rec {
+      "wasm-encoder 0.212.0" = rec {
         crateName = "wasm-encoder";
-        version = "0.211.1";
+        version = "0.212.0";
         edition = "2021";
-        sha256 = "1m3hxnlk3cbl52vp4xrpbsi8x9kgddj4fidp69zkbvr024d96zay";
+        sha256 = "0czwsdmr0g3fd75m6969hrdmmlgxw6nilbymnsg95f0q8kgl06ah";
         libName = "wasm_encoder";
         authors = [
           "Nick Fitzgerald <fitzgen@gmail.com>"
@@ -8407,7 +8456,7 @@ rec {
           }
           {
             name = "bitflags";
-            packageId = "bitflags 2.5.0";
+            packageId = "bitflags 2.6.0";
           }
           {
             name = "hashbrown";
@@ -8861,7 +8910,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             features = [ "extra-traits" ];
           }
           {
@@ -9300,7 +9349,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             features = [ "full" ];
           }
         ];
@@ -9400,11 +9449,11 @@ rec {
         };
         resolvedDefaultFeatures = [ "std" ];
       };
-      "wast 211.0.1" = rec {
+      "wast 212.0.0" = rec {
         crateName = "wast";
-        version = "211.0.1";
+        version = "212.0.0";
         edition = "2021";
-        sha256 = "1ancjn2lmc6il1rdp7577w469lmia8ynnhw79aqsc3fhhbfhcmdj";
+        sha256 = "1xfip2ad58rdanzaj2rn37h3x9l81mj0la6qswfx3rdan1gs01j6";
         authors = [
           "Alex Crichton <alex@alexcrichton.com>"
         ];
@@ -9427,11 +9476,12 @@ rec {
           }
           {
             name = "wasm-encoder";
-            packageId = "wasm-encoder 0.211.1";
+            packageId = "wasm-encoder 0.212.0";
           }
         ];
         features = {
           "default" = [ "wasm-module" ];
+          "dwarf" = [ "dep:gimli" ];
         };
         resolvedDefaultFeatures = [ "default" "wasm-module" ];
       };
@@ -9455,19 +9505,21 @@ rec {
       };
       "wat" = rec {
         crateName = "wat";
-        version = "1.211.1";
+        version = "1.212.0";
         edition = "2021";
-        sha256 = "0zfx3cpflyv3f0k4z71hz45gq601hqwzq7slh8nsrv3fr2k6qwgb";
+        sha256 = "0bskhywz7zwil0jvql81mdf24vmdma6jm7s9v3pdd98i7zwsfk67";
         authors = [
           "Alex Crichton <alex@alexcrichton.com>"
         ];
         dependencies = [
           {
             name = "wast";
-            packageId = "wast 211.0.1";
+            packageId = "wast 212.0.0";
           }
         ];
-
+        features = {
+          "dwarf" = [ "wast/dwarf" ];
+        };
       };
       "web-sys" = rec {
         crateName = "web-sys";
@@ -9978,7 +10030,7 @@ rec {
           }
           {
             name = "bitflags";
-            packageId = "bitflags 2.5.0";
+            packageId = "bitflags 2.6.0";
           }
           {
             name = "thiserror";
@@ -10051,7 +10103,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             features = [ "full" ];
           }
           {
@@ -10084,7 +10136,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
             features = [ "full" ];
           }
           {
@@ -10107,12 +10159,12 @@ rec {
           {
             name = "winapi-i686-pc-windows-gnu";
             packageId = "winapi-i686-pc-windows-gnu";
-            target = { target, features }: (stdenv.hostPlatform.rust.rustcTarget == "i686-pc-windows-gnu");
+            target = { target, features }: (pkgs.rust.lib.toRustTarget stdenv.hostPlatform == "i686-pc-windows-gnu");
           }
           {
             name = "winapi-x86_64-pc-windows-gnu";
             packageId = "winapi-x86_64-pc-windows-gnu";
-            target = { target, features }: (stdenv.hostPlatform.rust.rustcTarget == "x86_64-pc-windows-gnu");
+            target = { target, features }: (pkgs.rust.lib.toRustTarget stdenv.hostPlatform == "x86_64-pc-windows-gnu");
           }
         ];
         features = {
@@ -10215,7 +10267,7 @@ rec {
         dependencies = [
           {
             name = "windows-targets";
-            packageId = "windows-targets 0.52.5";
+            packageId = "windows-targets 0.52.6";
           }
         ];
         features = {
@@ -10528,7 +10580,7 @@ rec {
         dependencies = [
           {
             name = "windows-targets";
-            packageId = "windows-targets 0.52.5";
+            packageId = "windows-targets 0.52.6";
           }
         ];
         features = {
@@ -10777,7 +10829,7 @@ rec {
           {
             name = "windows_aarch64_gnullvm";
             packageId = "windows_aarch64_gnullvm 0.48.5";
-            target = { target, features }: (stdenv.hostPlatform.rust.rustcTarget == "aarch64-pc-windows-gnullvm");
+            target = { target, features }: (pkgs.rust.lib.toRustTarget stdenv.hostPlatform == "aarch64-pc-windows-gnullvm");
           }
           {
             name = "windows_aarch64_msvc";
@@ -10802,7 +10854,7 @@ rec {
           {
             name = "windows_x86_64_gnullvm";
             packageId = "windows_x86_64_gnullvm 0.48.5";
-            target = { target, features }: (stdenv.hostPlatform.rust.rustcTarget == "x86_64-pc-windows-gnullvm");
+            target = { target, features }: (pkgs.rust.lib.toRustTarget stdenv.hostPlatform == "x86_64-pc-windows-gnullvm");
           }
           {
             name = "windows_x86_64_msvc";
@@ -10812,11 +10864,11 @@ rec {
         ];
 
       };
-      "windows-targets 0.52.5" = rec {
+      "windows-targets 0.52.6" = rec {
         crateName = "windows-targets";
-        version = "0.52.5";
+        version = "0.52.6";
         edition = "2021";
-        sha256 = "1sz7jrnkygmmlj1ia8fk85wbyil450kq5qkh5qh9sh2rcnj161vg";
+        sha256 = "0wwrx625nwlfp7k93r2rra568gad1mwd888h1jwnl0vfg5r4ywlv";
         libName = "windows_targets";
         authors = [
           "Microsoft"
@@ -10824,42 +10876,42 @@ rec {
         dependencies = [
           {
             name = "windows_aarch64_gnullvm";
-            packageId = "windows_aarch64_gnullvm 0.52.5";
-            target = { target, features }: (stdenv.hostPlatform.rust.rustcTarget == "aarch64-pc-windows-gnullvm");
+            packageId = "windows_aarch64_gnullvm 0.52.6";
+            target = { target, features }: (pkgs.rust.lib.toRustTarget stdenv.hostPlatform == "aarch64-pc-windows-gnullvm");
           }
           {
             name = "windows_aarch64_msvc";
-            packageId = "windows_aarch64_msvc 0.52.5";
+            packageId = "windows_aarch64_msvc 0.52.6";
             target = { target, features }: (("aarch64" == target."arch" or null) && ("msvc" == target."env" or null) && (!(target."windows_raw_dylib" or false)));
           }
           {
             name = "windows_i686_gnu";
-            packageId = "windows_i686_gnu 0.52.5";
+            packageId = "windows_i686_gnu 0.52.6";
             target = { target, features }: (("x86" == target."arch" or null) && ("gnu" == target."env" or null) && (!("llvm" == target."abi" or null)) && (!(target."windows_raw_dylib" or false)));
           }
           {
             name = "windows_i686_gnullvm";
             packageId = "windows_i686_gnullvm";
-            target = { target, features }: (stdenv.hostPlatform.rust.rustcTarget == "i686-pc-windows-gnullvm");
+            target = { target, features }: (pkgs.rust.lib.toRustTarget stdenv.hostPlatform == "i686-pc-windows-gnullvm");
           }
           {
             name = "windows_i686_msvc";
-            packageId = "windows_i686_msvc 0.52.5";
+            packageId = "windows_i686_msvc 0.52.6";
             target = { target, features }: (("x86" == target."arch" or null) && ("msvc" == target."env" or null) && (!(target."windows_raw_dylib" or false)));
           }
           {
             name = "windows_x86_64_gnu";
-            packageId = "windows_x86_64_gnu 0.52.5";
+            packageId = "windows_x86_64_gnu 0.52.6";
             target = { target, features }: (("x86_64" == target."arch" or null) && ("gnu" == target."env" or null) && (!("llvm" == target."abi" or null)) && (!(target."windows_raw_dylib" or false)));
           }
           {
             name = "windows_x86_64_gnullvm";
-            packageId = "windows_x86_64_gnullvm 0.52.5";
-            target = { target, features }: (stdenv.hostPlatform.rust.rustcTarget == "x86_64-pc-windows-gnullvm");
+            packageId = "windows_x86_64_gnullvm 0.52.6";
+            target = { target, features }: (pkgs.rust.lib.toRustTarget stdenv.hostPlatform == "x86_64-pc-windows-gnullvm");
           }
           {
             name = "windows_x86_64_msvc";
-            packageId = "windows_x86_64_msvc 0.52.5";
+            packageId = "windows_x86_64_msvc 0.52.6";
             target = { target, features }: ((("x86_64" == target."arch" or null) || ("arm64ec" == target."arch" or null)) && ("msvc" == target."env" or null) && (!(target."windows_raw_dylib" or false)));
           }
         ];
@@ -10875,11 +10927,11 @@ rec {
         ];
 
       };
-      "windows_aarch64_gnullvm 0.52.5" = rec {
+      "windows_aarch64_gnullvm 0.52.6" = rec {
         crateName = "windows_aarch64_gnullvm";
-        version = "0.52.5";
+        version = "0.52.6";
         edition = "2021";
-        sha256 = "0qrjimbj67nnyn7zqy15mzzmqg0mn5gsr2yciqjxm3cb3vbyx23h";
+        sha256 = "1lrcq38cr2arvmz19v32qaggvj8bh1640mdm9c2fr877h0hn591j";
         authors = [
           "Microsoft"
         ];
@@ -10895,11 +10947,11 @@ rec {
         ];
 
       };
-      "windows_aarch64_msvc 0.52.5" = rec {
+      "windows_aarch64_msvc 0.52.6" = rec {
         crateName = "windows_aarch64_msvc";
-        version = "0.52.5";
+        version = "0.52.6";
         edition = "2021";
-        sha256 = "1dmga8kqlmln2ibckk6mxc9n59vdg8ziqa2zr8awcl720hazv1cr";
+        sha256 = "0sfl0nysnz32yyfh773hpi49b1q700ah6y7sacmjbqjjn5xjmv09";
         authors = [
           "Microsoft"
         ];
@@ -10915,11 +10967,11 @@ rec {
         ];
 
       };
-      "windows_i686_gnu 0.52.5" = rec {
+      "windows_i686_gnu 0.52.6" = rec {
         crateName = "windows_i686_gnu";
-        version = "0.52.5";
+        version = "0.52.6";
         edition = "2021";
-        sha256 = "0w4np3l6qwlra9s2xpflqrs60qk1pz6ahhn91rr74lvdy4y0gfl8";
+        sha256 = "02zspglbykh1jh9pi7gn8g1f97jh1rrccni9ivmrfbl0mgamm6wf";
         authors = [
           "Microsoft"
         ];
@@ -10927,9 +10979,9 @@ rec {
       };
       "windows_i686_gnullvm" = rec {
         crateName = "windows_i686_gnullvm";
-        version = "0.52.5";
+        version = "0.52.6";
         edition = "2021";
-        sha256 = "1s9f4gff0cixd86mw3n63rpmsm4pmr4ffndl6s7qa2h35492dx47";
+        sha256 = "0rpdx1537mw6slcpqa0rm3qixmsb79nbhqy5fsm3q2q9ik9m5vhf";
         authors = [
           "Microsoft"
         ];
@@ -10945,11 +10997,11 @@ rec {
         ];
 
       };
-      "windows_i686_msvc 0.52.5" = rec {
+      "windows_i686_msvc 0.52.6" = rec {
         crateName = "windows_i686_msvc";
-        version = "0.52.5";
+        version = "0.52.6";
         edition = "2021";
-        sha256 = "1gw7fklxywgpnwbwg43alb4hm0qjmx72hqrlwy5nanrxs7rjng6v";
+        sha256 = "0rkcqmp4zzmfvrrrx01260q3xkpzi6fzi2x2pgdcdry50ny4h294";
         authors = [
           "Microsoft"
         ];
@@ -10965,11 +11017,11 @@ rec {
         ];
 
       };
-      "windows_x86_64_gnu 0.52.5" = rec {
+      "windows_x86_64_gnu 0.52.6" = rec {
         crateName = "windows_x86_64_gnu";
-        version = "0.52.5";
+        version = "0.52.6";
         edition = "2021";
-        sha256 = "1n8p2mcf3lw6300k77a0knksssmgwb9hynl793mhkzyydgvlchjf";
+        sha256 = "0y0sifqcb56a56mvn7xjgs8g43p33mfqkd8wj1yhrgxzma05qyhl";
         authors = [
           "Microsoft"
         ];
@@ -10985,11 +11037,11 @@ rec {
         ];
 
       };
-      "windows_x86_64_gnullvm 0.52.5" = rec {
+      "windows_x86_64_gnullvm 0.52.6" = rec {
         crateName = "windows_x86_64_gnullvm";
-        version = "0.52.5";
+        version = "0.52.6";
         edition = "2021";
-        sha256 = "15n56jrh4s5bz66zimavr1rmcaw6wa306myrvmbc6rydhbj9h8l5";
+        sha256 = "03gda7zjx1qh8k9nnlgb7m3w3s1xkysg55hkd1wjch8pqhyv5m94";
         authors = [
           "Microsoft"
         ];
@@ -11005,11 +11057,11 @@ rec {
         ];
 
       };
-      "windows_x86_64_msvc 0.52.5" = rec {
+      "windows_x86_64_msvc 0.52.6" = rec {
         crateName = "windows_x86_64_msvc";
-        version = "0.52.5";
+        version = "0.52.6";
         edition = "2021";
-        sha256 = "1w1bn24ap8dp9i85s8mlg8cim2bl2368bd6qyvm0xzqvzmdpxi5y";
+        sha256 = "1v7rb5cibyzx8vak29pdrk8nx9hycsjs4w0jgms08qk49jl6v7sq";
         authors = [
           "Microsoft"
         ];
@@ -11096,7 +11148,7 @@ rec {
         dependencies = [
           {
             name = "bitflags";
-            packageId = "bitflags 2.5.0";
+            packageId = "bitflags 2.6.0";
           }
           {
             name = "windows-sys";
@@ -11214,9 +11266,9 @@ rec {
       };
       "zerocopy" = rec {
         crateName = "zerocopy";
-        version = "0.7.34";
+        version = "0.7.35";
         edition = "2018";
-        sha256 = "11xhrwixm78m6ca1jdxf584wdwvpgg7q00vg21fhwl0psvyf71xf";
+        sha256 = "1w36q7b9il2flg0qskapgi9ymgg7p985vniqd09vi0mwib8lz6qv";
         authors = [
           "Joshua Liebow-Feeser <joshlf@google.com>"
         ];
@@ -11250,9 +11302,9 @@ rec {
       };
       "zerocopy-derive" = rec {
         crateName = "zerocopy-derive";
-        version = "0.7.34";
+        version = "0.7.35";
         edition = "2018";
-        sha256 = "0fqvglw01w3hp7xj9gdk1800x9j7v58s9w8ijiyiz2a7krb39s8m";
+        sha256 = "0gnf2ap2y92nwdalzz3x7142f2b83sni66l39vxp2ijd6j080kzs";
         procMacro = true;
         libName = "zerocopy_derive";
         authors = [
@@ -11269,7 +11321,7 @@ rec {
           }
           {
             name = "syn";
-            packageId = "syn 2.0.68";
+            packageId = "syn 2.0.69";
           }
         ];
 
@@ -11293,9 +11345,9 @@ rec {
       };
       "zstd" = rec {
         crateName = "zstd";
-        version = "0.13.1";
+        version = "0.13.2";
         edition = "2018";
-        sha256 = "0fn2ijl2zh3ybyhbhyvajy82plvv7bjfla94mlh12fi02harny1d";
+        sha256 = "1ygkr6wspm9clbp7ykyl0rv69cfsf9q4lic9wcqiwn34lrwbgwpw";
         authors = [
           "Alexandre Bury <alexandre.bury@gmail.com>"
         ];
@@ -11325,9 +11377,9 @@ rec {
       };
       "zstd-safe" = rec {
         crateName = "zstd-safe";
-        version = "7.1.0";
+        version = "7.2.0";
         edition = "2018";
-        sha256 = "02pcwzf8j69hvzwkhkh64rayb1wccwjn1a5qr0ca00xwqr2rpn8w";
+        sha256 = "1yhs339xpzxdmzxdwqrszk1b2yf7x2fzqdn1fp3qsmkv3sbnwmgs";
         libName = "zstd_safe";
         authors = [
           "Alexandre Bury <alexandre.bury@gmail.com>"
@@ -11358,10 +11410,10 @@ rec {
       };
       "zstd-sys" = rec {
         crateName = "zstd-sys";
-        version = "2.0.11+zstd.1.5.6";
+        version = "2.0.12+zstd.1.5.6";
         edition = "2018";
         links = "zstd";
-        sha256 = "1m76q8563hwi6qgvzcqybbq6nfb0r4dzx1mp5vqydwxnq1ajqrbm";
+        sha256 = "04sc9svs555yw90d2xcjxr8lg3zqrycdxxlzkaflbjy3431l0kha";
         libName = "zstd_sys";
         authors = [
           "Alexandre Bury <alexandre.bury@gmail.com>"
@@ -11398,11 +11450,14 @@ rec {
     fuchsia = true;
     test = false;
 
-    inherit (platform.rust.platform)
-      arch
-      os
-      vendor;
-    family = platform.rust.platform.target-family;
+    /* We are choosing an arbitrary rust version to grab `lib` from,
+      which is unfortunate, but `lib` has been version-agnostic the
+      whole time so this is good enough for now.
+    */
+    os = pkgs.rust.lib.toTargetOs platform;
+    arch = pkgs.rust.lib.toTargetArch platform;
+    family = pkgs.rust.lib.toTargetFamily platform;
+    vendor = pkgs.rust.lib.toTargetVendor platform;
     env = "gnu";
     endian =
       if platform.parsed.cpu.significantByte.name == "littleEndian"
@@ -11645,7 +11700,7 @@ rec {
           let
             self = {
               crates = lib.mapAttrs (packageId: value: buildByPackageIdForPkgsImpl self pkgs packageId) crateConfigs;
-              target = makeTarget stdenv.hostPlatform;
+              target = makeTarget pkgs.stdenv.hostPlatform;
               build = mkBuiltByPackageIdByPkgs pkgs.buildPackages;
             };
           in
@@ -11720,6 +11775,8 @@ rec {
           buildRustCrateForPkgsFunc pkgs
             (
               crateConfig // {
+                # https://github.com/NixOS/nixpkgs/issues/218712
+                dontStrip = stdenv.hostPlatform.isDarwin;
                 src = crateConfig.src or (
                   pkgs.fetchurl rec {
                     name = "${crateConfig.crateName}-${crateConfig.version}.tar.gz";
