@@ -10,7 +10,7 @@ use serde::{
     Deserialize, Deserializer, Serialize, Serializer,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Plugin {
     GitHub {
         owner: String,

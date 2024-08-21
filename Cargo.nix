@@ -949,6 +949,10 @@ rec {
             rename = "brack-plugin";
           }
           {
+            name = "bytes";
+            packageId = "bytes";
+          }
+          {
             name = "futures";
             packageId = "futures";
           }
