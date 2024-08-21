@@ -716,10 +716,6 @@ rec {
             packageId = "extism";
           }
           {
-            name = "futures";
-            packageId = "futures";
-          }
-          {
             name = "reqwest";
             packageId = "reqwest 0.12.7";
           }
@@ -933,6 +929,13 @@ rec {
         crateName = "brack-project-manager";
         version = "0.1.0";
         edition = "2021";
+        crateBin = [
+          {
+            name = "debug_download_plugin";
+            path = "src/debug/debug_download_plugin.rs";
+            requiredFeatures = [ "debug" ];
+          }
+        ];
         src = lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-project-manager; };
         libName = "brack_project_manager";
         dependencies = [
@@ -959,6 +962,10 @@ rec {
             features = [ "derive" ];
           }
           {
+            name = "sha2";
+            packageId = "sha2";
+          }
+          {
             name = "tokio";
             packageId = "tokio";
             features = [ "macros" ];
@@ -968,7 +975,9 @@ rec {
             packageId = "toml 0.8.19";
           }
         ];
-
+        features = {
+        };
+        resolvedDefaultFeatures = [ "debug" "default" ];
       };
       "brack-sdk-rs" = rec {
         crateName = "brack-sdk-rs";

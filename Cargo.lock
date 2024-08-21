@@ -208,7 +208,6 @@ dependencies = [
  "brack-tokenizer",
  "clap",
  "extism",
- "futures",
  "reqwest 0.12.7",
  "tokio",
  "toml 0.8.19",
@@ -283,6 +282,7 @@ dependencies = [
  "futures",
  "reqwest 0.11.27",
  "serde",
+ "sha2",
  "tokio",
  "toml 0.8.19",
 ]

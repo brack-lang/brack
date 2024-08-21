@@ -13,3 +13,14 @@ tokio = { version = "1.38.0", features = ["macros"] }
 toml = "0.8.14"
 brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
 futures = "0.3.30"
+sha2 = "0.10.8"
+
+
+[features]
+default = []
+debug = []
+
+[[bin]]
+name = "debug_download_plugin"
+path = "src/debug/debug_download_plugin.rs"
+required-features = ["debug"]

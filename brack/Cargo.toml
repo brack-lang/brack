@@ -17,7 +17,6 @@ brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brac
 tokio = { version = "1", features = ["full"] }
 toml = "0.8.14"
 extism = "1.4.1"
-futures = "0.3.30"
 reqwest = "0.12.5"
 
 [dependencies.clap]

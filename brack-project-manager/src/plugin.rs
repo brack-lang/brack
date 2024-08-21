@@ -1,5 +1,6 @@
 use crate::config::Config;
 use core::fmt;
+use sha2::{Digest, Sha256};
 use std::{collections::HashMap, fs::File, io, path::Path};
 
 use anyhow::Result;
@@ -114,6 +115,14 @@ impl<'de> Deserialize<'de> for Plugin {
 
         const FIELDS: &'static [&'static str] = &["schema", "owner", "repo", "version"];
         deserializer.deserialize_struct("Plugin", FIELDS, PluginVisitor)
+    }
+}
+
+impl Plugin {
+    pub fn hash_sha256(&self) -> String {
+        let mut hasher = Sha256::new();
+        hasher.update(format!("{:?}", self));
+        format!("{:x}", hasher.finalize())
     }
 }
 
