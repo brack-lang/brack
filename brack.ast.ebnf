@@ -1,0 +1,8 @@
+document := stmt*
+stmt := (curly | expr ("\n" expr)*) ("\n"+ | "\n"* EOF)
+expr := (text | square | angle)+
+angle := "<" ident (expr ("," expr)*)? ">"
+curly := "{" ident (expr ("," expr)*)? "}"
+square := "[" ident (expr ("," expr)*)? "]"
+ident := text "." text
+text := [^.]+
