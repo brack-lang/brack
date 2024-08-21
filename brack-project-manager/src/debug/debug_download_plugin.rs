@@ -3,8 +3,9 @@ use brack_project_manager::project::Project;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let config = toml::from_str(&std::fs::read_to_string("Brack.toml").unwrap()).unwrap();
-    let mut project = Project::new(config);
+    let mut project = Project::new();
+    project.load_brack_toml()?;
+    project.clear_plugins()?;
     project.download_plugins_using_config().await?;
     dbg!(&project.plugins_metadata);
     Ok(())

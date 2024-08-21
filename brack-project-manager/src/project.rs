@@ -16,14 +16,14 @@ pub struct Project {
 }
 
 impl Project {
-    pub fn new(config: Config) -> Self {
+    pub fn new() -> Self {
         Self {
-            config,
+            config: Default::default(),
             plugins_metadata: Default::default(),
         }
     }
 
-    pub fn update_config_from_brack_toml(&mut self) -> Result<()> {
+    pub fn load_brack_toml(&mut self) -> Result<()> {
         let config: Config = toml::from_str(&std::fs::read_to_string("Brack.toml")?)?;
         self.config = config;
         Ok(())
