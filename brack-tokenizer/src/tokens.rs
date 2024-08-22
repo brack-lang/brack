@@ -9,6 +9,7 @@ pub enum Token {
     NewLine(Location),
     WhiteSpace(Location),
     Dot(Location),
+    BackSlash(Location),
     AngleBracketOpen(Location),
     AngleBracketClose(Location),
     SquareBracketOpen(Location),
@@ -44,7 +45,7 @@ pub fn mock_location() -> Location {
     }
 }
 
-pub fn marge_location(location1: &Location, location2: &Location) -> Location {
+pub fn merge_location(location1: &Location, location2: &Location) -> Location {
     let start = if location1.start.line < location2.start.line {
         location1.start.clone()
     } else if location1.start.line == location2.start.line {
@@ -81,6 +82,7 @@ impl Token {
             Token::NewLine(location) => location.clone(),
             Token::WhiteSpace(location) => location.clone(),
             Token::Dot(location) => location.clone(),
+            Token::BackSlash(location) => location.clone(),
             Token::AngleBracketOpen(location) => location.clone(),
             Token::AngleBracketClose(location) => location.clone(),
             Token::SquareBracketOpen(location) => location.clone(),

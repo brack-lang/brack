@@ -72,11 +72,11 @@ pub fn dispatch(t: &Tokenizer) -> Result<Vec<Token>> {
     match (&head[..], &head2[..]) {
         ("\\", _) => backslash::tokenize(t),
         ("<", _) => angle_bracket_open::tokenize(t),
-        (">", _) if angle_c > 0 => angle_bracket_close::tokenize(t),
+        (">", _) => angle_bracket_close::tokenize(t),
         ("{", _) => curly_bracket_open::tokenize(t),
-        ("}", _) if curly_c > 0 => curly_bracket_close::tokenize(t),
+        ("}", _) => curly_bracket_close::tokenize(t),
         ("[", _) => square_bracket_open::tokenize(t),
-        ("]", _) if square_c > 0 => square_bracket_close::tokenize(t),
+        ("]", _) => square_bracket_close::tokenize(t),
         (".", _) if look_for_ident => dot::tokenize(t),
         (",", _) if nested => comma::tokenize(t),
         (" ", _) if nested => whitespace::tokenize(t),
@@ -86,9 +86,9 @@ pub fn dispatch(t: &Tokenizer) -> Result<Vec<Token>> {
         (_, "<") | (_, "{") | (_, "[") | (_, "\n") | (_, "\0") => text::tokenize(t),
         (_, " ") if nested => text::tokenize(t),
         (_, ",") if nested => text::tokenize(t),
-        (_, ">") if angle_c > 0 => text::tokenize(t),
-        (_, "]") if square_c > 0 => text::tokenize(t),
-        (_, "}") if curly_c > 0 => text::tokenize(t),
+        (_, ">") => text::tokenize(t),
+        (_, "]") => text::tokenize(t),
+        (_, "}") => text::tokenize(t),
         _ => {
             let t2 = Tokenizer {
                 column: Some(column + 1),
