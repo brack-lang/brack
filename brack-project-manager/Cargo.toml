@@ -12,6 +12,10 @@ serde = { version = "1.0.203", features = ["derive"] }
 tokio = { version = "1.38.0", features = ["macros"] }
 toml = "0.8.14"
 brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
+brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
+brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
+brack-expander = { git = "https://github.com/brack-lang/brack", package = "brack-expander" }
+brack-codegen = { git = "https://github.com/brack-lang/brack", package = "brack-codegen" }
 futures = "0.3.30"
 sha2 = "0.10.8"
 bytes = "1.7.1"
@@ -24,4 +28,9 @@ debug = []
 [[bin]]
 name = "debug_download_plugin"
 path = "src/debug/debug_download_plugin.rs"
+required-features = ["debug"]
+
+[[bin]]
+name = "debug_build"
+path = "src/debug/debug_build.rs"
 required-features = ["debug"]

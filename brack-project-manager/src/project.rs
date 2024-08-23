@@ -87,4 +87,43 @@ impl Project {
 
         Ok(())
     }
+
+    pub fn build(&self) -> Result<()> {
+        let mut plugins = brack_plugin::plugin::new_plugins(self.plugins_metadata.clone())?;
+
+        let entries = std::fs::read_dir("docs")?;
+        for entry in entries {
+            let entry = entry?;
+            let path = entry.path();
+            let file_stem = path
+                .file_stem()
+                .ok_or_else(|| anyhow::anyhow!("Could not get file name from path."))?
+                .to_str()
+                .ok_or_else(|| anyhow::anyhow!("Could not convert file name to string."))?;
+            if path.ends_with(".[]") {
+                let tokenized = brack_tokenizer::tokenize::tokenize(&path.to_str().unwrap())?;
+                let parsed = brack_parser::parse::parse(&tokenized)?;
+                let expanded = brack_expander::expand::expander(&parsed, &mut plugins)?;
+                let gen = brack_codegen::generate::generate(&expanded, &mut plugins)?;
+                std::fs::create_dir_all("out")?;
+                std::fs::write(
+                    format!("out/{}.{}", file_stem, self.config.document.backend),
+                    gen,
+                )?;
+            }
+        }
+
+        println!("Build succeeded.");
+        for out in std::fs::read_dir("out")? {
+            let out = out?;
+            let path = out.path();
+            let file_stem = path
+                .file_name()
+                .ok_or_else(|| anyhow::anyhow!("Could not get file name from path."))?
+                .to_str()
+                .ok_or_else(|| anyhow::anyhow!("Could not convert file name to string."))?;
+            println!("  - ./out/{}", file_stem);
+        }
+        Ok(())
+    }
 }

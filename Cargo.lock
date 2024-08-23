@@ -278,7 +278,11 @@ name = "brack-project-manager"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "brack-codegen",
+ "brack-expander",
+ "brack-parser",
  "brack-plugin",
+ "brack-tokenizer",
  "bytes",
  "futures",
  "reqwest 0.11.27",
