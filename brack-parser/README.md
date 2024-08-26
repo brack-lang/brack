@@ -10,7 +10,7 @@ You can also refer to `./brack.cst.ebnf` for concrete syntax.
 document := (stmt newline newline+)* stmt newline* EOF
 stmt := expr_or_close (newline expr_or_close)*
 expr_or_close := expr | bracket_close
-escaped := backslash | (dot | comma | bracket_open | bracket_close | backslash | .)
+escaped := backslash (dot | comma | bracket_open | bracket_close | backslash | .)
 expr := (escaped | module | ident | bracket | dot | comma | whitespace | text)*
 bracket := bracket_open (expr | newline)* bracket_close?
 bracket_open := angle_bracket_open | square_bracket_open | curly_bracket_open
