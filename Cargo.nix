@@ -292,7 +292,7 @@ rec {
           "perf-literal" = [ "dep:memchr" ];
           "std" = [ "memchr?/std" ];
         };
-        resolvedDefaultFeatures = [ "std" ];
+        resolvedDefaultFeatures = [ "perf-literal" "std" ];
       };
       "ambient-authority" = rec {
         crateName = "ambient-authority";
@@ -664,6 +664,11 @@ rec {
             path = "src/main.rs";
             requiredFeatures = [ ];
           }
+          {
+            name = "debug_compile";
+            path = "src/debug/debug_compile.rs";
+            requiredFeatures = [ "debug" ];
+          }
         ];
         src = lib.cleanSourceWith { filter = sourceFilter;  src = ./brack; };
         dependencies = [
@@ -716,6 +721,10 @@ rec {
             packageId = "extism";
           }
           {
+            name = "regex";
+            packageId = "regex";
+          }
+          {
             name = "reqwest";
             packageId = "reqwest 0.12.7";
           }
@@ -729,7 +738,9 @@ rec {
             packageId = "toml 0.8.19";
           }
         ];
-
+        features = {
+        };
+        resolvedDefaultFeatures = [ "debug" "default" ];
       };
       "brack-codegen" = rec {
         crateName = "brack-codegen";
@@ -844,8 +855,8 @@ rec {
         edition = "2021";
         crateBin = [
           {
-            name = "debug_compile";
-            path = "src/debug/debug_compile.rs";
+            name = "debug_parse";
+            path = "src/debug/debug_parse.rs";
             requiredFeatures = [ "debug" ];
           }
         ];
@@ -931,6 +942,11 @@ rec {
         edition = "2021";
         crateBin = [
           {
+            name = "debug_build";
+            path = "src/debug/debug_build.rs";
+            requiredFeatures = [ "debug" ];
+          }
+          {
             name = "debug_download_plugin";
             path = "src/debug/debug_download_plugin.rs";
             requiredFeatures = [ "debug" ];
@@ -944,9 +960,29 @@ rec {
             packageId = "anyhow";
           }
           {
+            name = "brack-codegen";
+            packageId = "brack-codegen";
+            rename = "brack-codegen";
+          }
+          {
+            name = "brack-expander";
+            packageId = "brack-expander";
+            rename = "brack-expander";
+          }
+          {
+            name = "brack-parser";
+            packageId = "brack-parser";
+            rename = "brack-parser";
+          }
+          {
             name = "brack-plugin";
             packageId = "brack-plugin";
             rename = "brack-plugin";
+          }
+          {
+            name = "brack-tokenizer";
+            packageId = "brack-tokenizer";
+            rename = "brack-tokenizer";
           }
           {
             name = "bytes";
@@ -6032,7 +6068,7 @@ rec {
           "unstable" = [ "pattern" ];
           "use_std" = [ "std" ];
         };
-        resolvedDefaultFeatures = [ "std" "unicode-case" "unicode-perl" ];
+        resolvedDefaultFeatures = [ "default" "perf" "perf-backtrack" "perf-cache" "perf-dfa" "perf-inline" "perf-literal" "perf-onepass" "std" "unicode" "unicode-age" "unicode-bool" "unicode-case" "unicode-gencat" "unicode-perl" "unicode-script" "unicode-segment" ];
       };
       "regex-automata 0.1.10" = rec {
         crateName = "regex-automata";
@@ -6118,7 +6154,7 @@ rec {
           "unicode-script" = [ "regex-syntax?/unicode-script" ];
           "unicode-segment" = [ "regex-syntax?/unicode-segment" ];
         };
-        resolvedDefaultFeatures = [ "alloc" "meta" "nfa-pikevm" "nfa-thompson" "std" "syntax" "unicode-case" "unicode-perl" "unicode-word-boundary" ];
+        resolvedDefaultFeatures = [ "alloc" "dfa-onepass" "hybrid" "meta" "nfa-backtrack" "nfa-pikevm" "nfa-thompson" "perf-inline" "perf-literal" "perf-literal-multisubstring" "perf-literal-substring" "std" "syntax" "unicode" "unicode-age" "unicode-bool" "unicode-case" "unicode-gencat" "unicode-perl" "unicode-script" "unicode-segment" "unicode-word-boundary" ];
       };
       "regex-syntax 0.6.29" = rec {
         crateName = "regex-syntax";
@@ -6150,7 +6186,7 @@ rec {
           "default" = [ "std" "unicode" ];
           "unicode" = [ "unicode-age" "unicode-bool" "unicode-case" "unicode-gencat" "unicode-perl" "unicode-script" "unicode-segment" ];
         };
-        resolvedDefaultFeatures = [ "std" "unicode-case" "unicode-perl" ];
+        resolvedDefaultFeatures = [ "default" "std" "unicode" "unicode-age" "unicode-bool" "unicode-case" "unicode-gencat" "unicode-perl" "unicode-script" "unicode-segment" ];
       };
       "reqwest 0.11.27" = rec {
         crateName = "reqwest";

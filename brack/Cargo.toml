@@ -23,3 +23,12 @@ regex = "1.10.6"
 [dependencies.clap]
 version = "4.5.7"
 features = ["derive"]
+
+[features]
+default = []
+debug = []
+
+[[bin]]
+name = "debug_compile"
+path = "src/debug/debug_compile.rs"
+required-features = ["debug"]

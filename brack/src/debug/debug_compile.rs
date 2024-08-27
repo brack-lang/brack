@@ -1,15 +1,8 @@
-use std::collections::HashMap;
-
 use anyhow::Result;
 use brack::sub_commands::SubCommands;
-use clap::Parser;
 use regex::Regex;
-
-#[derive(Parser, Debug)]
-struct Args {
-    #[clap(subcommand)]
-    subcommand: SubCommands,
-}
+use std::collections::HashMap;
+use tokio;
 
 pub fn run_compile(subcommand: SubCommands) -> Result<()> {
     let mut pathes = HashMap::new();
@@ -36,11 +29,6 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
     for entry in entries {
         let entry = entry?;
         let path = entry.path();
-        // let name = path
-        //     .file_name()
-        //     .ok_or_else(|| anyhow::anyhow!("Could not get file name from path."))?
-        //     .to_str()
-        //     .ok_or_else(|| anyhow::anyhow!("Could not convert file name to string."))?;
         let capture = pattern.captures(
             path.to_str()
                 .ok_or_else(|| anyhow::anyhow!("Could not convert file name to string."))?,
@@ -65,50 +53,14 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
     Ok(())
 }
 
-fn new_project(name: &str) -> Result<()> {
-    std::fs::create_dir(name)?;
-    std::fs::create_dir(format!("{}/docs", name))?;
-    std::fs::write(format!("{}/docs/main.[]", name), "")?;
-    std::fs::write(
-        format!("{}/Brack.toml", name),
-        format!(
-            r#"[document]
-name = "{}"
-version = "0.1.0"
-backend = ""
-authors = ["your name <your email>"]
-
-[plugins]
-"#,
-            name
-        ),
-    )?;
-    std::fs::write(
-        format!("{}/.gitignore", name),
-        r#"plugins
-out
-"#,
-    )?;
-    Ok(())
-}
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    let args = Args::parse();
-    match args.subcommand {
-        SubCommands::Build => {
-            let mut project = brack_project_manager::project::Project::new();
-            project.load_brack_toml()?;
-            project.download_plugins_using_config().await?;
-            project.build()?;
-        }
-        SubCommands::Compile { .. } => run_compile(args.subcommand)?,
-        SubCommands::LanguageServer => {
-            let mut language_server = brack_language_server::server::LanguageServer::new();
-            language_server.run().await?;
-        }
-        SubCommands::New { name } => new_project(&name)?,
-        SubCommands::Add { schema } => brack_project_manager::plugin::add_plugin(&schema).await?,
-    }
+    let args = SubCommands::Compile {
+        plugins_dir_path: Some("plugins".to_string()),
+        backend: "html".to_string(),
+        filename: "docs/main.[]".to_string(),
+    };
+    run_compile(args)?;
+
     Ok(())
 }
