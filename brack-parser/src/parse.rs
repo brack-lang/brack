@@ -6,7 +6,7 @@ use crate::{
     eof, newline, stmt,
 };
 
-// (stmt newline newline+)* stmt newline* EOF
+// (stmt newline newline+)* stmt? newline* EOF
 pub fn parse<'a>(tokens: &'a [Token]) -> Result<CST> {
     let mut tokens = tokens;
     let mut cst = new_document();
