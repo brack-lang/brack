@@ -14,6 +14,7 @@ brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-p
 brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
 brack-plugin-manager = { git = "https://github.com/brack-lang/brack", package = "brack-plugin-manager" }
 brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
+brack-transformer = { git = "https://github.com/brack-lang/brack", package = "brack-transformer" }
 tokio = { version = "1", features = ["full"] }
 toml = "0.8.14"
 

@@ -200,6 +200,7 @@ dependencies = [
  "brack-plugin",
  "brack-plugin-manager",
  "brack-tokenizer",
+ "brack-transformer",
  "clap",
  "tokio",
  "toml 0.8.19",
@@ -213,6 +214,7 @@ dependencies = [
  "brack-parser",
  "brack-plugin",
  "brack-sdk-rs",
+ "brack-transformer",
  "extism",
 ]
 
@@ -224,6 +226,7 @@ dependencies = [
  "brack-parser",
  "brack-plugin",
  "brack-sdk-rs",
+ "brack-transformer",
  "extism",
 ]
 
@@ -292,6 +295,19 @@ dependencies = [
  "anyhow",
  "serde",
  "unicode-segmentation",
+]
+
+[[package]]
+name = "brack-transformer"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "brack-parser",
+ "brack-tokenizer",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "uuid",
 ]
 
 [[package]]

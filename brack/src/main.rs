@@ -50,10 +50,11 @@ fn run_compile(subcommand: SubCommands) -> Result<()> {
         anyhow::bail!("Filename must end with .[]");
     }
 
-    let tokenized = brack_tokenizer::tokenize::tokenize(&args.2)?;
-    let parsed = brack_parser::parse::parse(&tokenized)?;
-    let expanded = brack_expander::expand::expander(&parsed, &mut plugins)?;
-    let gen = brack_codegen::generate::generate(&expanded, &mut plugins)?;
+    let tokens = brack_tokenizer::tokenize::tokenize(&args.2)?;
+    let cst = brack_parser::parse::parse(&tokens)?;
+    let ast = brack_transformer::transform::transform(&cst)?;
+    let expanded_ast = brack_expander::expand::expander(&ast, &mut plugins)?;
+    let gen = brack_codegen::generate::generate(&expanded_ast, &mut plugins)?;
     println!("{}", gen);
     Ok(())
 }
@@ -121,10 +122,11 @@ fn build() -> Result<()> {
             .to_str()
             .ok_or_else(|| anyhow::anyhow!("Could not convert file name to string."))?;
         if name.ends_with(".[]") {
-            let tokenized = brack_tokenizer::tokenize::tokenize(&path.to_str().unwrap())?;
-            let parsed = brack_parser::parse::parse(&tokenized)?;
-            let expanded = brack_expander::expand::expander(&parsed, &mut plugins)?;
-            let gen = brack_codegen::generate::generate(&expanded, &mut plugins)?;
+            let tokens = brack_tokenizer::tokenize::tokenize(&path.to_str().unwrap())?;
+            let cst = brack_parser::parse::parse(&tokens)?;
+            let ast = brack_transformer::transform::transform(&cst)?;
+            let expanded_ast = brack_expander::expand::expander(&ast, &mut plugins)?;
+            let gen = brack_codegen::generate::generate(&expanded_ast, &mut plugins)?;
             std::fs::create_dir_all("out")?;
             std::fs::write(
                 format!("out/{}.{}", name.trim_end_matches(".[]"), backend),
