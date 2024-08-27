@@ -21,6 +21,6 @@ default = []
 debug = []
 
 [[bin]]
-name = "debug_compile"
-path = "src/debug/debug_compile.rs"
+name = "debug_parse"
+path = "src/debug/debug_parse.rs"
 required-features = ["debug"]
