@@ -12,8 +12,7 @@
                     "--bin=${fileBasenameNoExtension}",
                 ],
             },
-            // "cwd": "${workspaceFolder}"
-            "cwd": "/Users/uekann/Desktop/VSCodeProjects/brack/test"
+            "cwd": "${workspaceFolder}"
         },
         {
             "type": "lldb",
