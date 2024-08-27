@@ -1,6 +1,9 @@
+use std::collections::HashMap;
+
 use anyhow::Result;
 use brack::sub_commands::SubCommands;
 use clap::Parser;
+use regex::Regex;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -8,53 +11,59 @@ struct Args {
     subcommand: SubCommands,
 }
 
-// fn run_compile(subcommand: SubCommands) -> Result<()> {
-//     let mut pathes = vec![];
+fn run_compile(subcommand: SubCommands) -> Result<()> {
+    let mut pathes = HashMap::new();
 
-//     let args = match subcommand {
-//         SubCommands::Compile {
-//             plugins_dir_path,
-//             backend,
-//             filename,
-//         } => (plugins_dir_path, backend, filename),
-//         _ => unreachable!(),
-//     };
+    let args = match subcommand {
+        SubCommands::Compile {
+            plugins_dir_path,
+            backend,
+            filename,
+        } => (plugins_dir_path, backend, filename),
+        _ => unreachable!(),
+    };
 
-//     let plugins_dir_path = match args.0 {
-//         Some(path) => path,
-//         None => match std::env::var("BRACK_PLUGINS_PATH") {
-//             Ok(path) => path,
-//             Err(_) => String::new(),
-//         },
-//     };
+    let plugins_dir_path = match args.0 {
+        Some(path) => path,
+        None => match std::env::var("BRACK_PLUGINS_PATH") {
+            Ok(path) => path,
+            Err(_) => String::new(),
+        },
+    };
 
-//     let entries = read_dir(plugins_dir_path)?;
-//     for entry in entries {
-//         let entry = entry?;
-//         let path = entry.path();
-//         let name = path
-//             .file_name()
-//             .ok_or_else(|| anyhow::anyhow!("Could not get file name from path."))?
-//             .to_str()
-//             .ok_or_else(|| anyhow::anyhow!("Could not convert file name to string."))?;
-//         if name.ends_with(format!(".{}.wasm", args.1).as_str()) {
-//             pathes.push(path);
-//         }
-//     }
+    let pattern = Regex::new(r"(?<module_name>[[:alpha:]]+)_[[:alnum:]]+.wasm").unwrap();
+    let entries = std::fs::read_dir(plugins_dir_path)?;
+    for entry in entries {
+        let entry = entry?;
+        let path = entry.path();
+        // let name = path
+        //     .file_name()
+        //     .ok_or_else(|| anyhow::anyhow!("Could not get file name from path."))?
+        //     .to_str()
+        //     .ok_or_else(|| anyhow::anyhow!("Could not convert file name to string."))?;
+        let capture = pattern.captures(
+            path.to_str()
+                .ok_or_else(|| anyhow::anyhow!("Could not convert file name to string."))?,
+        );
+        if let Some(capture) = capture {
+            let module_name = capture.name("module_name").unwrap().as_str();
+            pathes.insert(module_name.to_string(), path);
+        }
+    }
 
-//     let mut plugins = brack_plugin::plugin::new_plugins(pathes)?;
+    let mut plugins = brack_plugin::plugin::new_plugins(pathes)?;
 
-//     if !args.2.ends_with(".[]") {
-//         anyhow::bail!("Filename must end with .[]");
-//     }
+    if !args.2.ends_with(".[]") {
+        anyhow::bail!("Filename must end with .[]");
+    }
 
-//     let tokenized = brack_tokenizer::tokenize::tokenize(&args.2)?;
-//     let parsed = brack_parser::parse::parse(&tokenized)?;
-//     let expanded = brack_expander::expand::expander(&parsed, &mut plugins)?;
-//     let gen = brack_codegen::generate::generate(&expanded, &mut plugins)?;
-//     println!("{}", gen);
-//     Ok(())
-// }
+    let tokenized = brack_tokenizer::tokenize::tokenize(&args.2)?;
+    let parsed = brack_parser::parse::parse(&tokenized)?;
+    let expanded = brack_expander::expand::expander(&parsed, &mut plugins)?;
+    let gen = brack_codegen::generate::generate(&expanded, &mut plugins)?;
+    println!("{}", gen);
+    Ok(())
+}
 
 fn new_project(name: &str) -> Result<()> {
     std::fs::create_dir(name)?;
@@ -93,14 +102,13 @@ async fn main() -> Result<()> {
             project.download_plugins_using_config().await?;
             project.build()?;
         }
-        // SubCommands::Compile { .. } => run_compile(args.subcommand)?,
+        SubCommands::Compile { .. } => run_compile(args.subcommand)?,
         SubCommands::LanguageServer => {
             let mut language_server = brack_language_server::server::LanguageServer::new();
             language_server.run().await?;
         }
         SubCommands::New { name } => new_project(&name)?,
         SubCommands::Add { schema } => brack_project_manager::plugin::add_plugin(&schema).await?,
-        _ => unreachable!(),
     }
     Ok(())
 }

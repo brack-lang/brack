@@ -40,7 +40,8 @@ impl Project {
         if let Some(plugins) = self.config.plugins.clone() {
             let mut tasks = vec![];
             for (name, plugin) in plugins {
-                let path = PathBuf::from(&format!("plugins/{}.wasm", plugin.hash_sha256()));
+                let path =
+                    PathBuf::from(&format!("plugins/{}_{}.wasm", name, plugin.hash_sha256()));
                 if path.exists() {
                     self.plugins_metadata.insert(name, path.into());
                     continue;

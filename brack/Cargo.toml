@@ -18,6 +18,7 @@ tokio = { version = "1", features = ["full"] }
 toml = "0.8.14"
 extism = "1.4.1"
 reqwest = "0.12.5"
+regex = "1.10.6"
 
 [dependencies.clap]
 version = "4.5.7"

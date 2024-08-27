@@ -208,6 +208,7 @@ dependencies = [
  "brack-tokenizer",
  "clap",
  "extism",
+ "regex",
  "reqwest 0.12.7",
  "tokio",
  "toml 0.8.19",
