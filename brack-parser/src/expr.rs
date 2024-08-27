@@ -5,7 +5,7 @@ use crate::{
     bracket, comma, cst::new_expr, dot, escaped, ident, modules, parser::Parser, text, whitespace,
 };
 
-// (escaped | module | ident | bracket | dot | comma | whitespace | text)*
+// (escaped | module | ident | bracket | dot | comma | whitespace | text)+
 pub fn parse<'a>(tokens: &'a [Token]) -> Result<Parser> {
     let mut tokens = tokens;
     let mut expr = new_expr();
@@ -40,6 +40,12 @@ pub fn parse<'a>(tokens: &'a [Token]) -> Result<Parser> {
         } else {
             break;
         }
+    }
+
+    if expr.children().is_empty() {
+        return Err(anyhow::anyhow!(
+            "Expected escaped, module, ident, bracket, dot, comma, whitespace, or text, found none"
+        ));
     }
 
     expr.set_location(Location {

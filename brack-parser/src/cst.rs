@@ -148,6 +148,31 @@ impl CST {
     }
 }
 
+pub fn matches_kind(cst: &CST, kind: &CST) -> bool {
+    match (cst, kind) {
+        (CST::Document(_), CST::Document(_))
+        | (CST::Stmt(_), CST::Stmt(_))
+        | (CST::Expr(_), CST::Expr(_))
+        | (CST::Bracket(_), CST::Bracket(_))
+        | (CST::AngleBracketOpen(_), CST::AngleBracketOpen(_))
+        | (CST::AngleBracketClose(_), CST::AngleBracketClose(_))
+        | (CST::SquareBracketOpen(_), CST::SquareBracketOpen(_))
+        | (CST::SquareBracketClose(_), CST::SquareBracketClose(_))
+        | (CST::CurlyBracketOpen(_), CST::CurlyBracketOpen(_))
+        | (CST::CurlyBracketClose(_), CST::CurlyBracketClose(_))
+        | (CST::Module(_), CST::Module(_))
+        | (CST::Ident(_), CST::Ident(_))
+        | (CST::Text(_), CST::Text(_))
+        | (CST::Whitespace(_), CST::Whitespace(_))
+        | (CST::Newline(_), CST::Newline(_))
+        | (CST::BackSlash(_), CST::BackSlash(_))
+        | (CST::Dot(_), CST::Dot(_))
+        | (CST::Comma(_), CST::Comma(_))
+        | (CST::EOF(_), CST::EOF(_)) => true,
+        _ => false,
+    }
+}
+
 pub fn new_document() -> CST {
     CST::Document(InnerNode {
         id: Uuid::new_v4().to_string(),
@@ -220,10 +245,10 @@ pub fn new_ident(value: String, location: Location) -> CST {
     })
 }
 
-pub fn new_module(location: Location) -> CST {
+pub fn new_module(value: String, location: Location) -> CST {
     CST::Module(LeafNode {
         id: Uuid::new_v4().to_string(),
-        value: None,
+        value: Some(value),
         location,
     })
 }
