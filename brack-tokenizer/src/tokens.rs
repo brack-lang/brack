@@ -93,4 +93,25 @@ impl Token {
             Token::EOF(location) => location.clone(),
         }
     }
+
+    pub fn set_location(&mut self, location: Location) {
+        match self {
+            Token::Empty(l) => *l = location,
+            Token::Text(_, l) => *l = location,
+            Token::Module(_, l) => *l = location,
+            Token::Ident(_, l) => *l = location,
+            Token::NewLine(l) => *l = location,
+            Token::WhiteSpace(l) => *l = location,
+            Token::Dot(l) => *l = location,
+            Token::BackSlash(l) => *l = location,
+            Token::AngleBracketOpen(l) => *l = location,
+            Token::AngleBracketClose(l) => *l = location,
+            Token::SquareBracketOpen(l) => *l = location,
+            Token::SquareBracketClose(l) => *l = location,
+            Token::CurlyBracketOpen(l) => *l = location,
+            Token::CurlyBracketClose(l) => *l = location,
+            Token::Comma(l) => *l = location,
+            Token::EOF(l) => *l = location,
+        }
+    }
 }
