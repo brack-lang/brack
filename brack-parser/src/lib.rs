@@ -16,5 +16,4 @@ pub mod parse;
 mod parser;
 mod stmt;
 mod text;
-mod utils;
 mod whitespace;
