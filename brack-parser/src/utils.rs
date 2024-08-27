@@ -44,7 +44,10 @@ pub fn matches_kind(token: &Token, kind: &Token) -> bool {
         (CurlyBracketOpen(_), CurlyBracketOpen(_)) => true,
         (CurlyBracketClose(_), CurlyBracketClose(_)) => true,
         (Comma(_), Comma(_)) => true,
+        (Module(_, _), Module(_, _)) => true,
+        (WhiteSpace(_), WhiteSpace(_)) => true,
         (EOF(_), EOF(_)) => true,
         _ => false,
     }
 }
+

@@ -2,305 +2,54 @@ use anyhow::Result;
 use brack_tokenizer::tokens::Token;
 
 use crate::{
-    ast::{new_document, AST},
-    error::ParserError,
-    stmt,
+    cst::{new_document, CST},
+    eof, newline, stmt,
 };
 
-pub fn parse(tokens: &Vec<Token>) -> Result<AST, ParserError> {
-    let mut new_tokens = tokens.clone();
-    let mut result = new_document();
+// (stmt newline newline+)* stmt newline* EOF
+pub fn parse<'a>(tokens: &'a [Token]) -> Result<CST> {
+    let mut tokens = tokens;
+    let mut cst = new_document();
 
-    while new_tokens.len() > 0 {
-        match stmt::parse(&new_tokens) {
-            Ok((ast, tokens)) => {
-                result.add(ast);
-                new_tokens = tokens;
+    loop {
+        if let Ok((cst1, new_tokens)) = stmt::parse(tokens) {
+            cst.add(cst1);
+            tokens = new_tokens;
+        } else {
+            break;
+        }
+
+        if let Ok((cst2, new_tokens)) = newline::parse(tokens) {
+            cst.add(cst2);
+            tokens = new_tokens;
+        } else {
+            break;
+        }
+
+        loop {
+            if let Ok((cst3, new_tokens)) = newline::parse(tokens) {
+                cst.add(cst3);
+                tokens = new_tokens;
+            } else {
+                break;
             }
-            Err(e) => return Err(e),
         }
     }
 
-    Ok(result)
-}
+    let (cst1, mut tokens) = stmt::parse(tokens)?;
+    cst.add(cst1);
 
-#[cfg(test)]
-mod test {
-    use anyhow::Result;
-    use brack_tokenizer::tokens::{mock_location, Token};
-
-    use crate::ast::{
-        assert_ast_eq, new_angle_with_children, new_curly_with_children,
-        new_document_with_children, new_expr_with_children, new_ident, new_square_with_children,
-        new_stmt_with_children, new_text,
-    };
-
-    use super::parse;
-
-    #[test]
-    fn test_parse_no_commands() -> Result<()> {
-        let tokens = vec![
-            Token::Text("Hello, World!".to_string(), mock_location()),
-            Token::EOF(mock_location()),
-        ];
-        let parsed = parse(&tokens)?;
-        let expected =
-            new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
-                vec![new_text("Hello, World!".to_string(), mock_location())],
-            )])]);
-        assert_ast_eq(&parsed, &expected);
-        Ok(())
+    loop {
+        if let Ok((cst1, new_tokens)) = newline::parse(tokens) {
+            cst.add(cst1);
+            tokens = new_tokens;
+        } else {
+            break;
+        }
     }
 
-    #[test]
-    fn test_parse_commands_with_an_argument_includes_square_brackets() -> Result<()> {
-        let tokens = vec![
-            Token::Text("Hello, ".to_string(), mock_location()),
-            Token::SquareBracketOpen(mock_location()),
-            Token::Module("std".to_string(), mock_location()),
-            Token::Dot(mock_location()),
-            Token::Ident("*".to_string(), mock_location()),
-            Token::Text("World!".to_string(), mock_location()),
-            Token::SquareBracketClose(mock_location()),
-            Token::EOF(mock_location()),
-        ];
-        let parsed = parse(&tokens)?;
-        let expected =
-            new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
-                vec![
-                    new_text("Hello, ".to_string(), mock_location()),
-                    new_square_with_children(vec![
-                        new_ident(vec![
-                            new_text("std".to_string(), mock_location()),
-                            new_text("*".to_string(), mock_location()),
-                        ]),
-                        new_expr_with_children(vec![new_text(
-                            "World!".to_string(),
-                            mock_location(),
-                        )]),
-                    ]),
-                ],
-            )])]);
-        assert_ast_eq(&parsed, &expected);
-        Ok(())
-    }
+    let (cst1, _) = eof::parse(tokens)?;
+    cst.add(cst1);
 
-    #[test]
-    fn test_parse_commands_with_an_argument_includes_curly_brackets() -> Result<()> {
-        let tokens = vec![
-            Token::CurlyBracketOpen(mock_location()),
-            Token::Module("std".to_string(), mock_location()),
-            Token::Dot(mock_location()),
-            Token::Ident("*".to_string(), mock_location()),
-            Token::Text("Heading".to_string(), mock_location()),
-            Token::CurlyBracketClose(mock_location()),
-            Token::NewLine(mock_location()),
-            Token::Text("Hello, World!".to_string(), mock_location()),
-            Token::EOF(mock_location()),
-        ];
-        let parsed = parse(&tokens)?;
-        let expected = new_document_with_children(vec![
-            new_stmt_with_children(vec![new_curly_with_children(vec![
-                new_ident(vec![
-                    new_text("std".to_string(), mock_location()),
-                    new_text("*".to_string(), mock_location()),
-                ]),
-                new_expr_with_children(vec![new_text("Heading".to_string(), mock_location())]),
-            ])]),
-            new_stmt_with_children(vec![new_expr_with_children(vec![new_text(
-                "Hello, World!".to_string(),
-                mock_location(),
-            )])]),
-        ]);
-        assert_ast_eq(&parsed, &expected);
-        Ok(())
-    }
-
-    #[test]
-    fn test_parse_commands_with_an_argument_includes_angle_brackets() -> Result<()> {
-        let tokens = vec![
-            Token::Text("Hello, ".to_string(), mock_location()),
-            Token::AngleBracketOpen(mock_location()),
-            Token::Module("std".to_string(), mock_location()),
-            Token::Dot(mock_location()),
-            Token::Ident("*".to_string(), mock_location()),
-            Token::Text("World!".to_string(), mock_location()),
-            Token::AngleBracketClose(mock_location()),
-            Token::EOF(mock_location()),
-        ];
-        let parsed = parse(&tokens)?;
-        let expected =
-            new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
-                vec![
-                    new_text("Hello, ".to_string(), mock_location()),
-                    new_angle_with_children(vec![
-                        new_ident(vec![
-                            new_text("std".to_string(), mock_location()),
-                            new_text("*".to_string(), mock_location()),
-                        ]),
-                        new_expr_with_children(vec![new_text(
-                            "World!".to_string(),
-                            mock_location(),
-                        )]),
-                    ]),
-                ],
-            )])]);
-        assert_ast_eq(&parsed, &expected);
-        Ok(())
-    }
-
-    #[test]
-    fn test_parse_commands_with_two_arguments_includes_square_brackets() -> Result<()> {
-        let tokens = vec![
-            Token::Text("Hello, ".to_string(), mock_location()),
-            Token::SquareBracketOpen(mock_location()),
-            Token::Module("std".to_string(), mock_location()),
-            Token::Dot(mock_location()),
-            Token::Ident("@".to_string(), mock_location()),
-            Token::Text("World!".to_string(), mock_location()),
-            Token::Comma(mock_location()),
-            Token::Text("https://example.com/".to_string(), mock_location()),
-            Token::SquareBracketClose(mock_location()),
-            Token::EOF(mock_location()),
-        ];
-        let parsed = parse(&tokens)?;
-        let expected =
-            new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
-                vec![
-                    new_text("Hello, ".to_string(), mock_location()),
-                    new_square_with_children(vec![
-                        new_ident(vec![
-                            new_text("std".to_string(), mock_location()),
-                            new_text("@".to_string(), mock_location()),
-                        ]),
-                        new_expr_with_children(vec![new_text(
-                            "World!".to_string(),
-                            mock_location(),
-                        )]),
-                        new_expr_with_children(vec![new_text(
-                            "https://example.com/".to_string(),
-                            mock_location(),
-                        )]),
-                    ]),
-                ],
-            )])]);
-        assert_ast_eq(&parsed, &expected);
-        Ok(())
-    }
-
-    #[test]
-    fn test_parse_nesting_commands() -> Result<()> {
-        let tokens = vec![
-            Token::Text("Hello, ".to_string(), mock_location()),
-            Token::SquareBracketOpen(mock_location()),
-            Token::Module("std".to_string(), mock_location()),
-            Token::Dot(mock_location()),
-            Token::Ident("*".to_string(), mock_location()),
-            Token::SquareBracketOpen(mock_location()),
-            Token::Module("std".to_string(), mock_location()),
-            Token::Dot(mock_location()),
-            Token::Ident("@".to_string(), mock_location()),
-            Token::Text("World!".to_string(), mock_location()),
-            Token::Comma(mock_location()),
-            Token::Text("https://example.com/".to_string(), mock_location()),
-            Token::SquareBracketClose(mock_location()),
-            Token::SquareBracketClose(mock_location()),
-            Token::EOF(mock_location()),
-        ];
-        let parsed = parse(&tokens)?;
-        let expected =
-            new_document_with_children(vec![new_stmt_with_children(vec![new_expr_with_children(
-                vec![
-                    new_text("Hello, ".to_string(), mock_location()),
-                    new_square_with_children(vec![
-                        new_ident(vec![
-                            new_text("std".to_string(), mock_location()),
-                            new_text("*".to_string(), mock_location()),
-                        ]),
-                        new_expr_with_children(vec![new_square_with_children(vec![
-                            new_ident(vec![
-                                new_text("std".to_string(), mock_location()),
-                                new_text("@".to_string(), mock_location()),
-                            ]),
-                            new_expr_with_children(vec![new_text(
-                                "World!".to_string(),
-                                mock_location(),
-                            )]),
-                            new_expr_with_children(vec![new_text(
-                                "https://example.com/".to_string(),
-                                mock_location(),
-                            )]),
-                        ])]),
-                    ]),
-                ],
-            )])]);
-        assert_ast_eq(&parsed, &expected);
-        Ok(())
-    }
-
-    #[test]
-    fn test_parse_newlines() -> Result<()> {
-        let tokens = vec![
-            Token::Text("Hello,".to_string(), mock_location()),
-            Token::NewLine(mock_location()),
-            Token::Text("World,".to_string(), mock_location()),
-            Token::NewLine(mock_location()),
-            Token::CurlyBracketOpen(mock_location()),
-            Token::Module("std".to_string(), mock_location()),
-            Token::Dot(mock_location()),
-            Token::Ident("**".to_string(), mock_location()),
-            Token::Text("Contact".to_string(), mock_location()),
-            Token::CurlyBracketClose(mock_location()),
-            Token::NewLine(mock_location()),
-            Token::SquareBracketOpen(mock_location()),
-            Token::Module("std".to_string(), mock_location()),
-            Token::Dot(mock_location()),
-            Token::Ident("@".to_string(), mock_location()),
-            Token::Text("My website".to_string(), mock_location()),
-            Token::Comma(mock_location()),
-            Token::Text("https://example.com/".to_string(), mock_location()),
-            Token::SquareBracketClose(mock_location()),
-            Token::NewLine(mock_location()),
-            Token::NewLine(mock_location()),
-            Token::Text("2023.12.28".to_string(), mock_location()),
-            Token::NewLine(mock_location()),
-            Token::EOF(mock_location()),
-        ];
-        let parsed = parse(&tokens)?;
-        let expected = new_document_with_children(vec![
-            new_stmt_with_children(vec![
-                new_expr_with_children(vec![new_text("Hello,".to_string(), mock_location())]),
-                new_expr_with_children(vec![new_text("World,".to_string(), mock_location())]),
-            ]),
-            new_stmt_with_children(vec![new_curly_with_children(vec![
-                new_ident(vec![
-                    new_text("std".to_string(), mock_location()),
-                    new_text("**".to_string(), mock_location()),
-                ]),
-                new_expr_with_children(vec![new_text("Contact".to_string(), mock_location())]),
-            ])]),
-            new_stmt_with_children(vec![new_expr_with_children(vec![
-                new_square_with_children(vec![
-                    new_ident(vec![
-                        new_text("std".to_string(), mock_location()),
-                        new_text("@".to_string(), mock_location()),
-                    ]),
-                    new_expr_with_children(vec![new_text(
-                        "My website".to_string(),
-                        mock_location(),
-                    )]),
-                    new_expr_with_children(vec![new_text(
-                        "https://example.com/".to_string(),
-                        mock_location(),
-                    )]),
-                ]),
-            ])]),
-            new_stmt_with_children(vec![new_expr_with_children(vec![new_text(
-                "2023.12.28".to_string(),
-                mock_location(),
-            )])]),
-        ]);
-        assert_ast_eq(&parsed, &expected);
-        Ok(())
-    }
+    Ok(cst)
 }
