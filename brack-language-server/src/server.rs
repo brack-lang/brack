@@ -1,6 +1,7 @@
 use std::str::from_utf8;
 
 use anyhow::Result;
+use brack_tokenizer::tokens::mock_location;
 use lsp_types::{
     ClientCapabilities, Diagnostic, DidChangeTextDocumentParams, DidOpenTextDocumentParams,
     DidSaveTextDocumentParams, InitializeParams, Position, Range,
@@ -171,8 +172,8 @@ impl LanguageServer {
                     .await;
             }
             Err(parser_error) => {
-                let location = parser_error.get_location();
-                let message = parser_error.get_message();
+                let location = mock_location(); // parser_error.get_location();
+                let message = "FIXME: dummy message".to_string(); // parser_error.get_message();
                 let diagnostics = vec![Diagnostic {
                     range: Range {
                         start: Position {
