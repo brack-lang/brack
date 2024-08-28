@@ -12,7 +12,7 @@ pub struct InnerNode {
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct LeafNode {
     pub id: String,
-    pub value: String,
+    pub value: Option<String>,
     pub location: Location,
 }
 
@@ -24,8 +24,10 @@ pub enum AST {
     Angle(InnerNode),
     Square(InnerNode),
     Curly(InnerNode),
-    Identifier(InnerNode),
+    Ident(LeafNode),
+    Module(LeafNode),
     Text(LeafNode),
+    Invalid(LeafNode),
 }
 
 impl AST {
@@ -36,22 +38,24 @@ impl AST {
             | AST::Expr(node)
             | AST::Angle(node)
             | AST::Square(node)
-            | AST::Curly(node)
-            | AST::Identifier(node) => &node.children,
-            AST::Text(_) => panic!("Leaf node has no children"),
+            | AST::Curly(node) => &node.children,
+            AST::Ident(_) | AST::Module(_) | AST::Text(_) | AST::Invalid(_) => {
+                panic!("Leaf node has no children")
+            }
         }
     }
 
     pub fn value(&self) -> String {
         match self {
-            AST::Text(leaf) => leaf.value.clone(),
+            AST::Ident(leaf) | AST::Module(leaf) | AST::Text(leaf) | AST::Invalid(leaf) => {
+                leaf.value.clone()
+            }
             AST::Document(_)
             | AST::Stmt(_)
             | AST::Expr(_)
             | AST::Angle(_)
             | AST::Square(_)
-            | AST::Curly(_)
-            | AST::Identifier(_) => panic!("Inner node has no value"),
+            | AST::Curly(_) => panic!("Inner node has no value"),
         }
     }
 
@@ -62,9 +66,10 @@ impl AST {
             | AST::Expr(node)
             | AST::Angle(node)
             | AST::Square(node)
-            | AST::Curly(node)
-            | AST::Identifier(node) => node.id.clone(),
-            AST::Text(leaf) => leaf.id.clone(),
+            | AST::Curly(node) => node.id.clone(),
+            AST::Ident(leaf) | AST::Module(leaf) | AST::Text(leaf) | AST::Invalid(leaf) => {
+                leaf.id.clone()
+            }
         }
     }
 
@@ -75,8 +80,7 @@ impl AST {
             | AST::Expr(node)
             | AST::Angle(node)
             | AST::Square(node)
-            | AST::Curly(node)
-            | AST::Identifier(node) => {
+            | AST::Curly(node) => {
                 node.children.push(ast.clone());
                 let location_children = match ast {
                     AST::Document(inner)
@@ -84,13 +88,14 @@ impl AST {
                     | AST::Expr(inner)
                     | AST::Angle(inner)
                     | AST::Square(inner)
-                    | AST::Curly(inner)
-                    | AST::Identifier(inner) => inner.location,
-                    AST::Text(leaf) => leaf.location,
+                    | AST::Curly(inner) => inner.location,
+                    AST::Text(leaf) | AST::Ident(leaf) | AST::Module(leaf) | AST::Invalid(leaf) => {
+                        leaf.location
+                    }
                 };
                 node.location = merge_location(&node.location, &location_children);
             }
-            AST::Text(_) => {
+            AST::Ident(_) | AST::Module(_) | AST::Text(_) | AST::Invalid(_) => {
                 panic!("Cannot add child to leaf node");
             }
         }
@@ -103,8 +108,7 @@ impl AST {
             | AST::Expr(node)
             | AST::Angle(node)
             | AST::Square(node)
-            | AST::Curly(node)
-            | AST::Identifier(node) => {
+            | AST::Curly(node) => {
                 if node.id == id {
                     return Some(self);
                 }
@@ -115,7 +119,7 @@ impl AST {
                 }
                 None
             }
-            AST::Text(node) => {
+            AST::Ident(node) | AST::Module(node) | AST::Text(node) | AST::Invalid(node) => {
                 if node.id == id {
                     return Some(self);
                 }
@@ -134,11 +138,10 @@ fn merge_all_locations(asts: &Vec<AST>) -> Location {
             | AST::Expr(inner)
             | AST::Angle(inner)
             | AST::Square(inner)
-            | AST::Curly(inner)
-            | AST::Identifier(inner) => {
+            | AST::Curly(inner) => {
                 location = merge_location(&location, &inner.location);
             }
-            AST::Text(leaf) => {
+            AST::Ident(leaf) | AST::Module(leaf) | AST::Text(leaf) | AST::Invalid(leaf) => {
                 location = merge_location(&location, &leaf.location);
             }
         }
@@ -248,11 +251,11 @@ pub fn new_square_with_children(children: Vec<AST>) -> AST {
     })
 }
 
-pub fn new_ident(children: Vec<AST>) -> AST {
+pub fn new_ident(value: String, children: Vec<AST>) -> AST {
     let location = merge_all_locations(&children);
-    AST::Identifier(InnerNode {
+    AST::Ident(LeafNode {
         id: Uuid::new_v4().to_string(),
-        children,
+        value,
         location,
     })
 }
@@ -284,7 +287,8 @@ pub fn assert_ast_eq(node1: &AST, node2: &AST) {
         (AST::Angle(inner1), AST::Angle(inner2)) => assert_inner_node_eq(inner1, inner2),
         (AST::Square(inner1), AST::Square(inner2)) => assert_inner_node_eq(inner1, inner2),
         (AST::Curly(inner1), AST::Curly(inner2)) => assert_inner_node_eq(inner1, inner2),
-        (AST::Identifier(leaf1), AST::Identifier(leaf2)) => assert_inner_node_eq(leaf1, leaf2),
+        (AST::Ident(leaf1), AST::Ident(leaf2)) => assert_leaf_node_eq(leaf1, leaf2),
+        (AST::Module(leaf1), AST::Module(leaf2)) => assert_leaf_node_eq(leaf1, leaf2),
         (AST::Text(leaf1), AST::Text(leaf2)) => assert_leaf_node_eq(leaf1, leaf2),
         _ => panic!(
             "Mismatched AST node types or unexpected AST node\nleft: {:?}\nright: {:?}",
