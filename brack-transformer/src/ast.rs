@@ -28,6 +28,7 @@ pub enum AST {
     Module(LeafNode),
     Text(LeafNode),
     Invalid(LeafNode),
+    Ignored(LeafNode),
 }
 
 impl AST {
@@ -39,23 +40,25 @@ impl AST {
             | AST::Angle(node)
             | AST::Square(node)
             | AST::Curly(node) => &node.children,
-            AST::Ident(_) | AST::Module(_) | AST::Text(_) | AST::Invalid(_) => {
+            AST::Ident(_) | AST::Module(_) | AST::Text(_) => {
                 panic!("Leaf node has no children")
             }
+            AST::Invalid(_) => panic!("This node is broken"),
+            AST::Ignored(_) => panic!("This node has to be ignored"),
         }
     }
 
-    pub fn value(&self) -> String {
+    pub fn value(&self) -> Option<String> {
         match self {
-            AST::Ident(leaf) | AST::Module(leaf) | AST::Text(leaf) | AST::Invalid(leaf) => {
-                leaf.value.clone()
-            }
+            AST::Ident(leaf) | AST::Module(leaf) | AST::Text(leaf) => leaf.value.clone(),
             AST::Document(_)
             | AST::Stmt(_)
             | AST::Expr(_)
             | AST::Angle(_)
             | AST::Square(_)
             | AST::Curly(_) => panic!("Inner node has no value"),
+            AST::Invalid(_) => panic!("This node is broken"),
+            AST::Ignored(_) => panic!("This node has to be ignored"),
         }
     }
 
@@ -67,9 +70,11 @@ impl AST {
             | AST::Angle(node)
             | AST::Square(node)
             | AST::Curly(node) => node.id.clone(),
-            AST::Ident(leaf) | AST::Module(leaf) | AST::Text(leaf) | AST::Invalid(leaf) => {
-                leaf.id.clone()
-            }
+            AST::Ident(leaf)
+            | AST::Module(leaf)
+            | AST::Text(leaf)
+            | AST::Invalid(leaf)
+            | AST::Ignored(leaf) => leaf.id.clone(),
         }
     }
 
@@ -89,15 +94,19 @@ impl AST {
                     | AST::Angle(inner)
                     | AST::Square(inner)
                     | AST::Curly(inner) => inner.location,
-                    AST::Text(leaf) | AST::Ident(leaf) | AST::Module(leaf) | AST::Invalid(leaf) => {
-                        leaf.location
-                    }
+                    AST::Text(leaf)
+                    | AST::Ident(leaf)
+                    | AST::Module(leaf)
+                    | AST::Invalid(leaf)
+                    | AST::Ignored(leaf) => leaf.location,
                 };
                 node.location = merge_location(&node.location, &location_children);
             }
-            AST::Ident(_) | AST::Module(_) | AST::Text(_) | AST::Invalid(_) => {
+            AST::Ident(_) | AST::Module(_) | AST::Text(_) => {
                 panic!("Cannot add child to leaf node");
             }
+            AST::Invalid(_) => panic!("This node is broken"),
+            AST::Ignored(_) => panic!("This node has to be ignored"),
         }
     }
 
@@ -119,7 +128,11 @@ impl AST {
                 }
                 None
             }
-            AST::Ident(node) | AST::Module(node) | AST::Text(node) | AST::Invalid(node) => {
+            AST::Ident(node)
+            | AST::Module(node)
+            | AST::Text(node)
+            | AST::Invalid(node)
+            | AST::Ignored(node) => {
                 if node.id == id {
                     return Some(self);
                 }
@@ -141,7 +154,11 @@ fn merge_all_locations(asts: &Vec<AST>) -> Location {
             | AST::Curly(inner) => {
                 location = merge_location(&location, &inner.location);
             }
-            AST::Ident(leaf) | AST::Module(leaf) | AST::Text(leaf) | AST::Invalid(leaf) => {
+            AST::Ident(leaf)
+            | AST::Module(leaf)
+            | AST::Text(leaf)
+            | AST::Invalid(leaf)
+            | AST::Ignored(leaf) => {
                 location = merge_location(&location, &leaf.location);
             }
         }
@@ -255,7 +272,7 @@ pub fn new_ident(value: String, children: Vec<AST>) -> AST {
     let location = merge_all_locations(&children);
     AST::Ident(LeafNode {
         id: Uuid::new_v4().to_string(),
-        value,
+        value: Some(value),
         location,
     })
 }
@@ -263,8 +280,24 @@ pub fn new_ident(value: String, children: Vec<AST>) -> AST {
 pub fn new_text(value: String, location: Location) -> AST {
     AST::Text(LeafNode {
         id: Uuid::new_v4().to_string(),
-        value,
+        value: Some(value),
         location,
+    })
+}
+
+pub fn new_invalid() -> AST {
+    AST::Invalid(LeafNode {
+        id: Uuid::new_v4().to_string(),
+        value: None,
+        location: mock_location(),
+    })
+}
+
+pub fn new_ignored() -> AST {
+    AST::Ignored(LeafNode {
+        id: Uuid::new_v4().to_string(),
+        value: None,
+        location: mock_location(),
     })
 }
 
@@ -294,5 +327,22 @@ pub fn assert_ast_eq(node1: &AST, node2: &AST) {
             "Mismatched AST node types or unexpected AST node\nleft: {:?}\nright: {:?}",
             node1, node2
         ),
+    }
+}
+
+pub fn matches_kind(node1: &AST, node2: &AST) -> bool {
+    match (node1, node2) {
+        (AST::Document(_), AST::Document(_)) => true,
+        (AST::Stmt(_), AST::Stmt(_)) => true,
+        (AST::Expr(_), AST::Expr(_)) => true,
+        (AST::Angle(_), AST::Angle(_)) => true,
+        (AST::Curly(_), AST::Curly(_)) => true,
+        (AST::Square(_), AST::Square(_)) => true,
+        (AST::Module(_), AST::Module(_)) => true,
+        (AST::Ident(_), AST::Ident(_)) => true,
+        (AST::Text(_), AST::Text(_)) => true,
+        (AST::Invalid(_), AST::Invalid(_)) => true,
+        (AST::Ignored(_), AST::Ignored(_)) => true,
+        _ => false,
     }
 }

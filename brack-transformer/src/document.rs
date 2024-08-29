@@ -7,7 +7,7 @@ use crate::{
     transform,
 };
 
-pub fn transform(cst: &CST) -> (AST, Vec<TransformError>) {
+pub fn transform(cst: &CST) -> (CST, Vec<TransformError>) {
     let node = match cst {
         CST::Document(node) => node,
         _ => panic!("Cannot pass non-document node to transform_document"),
@@ -19,8 +19,11 @@ pub fn transform(cst: &CST) -> (AST, Vec<TransformError>) {
         asts.push(ast);
         errors.append(&mut node_errors);
     }
+
+    // ignored 対象のノードを全て削除する
+
     (
-        AST::Document(InnerNode {
+        CST::Document(InnerNode {
             id: Uuid::new_v4().to_string(),
             children: asts,
             location: node.location.clone(),
