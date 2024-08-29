@@ -101,7 +101,7 @@ impl Project {
                 .ok_or_else(|| anyhow::anyhow!("Could not get file name from path."))?
                 .to_str()
                 .ok_or_else(|| anyhow::anyhow!("Could not convert file name to string."))?;
-            if path.ends_with(".[]") {
+            if path.extension() == Some("[]".as_ref()) {
                 let tokenized = brack_tokenizer::tokenize::tokenize(&path.to_str().unwrap())?;
                 let parsed = brack_parser::parse::parse(&tokenized)?;
                 let expanded = brack_expander::expand::expander(&parsed, &mut plugins)?;
