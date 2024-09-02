@@ -36,11 +36,6 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
     for entry in entries {
         let entry = entry?;
         let path = entry.path();
-        // let name = path
-        //     .file_name()
-        //     .ok_or_else(|| anyhow::anyhow!("Could not get file name from path."))?
-        //     .to_str()
-        //     .ok_or_else(|| anyhow::anyhow!("Could not convert file name to string."))?;
         let capture = pattern.captures(
             path.to_str()
                 .ok_or_else(|| anyhow::anyhow!("Could not convert file name to string."))?,
