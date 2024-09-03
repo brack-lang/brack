@@ -21,7 +21,9 @@ pub enum CST {
     Document(InnerNode),
     Stmt(InnerNode),
     Expr(InnerNode),
-    Bracket(InnerNode),
+    Angle(InnerNode),
+    Curly(InnerNode),
+    Square(InnerNode),
     AngleBracketOpen(LeafNode),
     AngleBracketClose(LeafNode),
     SquareBracketOpen(LeafNode),
@@ -42,18 +44,24 @@ pub enum CST {
 impl CST {
     pub fn children(&self) -> &Vec<CST> {
         match self {
-            CST::Document(node) | CST::Stmt(node) | CST::Expr(node) | CST::Bracket(node) => {
-                &node.children
-            }
+            CST::Document(node)
+            | CST::Stmt(node)
+            | CST::Expr(node)
+            | CST::Angle(node)
+            | CST::Curly(node)
+            | CST::Square(node) => &node.children,
             _ => panic!("This node does not have children"),
         }
     }
 
     pub fn location(&self) -> Location {
         match self {
-            CST::Document(node) | CST::Stmt(node) | CST::Expr(node) | CST::Bracket(node) => {
-                node.location.clone()
-            }
+            CST::Document(node)
+            | CST::Stmt(node)
+            | CST::Expr(node)
+            | CST::Angle(node)
+            | CST::Curly(node)
+            | CST::Square(node) => node.location.clone(),
             CST::AngleBracketOpen(leaf)
             | CST::AngleBracketClose(leaf)
             | CST::CurlyBracketOpen(leaf)
@@ -74,7 +82,12 @@ impl CST {
 
     pub fn set_location(&mut self, location: Location) -> () {
         match self {
-            CST::Document(node) | CST::Stmt(node) | CST::Expr(node) | CST::Bracket(node) => {
+            CST::Document(node)
+            | CST::Stmt(node)
+            | CST::Expr(node)
+            | CST::Angle(node)
+            | CST::Curly(node)
+            | CST::Square(node) => {
                 node.location = location;
             }
             CST::AngleBracketOpen(leaf)
@@ -118,13 +131,20 @@ impl CST {
 
     pub fn add(&mut self, cst: CST) -> () {
         match self {
-            CST::Document(node) | CST::Stmt(node) | CST::Expr(node) | CST::Bracket(node) => {
+            CST::Document(node)
+            | CST::Stmt(node)
+            | CST::Expr(node)
+            | CST::Angle(node)
+            | CST::Square(node)
+            | CST::Curly(node) => {
                 node.children.push(cst.clone());
                 let location_children = match cst {
                     CST::Document(node)
                     | CST::Stmt(node)
                     | CST::Expr(node)
-                    | CST::Bracket(node) => node.location,
+                    | CST::Angle(node)
+                    | CST::Curly(node)
+                    | CST::Square(node) => node.location,
                     CST::AngleBracketOpen(leaf)
                     | CST::AngleBracketClose(leaf)
                     | CST::CurlyBracketOpen(leaf)
@@ -153,7 +173,9 @@ pub fn matches_kind(cst: &CST, kind: &CST) -> bool {
         (CST::Document(_), CST::Document(_))
         | (CST::Stmt(_), CST::Stmt(_))
         | (CST::Expr(_), CST::Expr(_))
-        | (CST::Bracket(_), CST::Bracket(_))
+        | (CST::Angle(_), CST::Angle(_))
+        | (CST::Curly(_), CST::Curly(_))
+        | (CST::Square(_), CST::Square(_))
         | (CST::AngleBracketOpen(_), CST::AngleBracketOpen(_))
         | (CST::AngleBracketClose(_), CST::AngleBracketClose(_))
         | (CST::SquareBracketOpen(_), CST::SquareBracketOpen(_))
@@ -253,8 +275,24 @@ pub fn new_module(value: String, location: Location) -> CST {
     })
 }
 
-pub fn new_bracket() -> CST {
-    CST::Bracket(InnerNode {
+pub fn new_angle() -> CST {
+    CST::Angle(InnerNode {
+        id: Uuid::new_v4().to_string(),
+        children: vec![],
+        location: mock_location(),
+    })
+}
+
+pub fn new_curly() -> CST {
+    CST::Curly(InnerNode {
+        id: Uuid::new_v4().to_string(),
+        children: vec![],
+        location: mock_location(),
+    })
+}
+
+pub fn new_square() -> CST {
+    CST::Square(InnerNode {
         id: Uuid::new_v4().to_string(),
         children: vec![],
         location: mock_location(),
