@@ -1,19 +1,21 @@
 use brack_parser::cst::CST;
-use uuid::Uuid;
 
-use crate::{
-    ast::{LeafNode, AST},
-    document,
-    error::TransformError,
-};
+use crate::{angle, backslash, curly, document, error::TransformError, expr, square, stmt};
+
+fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
+    match cst {
+        CST::Document(_) => document::simplify(&cst),
+        CST::Stmt(_) => stmt::simplify(&cst),
+        CST::Expr(_) => expr::simplify(&cst),
+        CST::Angle(_) => angle::simplify(&cst),
+        CST::Curly(_) => curly::simplify(&cst),
+        CST::Square(_) => square::simplify(&cst),
+        CST::BackSlash(_) => backslash::simplify(&cst),
+        node => (node.clone(), vec![]),
+    }
+}
 
 pub fn transform(cst: &CST) -> (CST, Vec<TransformError>) {
-    match cst {
-        CST::Document(_) => document::transform(&cst),
-        CST::Stmt(InnerNode) => {}
-        CST::Expr(InnerNode) => {}
-        CST::Bracket(InnerNode) => {}
-        CST::BackSlash(LeafNode) => {}
-        node => (node.clone(), vec![])
-    }
+    let (_cst, _errors) = simplify(&cst);
+    todo!()
 }

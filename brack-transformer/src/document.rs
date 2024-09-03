@@ -1,13 +1,12 @@
-use brack_parser::cst::CST;
+use brack_parser::cst::{InnerNode, CST};
 use uuid::Uuid;
 
 use crate::{
-    ast::{InnerNode, AST},
     error::TransformError,
     transform,
 };
 
-pub fn transform(cst: &CST) -> (CST, Vec<TransformError>) {
+pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
     let node = match cst {
         CST::Document(node) => node,
         _ => panic!("Cannot pass non-document node to transform_document"),

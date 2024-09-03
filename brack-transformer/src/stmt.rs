@@ -1,13 +1,12 @@
-use brack_parser::cst::CST;
+use brack_parser::cst::{InnerNode, CST};
 use uuid::Uuid;
 
 use crate::{
-    ast::{InnerNode, AST},
     error::TransformError,
     transform,
 };
 
-pub fn transform(cst: &CST) -> (AST, Vec<TransformError>) {
+pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
     let node = match cst {
         CST::Stmt(node) => node,
         _ => panic!("Cannot pass non-stmt node to stmt::transform"),
@@ -24,7 +23,7 @@ pub fn transform(cst: &CST) -> (AST, Vec<TransformError>) {
 
     // end
     (
-        AST::Stmt(InnerNode {
+        CST::Stmt(InnerNode {
             id: Uuid::new_v4().to_string(),
             children: asts,
             location: node.location.clone(),
