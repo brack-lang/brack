@@ -1,7 +1,7 @@
 mod curly;
 mod expr;
 pub mod generate;
-mod identifier;
+mod ident;
 mod square;
 mod stmt;
 mod text;

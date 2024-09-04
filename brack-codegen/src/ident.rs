@@ -12,7 +12,7 @@ pub fn generate(ast: &AST) -> Result<String> {
             }
             AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
             _ => anyhow::bail!(
-                "Identifier cannot contain Document, Stmt, Expr, Curly, Square and Identifier"
+                "Ident cannot contain Document, Stmt, Expr, Curly, Square and Ident"
             ),
         }
     }
