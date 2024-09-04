@@ -52,7 +52,7 @@ fn run_compile(subcommand: SubCommands) -> Result<()> {
 
     let tokens = brack_tokenizer::tokenize::tokenize(&args.2)?;
     let cst = brack_parser::parse::parse(&tokens)?;
-    let ast = brack_transformer::transform::transform(&cst)?;
+    let (ast, _errors) = brack_transformer::transform::transform(&cst);
     let expanded_ast = brack_expander::expand::expander(&ast, &mut plugins)?;
     let gen = brack_codegen::generate::generate(&expanded_ast, &mut plugins)?;
     println!("{}", gen);
@@ -124,7 +124,7 @@ fn build() -> Result<()> {
         if name.ends_with(".[]") {
             let tokens = brack_tokenizer::tokenize::tokenize(&path.to_str().unwrap())?;
             let cst = brack_parser::parse::parse(&tokens)?;
-            let ast = brack_transformer::transform::transform(&cst)?;
+            let (ast, _errors) = brack_transformer::transform::transform(&cst);
             let expanded_ast = brack_expander::expand::expander(&ast, &mut plugins)?;
             let gen = brack_codegen::generate::generate(&expanded_ast, &mut plugins)?;
             std::fs::create_dir_all("out")?;
