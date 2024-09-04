@@ -6,6 +6,7 @@ mod curly;
 mod expr;
 mod document;
 mod error;
+mod simplify;
 mod square;
 mod stmt;
 pub mod transform;
