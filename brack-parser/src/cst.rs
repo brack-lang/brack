@@ -1,3 +1,5 @@
+use std::fmt::{self};
+
 use brack_tokenizer::tokens::{merge_location, mock_location, Location};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -24,6 +26,7 @@ pub enum CST {
     Angle(InnerNode),
     Curly(InnerNode),
     Square(InnerNode),
+    BackSlash(InnerNode),
     AngleBracketOpen(LeafNode),
     AngleBracketClose(LeafNode),
     SquareBracketOpen(LeafNode),
@@ -35,10 +38,15 @@ pub enum CST {
     Text(LeafNode),
     Whitespace(LeafNode),
     Newline(LeafNode),
-    BackSlash(LeafNode),
     Dot(LeafNode),
     Comma(LeafNode),
     EOF(LeafNode),
+}
+
+impl fmt::Display for CST {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.display_with_indent(f, 0)
+    }
 }
 
 impl CST {
@@ -59,6 +67,7 @@ impl CST {
             CST::Document(node)
             | CST::Stmt(node)
             | CST::Expr(node)
+            | CST::BackSlash(node)
             | CST::Angle(node)
             | CST::Curly(node)
             | CST::Square(node) => node.location.clone(),
@@ -73,7 +82,6 @@ impl CST {
             | CST::Text(leaf)
             | CST::Whitespace(leaf)
             | CST::Newline(leaf)
-            | CST::BackSlash(leaf)
             | CST::Dot(leaf)
             | CST::Comma(leaf)
             | CST::EOF(leaf) => leaf.location.clone(),
@@ -85,6 +93,7 @@ impl CST {
             CST::Document(node)
             | CST::Stmt(node)
             | CST::Expr(node)
+            | CST::BackSlash(node)
             | CST::Angle(node)
             | CST::Curly(node)
             | CST::Square(node) => {
@@ -101,7 +110,6 @@ impl CST {
             | CST::Text(leaf)
             | CST::Whitespace(leaf)
             | CST::Newline(leaf)
-            | CST::BackSlash(leaf)
             | CST::Dot(leaf)
             | CST::Comma(leaf)
             | CST::EOF(leaf) => leaf.location = location,
@@ -121,7 +129,6 @@ impl CST {
             | CST::Text(leaf)
             | CST::Whitespace(leaf)
             | CST::Newline(leaf)
-            | CST::BackSlash(leaf)
             | CST::Dot(leaf)
             | CST::Comma(leaf)
             | CST::EOF(leaf) => leaf.value.clone(),
@@ -134,6 +141,7 @@ impl CST {
             CST::Document(node)
             | CST::Stmt(node)
             | CST::Expr(node)
+            | CST::BackSlash(node)
             | CST::Angle(node)
             | CST::Square(node)
             | CST::Curly(node) => {
@@ -142,6 +150,7 @@ impl CST {
                     CST::Document(node)
                     | CST::Stmt(node)
                     | CST::Expr(node)
+                    | CST::BackSlash(node)
                     | CST::Angle(node)
                     | CST::Curly(node)
                     | CST::Square(node) => node.location,
@@ -156,7 +165,6 @@ impl CST {
                     | CST::Text(leaf)
                     | CST::Whitespace(leaf)
                     | CST::Newline(leaf)
-                    | CST::BackSlash(leaf)
                     | CST::Dot(leaf)
                     | CST::Comma(leaf)
                     | CST::EOF(leaf) => leaf.location,
@@ -164,6 +172,99 @@ impl CST {
                 node.location = merge_location(&node.location, &location_children);
             }
             _ => panic!("This node does not have children"),
+        }
+    }
+
+    fn display_with_indent(&self, f: &mut fmt::Formatter<'_>, indent: usize) -> fmt::Result {
+        let indent_str = "  ".repeat(indent);
+        match self {
+            CST::Document(inner) => {
+                writeln!(f, "{}Document(id: {}) [", indent_str, inner.id)?;
+                for child in &inner.children {
+                    child.display_with_indent(f, indent + 1)?;
+                    writeln!(f, ",")?;
+                }
+                write!(f, "{}]", indent_str)
+            }
+            CST::Stmt(inner) => {
+                writeln!(f, "{}Stmt(id: {}) [", indent_str, inner.id)?;
+                for child in &inner.children {
+                    child.display_with_indent(f, indent + 1)?;
+                    writeln!(f, ",")?;
+                }
+                write!(f, "{}]", indent_str)
+            }
+            CST::Expr(inner) => {
+                writeln!(f, "{}Expr(id: {}) [", indent_str, inner.id)?;
+                for child in &inner.children {
+                    child.display_with_indent(f, indent + 1)?;
+                    writeln!(f, ",")?;
+                }
+                write!(f, "{}]", indent_str)
+            }
+            CST::Angle(inner) => {
+                writeln!(f, "{}Angle(id: {}) [", indent_str, inner.id)?;
+                for child in &inner.children {
+                    child.display_with_indent(f, indent + 1)?;
+                    writeln!(f, ",")?;
+                }
+                write!(f, "{}]", indent_str)
+            }
+            CST::Curly(inner) => {
+                writeln!(f, "{}Curly(id: {}) [", indent_str, inner.id)?;
+                for child in &inner.children {
+                    child.display_with_indent(f, indent + 1)?;
+                    writeln!(f, ",")?;
+                }
+                write!(f, "{}]", indent_str)
+            }
+            CST::Square(inner) => {
+                writeln!(f, "{}Square(id: {}) [", indent_str, inner.id)?;
+                for child in &inner.children {
+                    child.display_with_indent(f, indent + 1)?;
+                    writeln!(f, ",")?;
+                }
+                write!(f, "{}]", indent_str)
+            }
+            CST::AngleBracketOpen(leaf) => {
+                write!(f, "{}AngleBracketOpen(id: {})", indent_str, leaf.id)
+            }
+            CST::AngleBracketClose(leaf) => {
+                write!(f, "{}AngleBracketClose(id: {})", indent_str, leaf.id)
+            }
+            CST::SquareBracketOpen(leaf) => {
+                write!(f, "{}SquareBracketOpen(id: {})", indent_str, leaf.id)
+            }
+            CST::SquareBracketClose(leaf) => {
+                write!(f, "{}SquareBracketClose(id: {})", indent_str, leaf.id)
+            }
+            CST::CurlyBracketOpen(leaf) => {
+                write!(f, "{}CurlyBracketOpen(id: {})", indent_str, leaf.id)
+            }
+            CST::CurlyBracketClose(leaf) => {
+                write!(f, "{}CurlyBracketClose(id: {})", indent_str, leaf.id)
+            }
+            CST::Module(leaf) => write!(
+                f,
+                "{}Module(id: {}, value: {:?})",
+                indent_str, leaf.id, leaf.value
+            ),
+            CST::Ident(leaf) => write!(
+                f,
+                "{}Ident(id: {}, value: {:?})",
+                indent_str, leaf.id, leaf.value
+            ),
+            CST::Text(leaf) => write!(
+                f,
+                "{}Text(id: {}, value: {:?})",
+                indent_str, leaf.id, leaf.value
+            ),
+            CST::Whitespace(leaf) => write!(f, "{}Whitespace(id: {})", indent_str, leaf.id),
+            CST::Newline(leaf) => write!(f, "{}Newline(id: {})", indent_str, leaf.id),
+            CST::BackSlash(leaf) => write!(f, "{}BackSlash(id: {})", indent_str, leaf.id),
+            CST::Dot(leaf) => write!(f, "{}Dot(id: {})", indent_str, leaf.id),
+            CST::Comma(leaf) => write!(f, "{}Comma(id: {})", indent_str, leaf.id),
+            CST::EOF(leaf) => write!(f, "{}EOF(id: {})", indent_str, leaf.id),
         }
     }
 }
@@ -244,9 +345,9 @@ pub fn new_newline(location: Location) -> CST {
 }
 
 pub fn new_backslash(location: Location) -> CST {
-    CST::BackSlash(LeafNode {
+    CST::BackSlash(InnerNode {
         id: Uuid::new_v4().to_string(),
-        value: None,
+        children: vec![],
         location,
     })
 }
