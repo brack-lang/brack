@@ -23,7 +23,6 @@ pub fn tokenize_str(text: &str) -> Result<Vec<Token>> {
         square_nest_count: Some(0),
         angle_nest_count: Some(0),
         looking_for_identifier: Some(false),
-        escaped: Some(false),
         ..Default::default()
     };
     dispatch(&t)

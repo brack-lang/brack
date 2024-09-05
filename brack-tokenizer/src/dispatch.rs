@@ -1,6 +1,6 @@
 use crate::{
     angle_bracket_close, angle_bracket_open, backslash, comma, curly_bracket_close,
-    curly_bracket_open, dot, escape, identifier, module, newline, square_bracket_close,
+    curly_bracket_open, dot, identifier, module, newline, square_bracket_close,
     square_bracket_open, text,
     tokenizer::Tokenizer,
     tokens::{Location, LocationData, Token},
@@ -46,12 +46,6 @@ pub fn dispatch(t: &Tokenizer) -> Result<Vec<Token>> {
             },
         }));
         return Ok(tokens);
-    }
-
-    if t.escaped
-        .ok_or_else(|| anyhow::anyhow!("`t.escaped` is not set"))?
-    {
-        return escape::tokenize(t);
     }
 
     let (head2, _) = separate(&tail);

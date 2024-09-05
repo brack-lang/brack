@@ -10,7 +10,6 @@ pub struct Tokenizer {
     pub untreated: Option<String>,
     pub pool: Option<String>,
     pub tokens: Option<Vec<Token>>,
-    pub escaped: Option<bool>,
     pub angle_nest_count: Option<i32>,
     pub square_nest_count: Option<i32>,
     pub curly_nest_count: Option<i32>,
@@ -48,10 +47,6 @@ impl Tokenizer {
             tokens: match &other.tokens {
                 Some(s) => Some(s.clone()),
                 None => self.tokens.clone(),
-            },
-            escaped: match other.escaped {
-                Some(s) => Some(s),
-                None => self.escaped,
             },
             angle_nest_count: match other.angle_nest_count {
                 Some(s) => Some(s),
@@ -101,7 +96,6 @@ mod tests {
                     },
                 },
             )]),
-            escaped: Some(true),
             angle_nest_count: Some(1),
             square_nest_count: Some(1),
             curly_nest_count: Some(1),
@@ -128,7 +122,6 @@ mod tests {
                     },
                 },
             )]),
-            escaped: Some(false),
             angle_nest_count: Some(2),
             square_nest_count: Some(2),
             curly_nest_count: Some(2),
@@ -156,7 +149,6 @@ mod tests {
                     },
                 },
             )]),
-            escaped: Some(false),
             angle_nest_count: Some(2),
             square_nest_count: Some(2),
             curly_nest_count: Some(2),

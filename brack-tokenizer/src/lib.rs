@@ -6,7 +6,6 @@ mod curly_bracket_close;
 mod curly_bracket_open;
 mod dispatch;
 mod dot;
-mod escape;
 mod identifier;
 mod module;
 mod newline;
