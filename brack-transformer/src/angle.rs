@@ -2,9 +2,13 @@ use brack_parser::cst::{InnerNode, CST};
 use brack_tokenizer::tokens::merge_location;
 
 use crate::{
-    bracket::{
-        check_if_dot, check_if_ident_or_angle_bracket, check_if_module_or_angle_bracket, check_unexpected_dot, check_valid_arguments, remove_elements_not_included_ast, remove_whitespaces_and_newlines
-    }, error::TransformError, simplify
+    error::TransformError,
+    simplify,
+    utils::{
+        check_if_dot, check_if_ident_or_angle_bracket, check_if_module_or_angle_bracket,
+        check_unexpected_dot, check_valid_arguments, remove_elements_not_included_ast,
+        remove_whitespaces_and_newlines,
+    },
 };
 
 fn check_if_the_first_and_last_node_are_brackets(csts: &Vec<CST>) -> Vec<TransformError> {
@@ -24,7 +28,6 @@ fn check_if_the_first_and_last_node_are_brackets(csts: &Vec<CST>) -> Vec<Transfo
     }
     errors
 }
-
 
 pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
     let node = match cst {

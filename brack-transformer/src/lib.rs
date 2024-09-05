@@ -1,7 +1,6 @@
 mod angle;
 pub mod ast;
 mod backslash;
-mod bracket;
 mod curly;
 mod expr;
 mod document;
@@ -10,3 +9,4 @@ mod simplify;
 mod square;
 mod stmt;
 pub mod transform;
+mod utils;
