@@ -1,3 +1,5 @@
+use std::fmt;
+
 use brack_tokenizer::tokens::{merge_location, mock_location, Location};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -29,6 +31,12 @@ pub enum AST {
     Text(LeafNode),
     Invalid(LeafNode),
     Ignored(LeafNode),
+}
+
+impl fmt::Display for AST {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.display_with_ident(f, 0)
+    }
 }
 
 impl AST {
@@ -140,6 +148,59 @@ impl AST {
             }
         }
     }
+
+    pub fn display_with_ident(&self, f: &mut fmt::Formatter, ident: usize) -> fmt::Result {
+        let ident_str = "  ".repeat(ident);
+        match self {
+            AST::Document(node) => {
+                write!(f, "{}Document\n", ident_str)?;
+                for child in &node.children {
+                    child.display_with_ident(f, ident + 1)?;
+                }
+                Ok(())
+            }
+            AST::Stmt(node) => {
+                write!(f, "{}Stmt\n", ident_str)?;
+                for child in &node.children {
+                    child.display_with_ident(f, ident + 1)?;
+                }
+                Ok(())
+            }
+            AST::Expr(node) => {
+                write!(f, "{}Expr\n", ident_str)?;
+                for child in &node.children {
+                    child.display_with_ident(f, ident + 1)?;
+                }
+                Ok(())
+            }
+            AST::Angle(node) => {
+                write!(f, "{}Angle\n", ident_str)?;
+                for child in &node.children {
+                    child.display_with_ident(f, ident + 1)?;
+                }
+                Ok(())
+            }
+            AST::Square(node) => {
+                write!(f, "{}Square\n", ident_str)?;
+                for child in &node.children {
+                    child.display_with_ident(f, ident + 1)?;
+                }
+                Ok(())
+            }
+            AST::Curly(node) => {
+                write!(f, "{}Curly\n", ident_str)?;
+                for child in &node.children {
+                    child.display_with_ident(f, ident + 1)?;
+                }
+                Ok(())
+            }
+            AST::Ident(node) => write!(f, "{}Ident: {}\n", ident_str, node.value.as_ref().unwrap()),
+            AST::Module(node) => write!(f, "{}Module: {}\n", ident_str, node.value.as_ref().unwrap()),
+            AST::Text(node) => write!(f, "{}Text: {}\n", ident_str, node.value.as_ref().unwrap()),
+            AST::Invalid(_) => write!(f, "{}Invalid\n", ident_str),
+            AST::Ignored(_) => write!(f, "{}Ignored\n", ident_str),
+        }
+    }
 }
 
 fn merge_all_locations(asts: &Vec<AST>) -> Location {
@@ -166,16 +227,7 @@ fn merge_all_locations(asts: &Vec<AST>) -> Location {
     location
 }
 
-pub fn new_document() -> AST {
-    AST::Document(InnerNode {
-        id: Uuid::new_v4().to_string(),
-        children: vec![],
-        location: mock_location(),
-    })
-}
-
-pub fn new_document_with_children(children: Vec<AST>) -> AST {
-    let location = merge_all_locations(&children);
+pub fn new_document(children: Vec<AST>, location: Location) -> AST {
     AST::Document(InnerNode {
         id: Uuid::new_v4().to_string(),
         children,
@@ -183,16 +235,7 @@ pub fn new_document_with_children(children: Vec<AST>) -> AST {
     })
 }
 
-pub fn new_stmt() -> AST {
-    AST::Stmt(InnerNode {
-        id: Uuid::new_v4().to_string(),
-        children: vec![],
-        location: mock_location(),
-    })
-}
-
-pub fn new_stmt_with_children(children: Vec<AST>) -> AST {
-    let location = merge_all_locations(&children);
+pub fn new_stmt(children: Vec<AST>, location: Location) -> AST {
     AST::Stmt(InnerNode {
         id: Uuid::new_v4().to_string(),
         children,
@@ -200,16 +243,7 @@ pub fn new_stmt_with_children(children: Vec<AST>) -> AST {
     })
 }
 
-pub fn new_expr() -> AST {
-    AST::Expr(InnerNode {
-        id: Uuid::new_v4().to_string(),
-        children: vec![],
-        location: mock_location(),
-    })
-}
-
-pub fn new_expr_with_children(children: Vec<AST>) -> AST {
-    let location = merge_all_locations(&children);
+pub fn new_expr(children: Vec<AST>, location: Location) -> AST {
     AST::Expr(InnerNode {
         id: Uuid::new_v4().to_string(),
         children,
@@ -217,16 +251,7 @@ pub fn new_expr_with_children(children: Vec<AST>) -> AST {
     })
 }
 
-pub fn new_angle() -> AST {
-    AST::Angle(InnerNode {
-        id: Uuid::new_v4().to_string(),
-        children: vec![],
-        location: mock_location(),
-    })
-}
-
-pub fn new_angle_with_children(children: Vec<AST>) -> AST {
-    let location = merge_all_locations(&children);
+pub fn new_angle(children: Vec<AST>, location: Location) -> AST {
     AST::Angle(InnerNode {
         id: Uuid::new_v4().to_string(),
         children,
@@ -234,33 +259,7 @@ pub fn new_angle_with_children(children: Vec<AST>) -> AST {
     })
 }
 
-pub fn new_curly() -> AST {
-    AST::Curly(InnerNode {
-        id: Uuid::new_v4().to_string(),
-        children: vec![],
-        location: mock_location(),
-    })
-}
-
-pub fn new_curly_with_children(children: Vec<AST>) -> AST {
-    let location = merge_all_locations(&children);
-    AST::Curly(InnerNode {
-        id: Uuid::new_v4().to_string(),
-        children,
-        location,
-    })
-}
-
-pub fn new_square() -> AST {
-    AST::Square(InnerNode {
-        id: Uuid::new_v4().to_string(),
-        children: vec![],
-        location: mock_location(),
-    })
-}
-
-pub fn new_square_with_children(children: Vec<AST>) -> AST {
-    let location = merge_all_locations(&children);
+pub fn new_square(children: Vec<AST>, location: Location) -> AST {
     AST::Square(InnerNode {
         id: Uuid::new_v4().to_string(),
         children,
@@ -268,36 +267,43 @@ pub fn new_square_with_children(children: Vec<AST>) -> AST {
     })
 }
 
-pub fn new_ident(value: String, children: Vec<AST>) -> AST {
-    let location = merge_all_locations(&children);
+pub fn new_curly(children: Vec<AST>, location: Location) -> AST {
+    AST::Curly(InnerNode {
+        id: Uuid::new_v4().to_string(),
+        children,
+        location,
+    })
+}
+
+pub fn new_ident(value: Option<String>, location: Location) -> AST {
     AST::Ident(LeafNode {
         id: Uuid::new_v4().to_string(),
-        value: Some(value),
+        value,
         location,
     })
 }
 
-pub fn new_text(value: String, location: Location) -> AST {
+pub fn new_module(value: Option<String>, location: Location) -> AST {
+    AST::Module(LeafNode {
+        id: Uuid::new_v4().to_string(),
+        value,
+        location,
+    })
+}
+
+pub fn new_text(value: Option<String>, location: Location) -> AST {
     AST::Text(LeafNode {
         id: Uuid::new_v4().to_string(),
-        value: Some(value),
+        value,
         location,
     })
 }
 
-pub fn new_invalid() -> AST {
+pub fn new_invalid(location: Location) -> AST {
     AST::Invalid(LeafNode {
         id: Uuid::new_v4().to_string(),
         value: None,
-        location: mock_location(),
-    })
-}
-
-pub fn new_ignored() -> AST {
-    AST::Ignored(LeafNode {
-        id: Uuid::new_v4().to_string(),
-        value: None,
-        location: mock_location(),
+        location,
     })
 }
 

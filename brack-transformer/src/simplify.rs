@@ -15,17 +15,3 @@ pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use anyhow::Result;
-//     use brack_parser::parse::parse;
-//     use brack_tokenizer::tokenize::tokenize;
-
-//     #[test]
-//     fn test_simplify_square_1() -> Result<()> {
-//         let tokens = tokenize("../brack-tokenizer/test/multiple_errors.[]")?;
-//         let cst = parse(&tokens)?;
-//         let (_output, errors) = super::simplify(&cst);
-//         Err(anyhow::anyhow!(errors.iter().map(|e| e.to_string()).collect::<Vec<String>>().join("\n")))
-//     }
-// }

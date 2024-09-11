@@ -1,41 +1,79 @@
-use anyhow::anyhow;
+use anyhow::bail;
 use anyhow::Result;
 use brack_tokenizer::tokens::Token;
+use uuid::Uuid;
 
-use crate::comma;
-use crate::dot;
-use crate::text;
-use crate::{backslash, bracket_close, bracket_open, cst::CST};
+use crate::cst::new_backslash;
+use crate::cst::new_text;
+use crate::cst::InnerNode;
+use crate::cst::CST;
+use crate::parser::Parser;
 
 // backslash (dot | comma | bracket_open | bracket_close | backslash | .)
-pub fn parse<'a>(tokens: &'a [Token]) -> Result<(Vec<CST>, &'a [Token])> {
-    let mut result = vec![];
-    let (cst, mut tokens) = backslash::parse(tokens)?;
-    result.push(cst);
-    if let Ok((cst, new_tokens)) = dot::parse(tokens) {
-        result.push(cst);
-        tokens = new_tokens;
-    } else if let Ok((cst, new_tokens)) = comma::parse(tokens) {
-        result.push(cst);
-        tokens = new_tokens;
-    } else if let Ok((cst, new_tokens)) = bracket_open::parse(tokens) {
-        result.push(cst);
-        tokens = new_tokens;
-    } else if let Ok((cst, new_tokens)) = bracket_close::parse(tokens) {
-        result.push(cst);
-        tokens = new_tokens;
-    } else if let Ok((cst, new_tokens)) = text::parse(tokens) {
-        result.push(cst);
-        tokens = new_tokens;
-    } else if let Ok((cst, new_tokens)) = backslash::parse(tokens) {
-        result.push(cst);
-        tokens = new_tokens;
-    } else {
-        return Err(anyhow!(
-            "Expected dot, comma, bracket open, bracket close, backslash, or text, found none"
-        ));
+pub fn parse<'a>(tokens: &'a [Token]) -> Result<Parser> {
+    if let Some(token) = tokens.first() {
+        match token {
+            Token::BackSlash(location) => {
+                let mut tokens = &tokens[1..];
+                if let Some(token) = tokens.first() {
+                    let escaped_node = match token {
+                        Token::BackSlash(location) => {
+                            tokens = &tokens[1..];
+                            Ok(new_text("\\".to_string(), location.clone()))
+                        }
+                        Token::AngleBracketOpen(location) => {
+                            tokens = &tokens[1..];
+                            Ok(new_text("<".to_string(), location.clone()))
+                        }
+                        Token::AngleBracketClose(location) => {
+                            tokens = &tokens[1..];
+                            Ok(new_text(">".to_string(), location.clone()))
+                        }
+                        Token::CurlyBracketOpen(location) => {
+                            tokens = &tokens[1..];
+                            Ok(new_text("{".to_string(), location.clone()))
+                        }
+                        Token::CurlyBracketClose(location) => {
+                            tokens = &tokens[1..];
+                            Ok(new_text("}".to_string(), location.clone()))
+                        }
+                        Token::SquareBracketOpen(location) => {
+                            tokens = &tokens[1..];
+                            Ok(new_text("[".to_string(), location.clone()))
+                        }
+                        Token::SquareBracketClose(location) => {
+                            tokens = &tokens[1..];
+                            Ok(new_text("]".to_string(), location.clone()))
+                        }
+                        Token::Dot(location) => {
+                            tokens = &tokens[1..];
+                            Ok(new_text(".".to_string(), location.clone()))
+                        }
+                        Token::Comma(location) => {
+                            tokens = &tokens[1..];
+                            Ok(new_text(",".to_string(), location.clone()))
+                        }
+                        _ => Err(()),
+                    };
+                    let children = match escaped_node {
+                        Ok(node) => vec![node],
+                        Err(_) => vec![],
+                    };
+                    return Ok((
+                        CST::BackSlash(InnerNode {
+                            id: Uuid::new_v4().to_string(),
+                            location: location.clone(),
+                            children: children.clone(),
+                        }),
+                        tokens,
+                    ));
+                }
+                return Ok((new_backslash(location.clone()), &tokens[1..]));
+            }
+            token => bail!("Expected backslash, found {:?}", token),
+        }
     }
-    Ok((result, tokens))
+    bail!("Expected backslash, found none");
 }
 
 #[cfg(test)]
@@ -43,10 +81,7 @@ mod tests {
     use anyhow::Result;
     use brack_tokenizer::tokens::{mock_location, Token};
 
-    use crate::cst::{
-        matches_kind, new_angle_bracket_close, new_angle_bracket_open, new_backslash, new_comma,
-        new_dot, new_text,
-    };
+    use crate::cst::{matches_kind, new_backslash, new_text};
 
     #[test]
     fn test_escaped_parse_valid_dot() -> Result<()> {
@@ -54,10 +89,13 @@ mod tests {
             Token::BackSlash(mock_location()),
             Token::Dot(mock_location()),
         ];
-        let (csts, tokens) = super::parse(&tokens)?;
+        let (cst, tokens) = super::parse(&tokens)?;
         assert_eq!(tokens.len(), 0);
-        assert!(matches_kind(&csts[0], &new_backslash(mock_location())));
-        assert!(matches_kind(&csts[1], &new_dot(mock_location())));
+        assert!(matches_kind(&cst, &new_backslash(mock_location())));
+        assert!(matches_kind(
+            &cst.children()[0],
+            &new_text(String::from("."), mock_location())
+        ));
         Ok(())
     }
 
@@ -67,10 +105,13 @@ mod tests {
             Token::BackSlash(mock_location()),
             Token::Comma(mock_location()),
         ];
-        let (csts, tokens) = super::parse(&tokens)?;
+        let (cst, tokens) = super::parse(&tokens)?;
         assert_eq!(tokens.len(), 0);
-        assert!(matches_kind(&csts[0], &new_backslash(mock_location())));
-        assert!(matches_kind(&csts[1], &new_comma(mock_location())));
+        assert!(matches_kind(&cst, &new_backslash(mock_location())));
+        assert!(matches_kind(
+            &cst.children()[0],
+            &new_text(String::from(","), mock_location())
+        ));
         Ok(())
     }
 
@@ -80,12 +121,12 @@ mod tests {
             Token::BackSlash(mock_location()),
             Token::AngleBracketOpen(mock_location()),
         ];
-        let (csts, tokens) = super::parse(&tokens)?;
+        let (cst, tokens) = super::parse(&tokens)?;
         assert_eq!(tokens.len(), 0);
-        assert!(matches_kind(&csts[0], &new_backslash(mock_location())));
+        assert!(matches_kind(&cst, &new_backslash(mock_location())));
         assert!(matches_kind(
-            &csts[1],
-            &new_angle_bracket_open(mock_location())
+            &cst.children()[0],
+            &new_text(String::from("<"), mock_location())
         ));
         Ok(())
     }
@@ -96,12 +137,12 @@ mod tests {
             Token::BackSlash(mock_location()),
             Token::AngleBracketClose(mock_location()),
         ];
-        let (csts, tokens) = super::parse(&tokens)?;
+        let (cst, tokens) = super::parse(&tokens)?;
         assert_eq!(tokens.len(), 0);
-        assert!(matches_kind(&csts[0], &new_backslash(mock_location())));
+        assert!(matches_kind(&cst, &new_backslash(mock_location())));
         assert!(matches_kind(
-            &csts[1],
-            &new_angle_bracket_close(mock_location())
+            &cst.children()[0],
+            &new_text(String::from(">"), mock_location())
         ));
         Ok(())
     }
@@ -112,10 +153,13 @@ mod tests {
             Token::BackSlash(mock_location()),
             Token::BackSlash(mock_location()),
         ];
-        let (csts, tokens) = super::parse(&tokens)?;
+        let (cst, tokens) = super::parse(&tokens)?;
         assert_eq!(tokens.len(), 0);
-        assert!(matches_kind(&csts[0], &new_backslash(mock_location())));
-        assert!(matches_kind(&csts[1], &new_backslash(mock_location())));
+        assert!(matches_kind(&cst, &new_backslash(mock_location())));
+        assert!(matches_kind(
+            &cst.children()[0],
+            &new_text(String::from("\\"), mock_location())
+        ));
         Ok(())
     }
 
@@ -125,13 +169,10 @@ mod tests {
             Token::BackSlash(mock_location()),
             Token::Text("Hello!".to_string(), mock_location()),
         ];
-        let (csts, tokens) = super::parse(&tokens)?;
-        assert_eq!(tokens.len(), 0);
-        assert!(matches_kind(&csts[0], &new_backslash(mock_location())));
-        assert!(matches_kind(
-            &csts[1],
-            &new_text("Hello!".to_string(), mock_location())
-        ));
+        let (cst, tokens) = super::parse(&tokens)?;
+        assert_eq!(tokens.len(), 1);
+        assert!(matches_kind(&cst, &new_backslash(mock_location())));
+        assert_eq!(cst.children().len(), 0);
         Ok(())
     }
 

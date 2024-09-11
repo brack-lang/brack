@@ -11,10 +11,8 @@ pub fn parse<'a>(tokens: &'a [Token]) -> Result<Parser> {
     let mut expr = new_expr();
 
     loop {
-        if let Ok((csts, new_tokens)) = escaped::parse(tokens) {
-            for cst in csts {
-                expr.add(cst);
-            }
+        if let Ok((cst, new_tokens)) = escaped::parse(tokens) {
+            expr.add(cst);
             tokens = new_tokens;
         } else if let Ok((cst, new_tokens)) = modules::parse(tokens) {
             expr.add(cst);

@@ -50,7 +50,8 @@ pub fn remove_elements_not_included_ast(csts: &Vec<CST>) -> Vec<CST> {
             | CST::CurlyBracketOpen(_)
             | CST::CurlyBracketClose(_)
             | CST::SquareBracketOpen(_)
-            | CST::SquareBracketClose(_) => (),
+            | CST::SquareBracketClose(_)
+            | CST::EOF(_) => (),
             _ => new_csts.push(cst.clone()),
         }
     }
@@ -80,10 +81,11 @@ pub fn check_valid_arguments(csts: &Vec<CST>) -> (Vec<CST>, Vec<TransformError>)
             | CST::CurlyBracketClose(_)
             | CST::SquareBracketClose(_) => {
                 if !expr.children().is_empty() {
-                    new_csts.push(expr);
+                    new_csts.push(expr.clone());
                 } else if previous_comma {
                     errors.push(TransformError::UnexpectedComma(csts[i-1].location()));
                 }
+                expr = new_expr();
                 new_csts.push(csts[i].clone());
                 break;
             }
@@ -92,6 +94,9 @@ pub fn check_valid_arguments(csts: &Vec<CST>) -> (Vec<CST>, Vec<TransformError>)
                 previous_comma = false;
             }
         }
+    }
+    if !expr.children().is_empty() {
+        new_csts.push(expr);
     }
     (new_csts, errors)
 }

@@ -18,6 +18,7 @@ pub enum TransformError {
     CommaNotFound(Location),
     UnexpectedDot(Location),
     UnexpectedComma(Location),
+    InvalidBackslash(Location),
 }
 
 impl TransformError {
@@ -36,6 +37,7 @@ impl TransformError {
             Self::CommaNotFound(location) => location.clone(),
             Self::UnexpectedDot(location) => location.clone(),
             Self::UnexpectedComma(location) => location.clone(),
+            Self::InvalidBackslash(location) => location.clone(),
         }
     }
 
@@ -54,6 +56,7 @@ impl TransformError {
             Self::CommaNotFound(_) => "Need comma after module".to_string(),
             Self::UnexpectedDot(_) => "Unexpected dot".to_string(),
             Self::UnexpectedComma(_) => "Unexpected comma".to_string(),
+            Self::InvalidBackslash(_) => "Backslash must be followed by dot, comma, backslash, or bracket".to_string(),
         }
     }
 }

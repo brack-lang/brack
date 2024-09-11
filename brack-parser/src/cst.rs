@@ -41,6 +41,7 @@ pub enum CST {
     Dot(LeafNode),
     Comma(LeafNode),
     EOF(LeafNode),
+    Invalid(LeafNode),
 }
 
 impl fmt::Display for CST {
@@ -55,6 +56,7 @@ impl CST {
             CST::Document(node)
             | CST::Stmt(node)
             | CST::Expr(node)
+            | CST::BackSlash(node)
             | CST::Angle(node)
             | CST::Curly(node)
             | CST::Square(node) => &node.children,
@@ -84,6 +86,7 @@ impl CST {
             | CST::Newline(leaf)
             | CST::Dot(leaf)
             | CST::Comma(leaf)
+            | CST::Invalid(leaf)
             | CST::EOF(leaf) => leaf.location.clone(),
         }
     }
@@ -112,6 +115,7 @@ impl CST {
             | CST::Newline(leaf)
             | CST::Dot(leaf)
             | CST::Comma(leaf)
+            | CST::Invalid(leaf)
             | CST::EOF(leaf) => leaf.location = location,
         }
     }
@@ -167,6 +171,7 @@ impl CST {
                     | CST::Newline(leaf)
                     | CST::Dot(leaf)
                     | CST::Comma(leaf)
+                    | CST::Invalid(leaf)
                     | CST::EOF(leaf) => leaf.location,
                 };
                 node.location = merge_location(&node.location, &location_children);
@@ -264,6 +269,7 @@ impl CST {
             CST::BackSlash(leaf) => write!(f, "{}BackSlash(id: {})", indent_str, leaf.id),
             CST::Dot(leaf) => write!(f, "{}Dot(id: {})", indent_str, leaf.id),
             CST::Comma(leaf) => write!(f, "{}Comma(id: {})", indent_str, leaf.id),
+            CST::Invalid(leaf) => write!(f, "{}Invalid(id: {})", indent_str, leaf.id),
             CST::EOF(leaf) => write!(f, "{}EOF(id: {})", indent_str, leaf.id),
         }
     }
@@ -458,6 +464,14 @@ pub fn new_curly_bracket_open(location: Location) -> CST {
 
 pub fn new_curly_bracket_close(location: Location) -> CST {
     CST::CurlyBracketClose(LeafNode {
+        id: Uuid::new_v4().to_string(),
+        value: None,
+        location,
+    })
+}
+
+pub fn new_invalid(location: Location) -> CST {
+    CST::Invalid(LeafNode {
         id: Uuid::new_v4().to_string(),
         value: None,
         location,
