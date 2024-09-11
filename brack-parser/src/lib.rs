@@ -1,7 +1,6 @@
 mod angle;
 mod bracket;
 mod bracket_close;
-mod bracket_open;
 mod comma;
 pub mod cst;
 mod curly;
