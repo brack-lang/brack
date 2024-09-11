@@ -195,7 +195,9 @@ impl AST {
                 Ok(())
             }
             AST::Ident(node) => write!(f, "{}Ident: {}\n", ident_str, node.value.as_ref().unwrap()),
-            AST::Module(node) => write!(f, "{}Module: {}\n", ident_str, node.value.as_ref().unwrap()),
+            AST::Module(node) => {
+                write!(f, "{}Module: {}\n", ident_str, node.value.as_ref().unwrap())
+            }
             AST::Text(node) => write!(f, "{}Text: {}\n", ident_str, node.value.as_ref().unwrap()),
             AST::Invalid(_) => write!(f, "{}Invalid\n", ident_str),
             AST::Ignored(_) => write!(f, "{}Ignored\n", ident_str),

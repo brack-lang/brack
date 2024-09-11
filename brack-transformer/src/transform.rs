@@ -2,7 +2,8 @@ use brack_parser::cst::CST;
 
 use crate::{
     ast::{
-        new_angle, new_curly, new_document, new_expr, new_ident, new_invalid, new_module, new_square, new_stmt, new_text, AST
+        new_angle, new_curly, new_document, new_expr, new_ident, new_invalid, new_module,
+        new_square, new_stmt, new_text, AST,
     },
     error::TransformError,
     simplify,

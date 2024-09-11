@@ -14,4 +14,3 @@ pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
         node => (node.clone(), vec![]),
     }
 }
-

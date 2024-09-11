@@ -77,13 +77,11 @@ pub fn check_valid_arguments(csts: &Vec<CST>) -> (Vec<CST>, Vec<TransformError>)
                 expr = new_expr();
                 previous_comma = true;
             }
-            CST::AngleBracketClose(_)
-            | CST::CurlyBracketClose(_)
-            | CST::SquareBracketClose(_) => {
+            CST::AngleBracketClose(_) | CST::CurlyBracketClose(_) | CST::SquareBracketClose(_) => {
                 if !expr.children().is_empty() {
                     new_csts.push(expr.clone());
                 } else if previous_comma {
-                    errors.push(TransformError::UnexpectedComma(csts[i-1].location()));
+                    errors.push(TransformError::UnexpectedComma(csts[i - 1].location()));
                 }
                 expr = new_expr();
                 new_csts.push(csts[i].clone());

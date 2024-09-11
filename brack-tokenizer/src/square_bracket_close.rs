@@ -38,7 +38,7 @@ pub fn tokenize(t: &Tokenizer) -> Result<Vec<Token>> {
         },
     }));
 
-    let  t2 = Tokenizer {
+    let t2 = Tokenizer {
         column: Some(column + 1),
         token_start_column: Some(column + 1),
         untreated: Some(tail),

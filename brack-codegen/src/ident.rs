@@ -11,9 +11,9 @@ pub fn generate(ast: &AST) -> Result<String> {
                 result.push(text::generate(&child)?);
             }
             AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
-            _ => anyhow::bail!(
-                "Ident cannot contain Document, Stmt, Expr, Curly, Square and Ident"
-            ),
+            _ => {
+                anyhow::bail!("Ident cannot contain Document, Stmt, Expr, Curly, Square and Ident")
+            }
         }
     }
     Ok(result.join(" "))

@@ -1,7 +1,11 @@
 use anyhow::{bail, Result};
 use brack_tokenizer::tokens::{Location, Token};
 
-use crate::{cst::{new_curly, new_curly_bracket_close, new_curly_bracket_open}, expr, newline, parser::Parser};
+use crate::{
+    cst::{new_curly, new_curly_bracket_close, new_curly_bracket_open},
+    expr, newline,
+    parser::Parser,
+};
 
 // curly_bracket_open (expr | newline)* curly_bracket_close?
 pub fn parse<'a>(tokens: &'a [Token]) -> Result<Parser> {

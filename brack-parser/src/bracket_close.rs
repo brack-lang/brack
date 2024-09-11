@@ -30,14 +30,19 @@ mod tests {
     use anyhow::Result;
     use brack_tokenizer::tokens::{mock_location, Token};
 
-    use crate::cst::{matches_kind, new_angle_bracket_close, new_curly_bracket_close, new_square_bracket_close};
+    use crate::cst::{
+        matches_kind, new_angle_bracket_close, new_curly_bracket_close, new_square_bracket_close,
+    };
 
     #[test]
     fn test_bracket_close_parse_only_angle_bracket_close() -> Result<()> {
         let tokens = vec![Token::AngleBracketClose(mock_location())];
         let (cst, tokens) = super::parse(&tokens)?;
         assert_eq!(tokens.len(), 0);
-        assert!(matches_kind(&cst, &new_angle_bracket_close(mock_location())));
+        assert!(matches_kind(
+            &cst,
+            &new_angle_bracket_close(mock_location())
+        ));
         Ok(())
     }
 
@@ -46,7 +51,10 @@ mod tests {
         let tokens = vec![Token::SquareBracketClose(mock_location())];
         let (cst, tokens) = super::parse(&tokens)?;
         assert_eq!(tokens.len(), 0);
-        assert!(matches_kind(&cst, &new_square_bracket_close(mock_location())));
+        assert!(matches_kind(
+            &cst,
+            &new_square_bracket_close(mock_location())
+        ));
         Ok(())
     }
 
@@ -55,7 +63,10 @@ mod tests {
         let tokens = vec![Token::CurlyBracketClose(mock_location())];
         let (cst, tokens) = super::parse(&tokens)?;
         assert_eq!(tokens.len(), 0);
-        assert!(matches_kind(&cst, &new_curly_bracket_close(mock_location())));
+        assert!(matches_kind(
+            &cst,
+            &new_curly_bracket_close(mock_location())
+        ));
         Ok(())
     }
 

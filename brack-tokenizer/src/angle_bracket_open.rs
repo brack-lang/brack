@@ -59,13 +59,28 @@ mod tests {
     #[test]
     fn test_angle_bracket_open() -> Result<()> {
         let input = "<";
-        let expected_output = vec![AngleBracketOpen(Location {
-            start: LocationData { line: 0, character: 0 },
-            end: LocationData { line: 0, character: 1 },
-        }), EOF(Location {
-            start: LocationData { line: 0, character: 1 },
-            end: LocationData { line: 0, character: 1 },
-        })];
+        let expected_output = vec![
+            AngleBracketOpen(Location {
+                start: LocationData {
+                    line: 0,
+                    character: 0,
+                },
+                end: LocationData {
+                    line: 0,
+                    character: 1,
+                },
+            }),
+            EOF(Location {
+                start: LocationData {
+                    line: 0,
+                    character: 1,
+                },
+                end: LocationData {
+                    line: 0,
+                    character: 1,
+                },
+            }),
+        ];
         let actual_output = tokenize_str(input)?;
         assert_eq!(expected_output, actual_output);
         Ok(())
