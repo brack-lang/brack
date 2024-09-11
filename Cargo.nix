@@ -836,6 +836,11 @@ rec {
             rename = "brack-tokenizer";
           }
           {
+            name = "brack-transformer";
+            packageId = "brack-transformer";
+            rename = "brack-transformer";
+          }
+          {
             name = "lsp-types";
             packageId = "lsp-types";
           }
