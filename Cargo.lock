@@ -237,6 +237,7 @@ dependencies = [
  "anyhow",
  "brack-parser",
  "brack-tokenizer",
+ "brack-transformer",
  "lsp-types",
  "serde",
  "serde_json",

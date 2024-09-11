@@ -163,22 +163,25 @@ impl LanguageServer {
             Err(e) => return self.log_message(&format!("Error: {:?}", e)).await,
         };
 
-        match brack_parser::parse::parse(&tokens) {
-            Ok(ast) => {
-                self.log_message(&format!("AST: {:?}", ast)).await?;
-                let diagnostics: Vec<Diagnostic> = vec![];
-                return self
-                    .send_publish_diagnostics(&uri.to_string(), &diagnostics)
-                    .await;
-            }
-            Err(parser_error) => {
-                let location = mock_location(); // parser_error.get_location();
-                let message = "FIXME: dummy message".to_string(); // parser_error.get_message();
-                let diagnostics = vec![Diagnostic {
+        let cst = brack_parser::parse::parse(&tokens)?;
+        let (ast, errors) = brack_transformer::transform::transform(&cst);
+
+        if errors.is_empty() {
+            self.log_message(&format!("AST: {:?}", ast)).await?;
+            let diagnostics: Vec<Diagnostic> = vec![];
+            return self
+                .send_publish_diagnostics(&uri.to_string(), &diagnostics)
+                .await;
+        } else {
+            let mut diagnostics = vec![];
+            for error in errors {
+                let location = error.get_location();
+                let message = error.get_message();
+                let diagnostic = Diagnostic {
                     range: Range {
                         start: Position {
                             line: location.start.line as u32,
-                            character: location.end.character as u32,
+                            character: location.start.character as u32,
                         },
                         end: Position {
                             line: location.end.line as u32,
@@ -187,12 +190,13 @@ impl LanguageServer {
                     },
                     message,
                     ..Default::default()
-                }];
-                return self
-                    .send_publish_diagnostics(&uri.to_string(), &diagnostics)
-                    .await;
+                };
+                diagnostics.push(diagnostic);
             }
-        };
+            return self
+                .send_publish_diagnostics(&uri.to_string(), &diagnostics)
+                .await;
+        }
     }
 
     async fn handle_notification(&mut self, msg: &Value, method: &str) -> Result<()> {
