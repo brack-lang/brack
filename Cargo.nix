@@ -1027,6 +1027,10 @@ rec {
             packageId = "anyhow";
           }
           {
+            name = "pretty_assertions";
+            packageId = "pretty_assertions";
+          }
+          {
             name = "serde";
             packageId = "serde";
             features = [ "derive" ];
@@ -2170,6 +2174,16 @@ rec {
         features = {
           "serde" = [ "dep:serde" ];
         };
+      };
+      "diff" = rec {
+        crateName = "diff";
+        version = "0.1.13";
+        edition = "2015";
+        sha256 = "1j0nzjxci2zqx63hdcihkp0a4dkdmzxd7my4m7zk6cjyfy34j9an";
+        authors = [
+          "Utkarsh Kukreti <utkarshkukreti@gmail.com>"
+        ];
+
       };
       "digest" = rec {
         crateName = "digest";
@@ -4893,6 +4907,31 @@ rec {
           "default" = [ "std" ];
         };
         resolvedDefaultFeatures = [ "simd" "std" ];
+      };
+      "pretty_assertions" = rec {
+        crateName = "pretty_assertions";
+        version = "1.4.0";
+        edition = "2018";
+        sha256 = "0rmsnqlpmpfjp5gyi31xgc48kdhc1kqn246bnc494nwadhdfwz5g";
+        authors = [
+          "Colin Kiegel <kiegel@gmx.de>"
+          "Florent Fayolle <florent.fayolle69@gmail.com>"
+          "Tom Milligan <code@tommilligan.net>"
+        ];
+        dependencies = [
+          {
+            name = "diff";
+            packageId = "diff";
+          }
+          {
+            name = "yansi";
+            packageId = "yansi";
+          }
+        ];
+        features = {
+          "default" = [ "std" ];
+        };
+        resolvedDefaultFeatures = [ "default" "std" ];
       };
       "proc-macro-crate" = rec {
         crateName = "proc-macro-crate";
@@ -11629,6 +11668,16 @@ rec {
             packageId = "wast 35.0.2";
             usesDefaultFeatures = false;
           }
+        ];
+
+      };
+      "yansi" = rec {
+        crateName = "yansi";
+        version = "0.5.1";
+        edition = "2015";
+        sha256 = "1v4qljgzh73knr7291cgwrf56zrvhmpn837n5n5pypzq1kciq109";
+        authors = [
+          "Sergio Benitez <sb@sergio.bz>"
         ];
 
       };
