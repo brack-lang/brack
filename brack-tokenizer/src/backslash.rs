@@ -30,7 +30,7 @@ pub fn tokenize(t: &Tokenizer) -> Result<Vec<Token>> {
         },
         end: LocationData {
             line,
-            character: column,
+            character: column + 1,
         },
     }));
 

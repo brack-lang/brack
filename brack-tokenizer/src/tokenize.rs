@@ -33,6 +33,7 @@ mod tests {
     use super::tokenize;
     use crate::tokens::{Location, LocationData, Token};
     use anyhow::Result;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_split_no_commands() -> Result<()> {
@@ -518,7 +519,7 @@ mod tests {
                     },
                 }),
                 Token::Text(
-                    "https://example.com/".to_string(),
+                    "https://example".to_string(),
                     Location {
                         start: LocationData {
                             line: 0,
@@ -526,28 +527,62 @@ mod tests {
                         },
                         end: LocationData {
                             line: 0,
-                            character: 42,
+                            character: 37,
+                        },
+                    }
+                ),
+                Token::BackSlash(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 37,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 38,
+                    },
+                }),
+                Token::Dot(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 38,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 39,
+                    },
+                }),
+                Token::Text(
+                    "com/".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 39,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 43,
                         },
                     }
                 ),
                 Token::SquareBracketClose(Location {
                     start: LocationData {
                         line: 0,
-                        character: 42,
+                        character: 43,
                     },
                     end: LocationData {
                         line: 0,
-                        character: 43,
+                        character: 44,
                     },
                 }),
+
                 Token::EOF(Location {
                     start: LocationData {
                         line: 0,
-                        character: 43,
+                        character: 44,
                     },
                     end: LocationData {
                         line: 0,
-                        character: 43,
+                        character: 44,
                     },
                 }),
             ]
@@ -725,7 +760,7 @@ mod tests {
                     },
                 }),
                 Token::Text(
-                    "https://example.com/".to_string(),
+                    "https://example".to_string(),
                     Location {
                         start: LocationData {
                             line: 0,
@@ -733,38 +768,71 @@ mod tests {
                         },
                         end: LocationData {
                             line: 0,
-                            character: 49,
+                            character: 44,
+                        },
+                    }
+                ),
+                Token::BackSlash(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 44,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 45,
+                    },
+                }),
+                Token::Dot(Location {
+                    start: LocationData {
+                        line: 0,
+                        character: 45,
+                    },
+                    end: LocationData {
+                        line: 0,
+                        character: 46,
+                    },
+                }),
+                Token::Text(
+                    "com/".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 0,
+                            character: 46,
+                        },
+                        end: LocationData {
+                            line: 0,
+                            character: 50,
                         },
                     }
                 ),
                 Token::SquareBracketClose(Location {
                     start: LocationData {
                         line: 0,
-                        character: 49,
+                        character: 50,
                     },
                     end: LocationData {
                         line: 0,
-                        character: 50,
+                        character: 51,
                     },
                 }),
                 Token::SquareBracketClose(Location {
                     start: LocationData {
                         line: 0,
-                        character: 50,
+                        character: 51,
                     },
                     end: LocationData {
                         line: 0,
-                        character: 51,
+                        character: 52,
                     },
                 }),
                 Token::EOF(Location {
                     start: LocationData {
                         line: 0,
-                        character: 51,
+                        character: 52,
                     },
                     end: LocationData {
                         line: 0,
-                        character: 51,
+                        character: 52,
                     },
                 }),
             ]
@@ -1032,7 +1100,7 @@ mod tests {
                     },
                 }),
                 Token::Text(
-                    "https://example.com/".to_string(),
+                    "https://example".to_string(),
                     Location {
                         start: LocationData {
                             line: 3,
@@ -1040,21 +1108,44 @@ mod tests {
                         },
                         end: LocationData {
                             line: 3,
-                            character: 39,
+                            character: 34,
+                        },
+                    }
+                ),
+                Token::BackSlash(Location {
+                    start: LocationData {
+                        line: 3,
+                        character: 34,
+                    },
+                    end: LocationData {
+                        line: 3,
+                        character: 35,
+                    },
+                }),
+                Token::Dot(Location {
+                    start: LocationData {
+                        line: 3,
+                        character: 35,
+                    },
+                    end: LocationData {
+                        line: 3,
+                        character: 36,
+                    },
+                }),
+                Token::Text(
+                    "com/".to_string(),
+                    Location {
+                        start: LocationData {
+                            line: 3,
+                            character: 36,
+                        },
+                        end: LocationData {
+                            line: 3,
+                            character: 40,
                         },
                     }
                 ),
                 Token::SquareBracketClose(Location {
-                    start: LocationData {
-                        line: 3,
-                        character: 39,
-                    },
-                    end: LocationData {
-                        line: 3,
-                        character: 40,
-                    },
-                }),
-                Token::NewLine(Location {
                     start: LocationData {
                         line: 3,
                         character: 40,
@@ -1062,6 +1153,16 @@ mod tests {
                     end: LocationData {
                         line: 3,
                         character: 41,
+                    },
+                }),
+                Token::NewLine(Location {
+                    start: LocationData {
+                        line: 3,
+                        character: 41,
+                    },
+                    end: LocationData {
+                        line: 3,
+                        character: 42,
                     },
                 }),
                 Token::NewLine(Location {
@@ -1087,24 +1188,14 @@ mod tests {
                         },
                     }
                 ),
-                Token::NewLine(Location {
+                Token::EOF(Location {
                     start: LocationData {
                         line: 5,
                         character: 10,
                     },
                     end: LocationData {
                         line: 5,
-                        character: 11,
-                    },
-                }),
-                Token::EOF(Location {
-                    start: LocationData {
-                        line: 6,
-                        character: 0,
-                    },
-                    end: LocationData {
-                        line: 6,
-                        character: 0,
+                        character: 10,
                     },
                 }),
             ]

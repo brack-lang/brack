@@ -84,9 +84,7 @@ pub fn dispatch(t: &Tokenizer) -> Result<Vec<Token>> {
         (_, " ") if nested => text::tokenize(t),
         (_, ",") if nested => text::tokenize(t),
         (_, ".") if nested => text::tokenize(t),
-        (_, ">") => text::tokenize(t),
-        (_, "]") => text::tokenize(t),
-        (_, "}") => text::tokenize(t),
+        (_, ">") | (_, "]") | (_, "}") | (_, "\\") => text::tokenize(t),
         _ => {
             let t2 = Tokenizer {
                 column: Some(column + 1),
