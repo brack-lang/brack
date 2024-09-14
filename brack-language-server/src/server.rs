@@ -163,7 +163,7 @@ impl LanguageServer {
         };
 
         let cst = brack_parser::parse::parse(&tokens)?;
-        let (ast, errors) = brack_transformer::transform::transform(&cst);
+        let (_ast, errors) = brack_transformer::transform::transform(&cst);
 
         if errors.is_empty() {
             let diagnostics: Vec<Diagnostic> = vec![];
