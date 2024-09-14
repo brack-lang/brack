@@ -1,6 +1,6 @@
 use std::fmt;
 
-use brack_tokenizer::tokens::{merge_location, mock_location, Location};
+use brack_tokenizer::tokens::{merge_location, Location};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -203,30 +203,6 @@ impl AST {
             AST::Ignored(_) => write!(f, "{}Ignored\n", ident_str),
         }
     }
-}
-
-fn merge_all_locations(asts: &Vec<AST>) -> Location {
-    let mut location = mock_location();
-    for ast in asts {
-        match ast {
-            AST::Document(inner)
-            | AST::Stmt(inner)
-            | AST::Expr(inner)
-            | AST::Angle(inner)
-            | AST::Square(inner)
-            | AST::Curly(inner) => {
-                location = merge_location(&location, &inner.location);
-            }
-            AST::Ident(leaf)
-            | AST::Module(leaf)
-            | AST::Text(leaf)
-            | AST::Invalid(leaf)
-            | AST::Ignored(leaf) => {
-                location = merge_location(&location, &leaf.location);
-            }
-        }
-    }
-    location
 }
 
 pub fn new_document(children: Vec<AST>, location: Location) -> AST {

@@ -1,7 +1,6 @@
 use std::str::from_utf8;
 
 use anyhow::Result;
-use brack_tokenizer::tokens::mock_location;
 use lsp_types::{
     ClientCapabilities, Diagnostic, DidChangeTextDocumentParams, DidOpenTextDocumentParams,
     DidSaveTextDocumentParams, InitializeParams, Position, Range,
