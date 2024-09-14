@@ -574,7 +574,6 @@ mod tests {
                         character: 44,
                     },
                 }),
-
                 Token::EOF(Location {
                     start: LocationData {
                         line: 0,

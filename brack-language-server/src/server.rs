@@ -166,7 +166,6 @@ impl LanguageServer {
         let (ast, errors) = brack_transformer::transform::transform(&cst);
 
         if errors.is_empty() {
-            self.log_message(&format!("AST: {:?}", ast)).await?;
             let diagnostics: Vec<Diagnostic> = vec![];
             return self
                 .send_publish_diagnostics(&uri.to_string(), &diagnostics)
