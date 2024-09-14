@@ -334,6 +334,14 @@ pub fn new_eof(location: Location) -> CST {
     })
 }
 
+pub fn new_invalid(location: Location) -> CST {
+    CST::Invalid(LeafNode {
+        id: Uuid::new_v4().to_string(),
+        value: None,
+        location,
+    })
+}
+
 pub fn new_whitespace(location: Location) -> CST {
     CST::Whitespace(LeafNode {
         id: Uuid::new_v4().to_string(),
@@ -464,14 +472,6 @@ pub fn new_curly_bracket_open(location: Location) -> CST {
 
 pub fn new_curly_bracket_close(location: Location) -> CST {
     CST::CurlyBracketClose(LeafNode {
-        id: Uuid::new_v4().to_string(),
-        value: None,
-        location,
-    })
-}
-
-pub fn new_invalid(location: Location) -> CST {
-    CST::Invalid(LeafNode {
         id: Uuid::new_v4().to_string(),
         value: None,
         location,

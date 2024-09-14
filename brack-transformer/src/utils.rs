@@ -87,6 +87,10 @@ pub fn check_valid_arguments(csts: &Vec<CST>) -> (Vec<CST>, Vec<TransformError>)
                 new_csts.push(csts[i].clone());
                 break;
             }
+            CST::Dot(_) => {
+                errors.push(TransformError::UnexpectedDot(csts[i].location()));
+                continue;
+            }
             _ => {
                 expr.add(csts[i].clone());
                 previous_comma = false;
