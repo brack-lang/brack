@@ -65,6 +65,9 @@ pub fn dispatch(t: &Tokenizer) -> Result<Vec<Token>> {
     let nested = (angle_c + curly_c + square_c) > 0;
     match (&head[..], &head2[..]) {
         ("\\", _) => backslash::tokenize(t),
+        (_, ">") if look_for_ident => identifier::tokenize(t),
+        (_, "}") if look_for_ident => identifier::tokenize(t),
+        (_, "]") if look_for_ident => identifier::tokenize(t),
         ("<", _) => angle_bracket_open::tokenize(t),
         (">", _) => angle_bracket_close::tokenize(t),
         ("{", _) => curly_bracket_open::tokenize(t),
