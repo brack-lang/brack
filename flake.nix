@@ -44,7 +44,7 @@
                   buildInputs = buildInputsForBuild;
                   nativeBuildInputs = nativeBuildInputsForBuild;
                 };
-                brack-plugin-manager = attrs: {
+                brack-project-manager = attrs: {
                   buildInputs = buildInputsForBuild;
                   nativeBuildInputs = nativeBuildInputsForBuild;
                 };

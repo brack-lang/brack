@@ -7,7 +7,7 @@ members = [
     "brack-language-server",
     "brack-parser",
     "brack-plugin",
-    "brack-plugin-manager",
+    "brack-project-manager",
     "brack-sdk-rs",
     "brack-tokenizer",
     "brack-transformer",
@@ -21,7 +21,7 @@ brack-expander = { path = "./brack-expander" }
 brack-language-server = { path = "./brack-language-server" }
 brack-parser = { path = "./brack-parser" }
 brack-plugin = { path = "./brack-plugin" }
-brack-plugin-manager = { path = "./brack-plugin-manager" }
+brack-project-manager = { path = "./brack-project-manager" }
 brack-tokenizer = { path = "./brack-tokenizer" }
 brack-transformer = { path = "./brack-transformer" }
 brack-sdk-rs = { path = "./brack-sdk-rs" }

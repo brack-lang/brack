@@ -12,12 +12,24 @@ brack-expander = { git = "https://github.com/brack-lang/brack", package = "brack
 brack-language-server = { git = "https://github.com/brack-lang/brack", package = "brack-language-server" }
 brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
 brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
-brack-plugin-manager = { git = "https://github.com/brack-lang/brack", package = "brack-plugin-manager" }
+brack-project-manager = { git = "https://github.com/brack-lang/brack", package = "brack-project-manager" }
 brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
 brack-transformer = { git = "https://github.com/brack-lang/brack", package = "brack-transformer" }
 tokio = { version = "1", features = ["full"] }
 toml = "0.8.14"
+extism = "1.4.1"
+reqwest = "0.12.5"
+regex = "1.10.6"
 
 [dependencies.clap]
 version = "4.5.7"
 features = ["derive"]
+
+[features]
+default = []
+debug = []
+
+[[bin]]
+name = "debug_compile"
+path = "src/debug/debug_compile.rs"
+required-features = ["debug"]
