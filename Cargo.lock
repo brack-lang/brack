@@ -294,6 +294,7 @@ dependencies = [
  "brack-parser",
  "brack-plugin",
  "brack-tokenizer",
+ "brack-transformer",
  "bytes",
  "futures",
  "reqwest 0.11.27",

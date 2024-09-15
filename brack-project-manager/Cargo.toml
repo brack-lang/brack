@@ -15,6 +15,7 @@ brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-p
 brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
 brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
 brack-expander = { git = "https://github.com/brack-lang/brack", package = "brack-expander" }
+brack-transformer = { git = "https://github.com/brack-lang/brack", package = "brack-transformer" }
 brack-codegen = { git = "https://github.com/brack-lang/brack", package = "brack-codegen" }
 futures = "0.3.30"
 sha2 = "0.10.8"

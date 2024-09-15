@@ -104,7 +104,8 @@ impl Project {
             if path.extension() == Some("[]".as_ref()) {
                 let tokenized = brack_tokenizer::tokenize::tokenize(&path.to_str().unwrap())?;
                 let parsed = brack_parser::parse::parse(&tokenized)?;
-                let expanded = brack_expander::expand::expander(&parsed, &mut plugins)?;
+                let (ast, _errors) = brack_transformer::transform::transform(&parsed);
+                let expanded = brack_expander::expand::expander(&ast, &mut plugins)?;
                 let gen = brack_codegen::generate::generate(&expanded, &mut plugins)?;
                 std::fs::create_dir_all("out")?;
                 std::fs::write(
