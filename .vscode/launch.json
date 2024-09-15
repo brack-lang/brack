@@ -169,16 +169,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'brack-plugin-manager'",
+            "name": "Debug unit tests in library 'brack-project-manager'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=brack-plugin-manager"
+                    "--package=brack-project-manager"
                 ],
                 "filter": {
-                    "name": "brack-plugin-manager",
+                    "name": "brack-project-manager",
                     "kind": "lib"
                 }
             },
