@@ -46,6 +46,12 @@ fn expand_other(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<A
         AST::Text(_) => {
             return Ok(ast.clone());
         }
+        AST::Module(_) => {
+            return Ok(ast.clone());
+        }
+        AST::Ident(_) => {
+            return Ok(ast.clone());
+        }
         _ => {}
     }
     for child in ast.children() {

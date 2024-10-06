@@ -4,34 +4,51 @@ use brack_sdk_rs::{Type, Value};
 use brack_transformer::ast::AST;
 use extism::convert::Json;
 
-use crate::{curly, expr, ident, text};
+use crate::{curly, expr, text};
 
 pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
-    let mut module_name = String::from("");
-    let mut ident_name = String::from("");
-
+    match ast {
+        AST::Square(_) => (),
+        _ => anyhow::bail!("Square must be a square"),
+    };
     let mut arguments = vec![];
-    for (i, child) in ast.children().iter().enumerate() {
+    let module = ast
+        .children()
+        .get(0)
+        .ok_or_else(|| anyhow::anyhow!("Square must contain module and identifier"))?;
+    let ident = ast
+        .children()
+        .get(1)
+        .ok_or_else(|| anyhow::anyhow!("Square must contain module and identifier"))?;
+    for (_, child) in ast.children().iter().skip(2).enumerate() {
         let res = match child {
             AST::Expr(_) => expr::generate(&child, plugins)?,
             AST::Curly(_) => curly::generate(&child, plugins)?,
             AST::Square(_) => generate(&child, plugins)?,
-            AST::Ident(_) => ident::generate(&child)?,
             AST::Text(_) => text::generate(&child)?,
             AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
-            _ => anyhow::bail!("Square cannot contain Document, Stmt, Expr and Square"),
+            ast => anyhow::bail!("Square cannot contain the following node\n{}", ast),
         };
-        if i == 0 {
-            let (module, ident) = match res.split_once(" ") {
-                Some((module, ident)) => (module, ident),
-                None => anyhow::bail!("Square must contain module and identifier"),
-            };
-            module_name = module.to_string();
-            ident_name = ident.to_string();
-        } else {
-            arguments.push(res);
-        }
+        arguments.push(res);
     }
+
+    let module_name = match module {
+        AST::Module(module) => module.value.clone(),
+        _ => anyhow::bail!("Module must be a module"),
+    };
+    let module_name = match module_name {
+        Some(module_name) => module_name,
+        None => anyhow::bail!("Module name must be a string"),
+    };
+
+    let ident_name = match ident {
+        AST::Ident(ident) => ident.value.clone(),
+        _ => anyhow::bail!("Identifier must be an identifier"),
+    };
+    let ident_name = match ident_name {
+        Some(ident_name) => ident_name,
+        None => anyhow::bail!("Identifier name must be a string"),
+    };
 
     let (plugin, plugin_metadata_map) = plugins
         .get_mut(&module_name)
