@@ -93,14 +93,14 @@ async fn main() -> Result<()> {
     let args = Args::parse();
     match args.subcommand {
         SubCommands::Build => {
-            let mut project = brack_project_manager::project::Project::new();
+            let mut project = brack_project_manager::project::Project::new(".");
             project.load_brack_toml()?;
             project.download_plugins_using_config().await?;
             project.build()?;
         }
         SubCommands::Compile { .. } => run_compile(args.subcommand)?,
         SubCommands::LanguageServer => {
-            let mut language_server = brack_language_server::server::LanguageServer::new();
+            let mut language_server = brack_language_server::server::Server::new();
             language_server.run().await?;
         }
         SubCommands::New { name } => new_project(&name)?,

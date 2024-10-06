@@ -49,7 +49,7 @@ impl AST {
             | AST::Square(node)
             | AST::Curly(node) => &node.children,
             AST::Ident(_) | AST::Module(_) | AST::Text(_) => {
-                panic!("Leaf node has no children")
+                panic!("Leaf node has no children: {}", self)
             }
             AST::Invalid(_) => panic!("This node is broken"),
             AST::Ignored(_) => panic!("This node has to be ignored"),
