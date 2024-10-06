@@ -880,6 +880,21 @@ rec {
             rename = "brack-parser";
           }
           {
+            name = "brack-plugin";
+            packageId = "brack-plugin";
+            rename = "brack-plugin";
+          }
+          {
+            name = "brack-project-manager";
+            packageId = "brack-project-manager";
+            rename = "brack-project-manager";
+          }
+          {
+            name = "brack-sdk-rs";
+            packageId = "brack-sdk-rs";
+            rename = "brack-sdk-rs";
+          }
+          {
             name = "brack-tokenizer";
             packageId = "brack-tokenizer";
             rename = "brack-tokenizer";
