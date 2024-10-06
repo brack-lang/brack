@@ -9,7 +9,6 @@ use serde_json::Value;
 pub mod did_change;
 pub mod did_open;
 pub mod did_save;
-pub mod initialized;
 
 impl Server {
     pub(crate) async fn handle_notification(&mut self, msg: &Value, method: &str) -> Result<()> {
