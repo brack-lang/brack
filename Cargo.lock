@@ -251,6 +251,9 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "brack-parser",
+ "brack-plugin",
+ "brack-project-manager",
+ "brack-sdk-rs",
  "brack-tokenizer",
  "brack-transformer",
  "lsp-types",

@@ -1,25 +1,27 @@
 use std::str::from_utf8;
 
 use anyhow::Result;
-use lsp_types::{
-    ClientCapabilities, Diagnostic, DidChangeTextDocumentParams, DidOpenTextDocumentParams,
-    DidSaveTextDocumentParams, InitializeParams, Position, Range,
-};
+use brack_project_manager::project::Project;
+use lsp_types::{ClientCapabilities, Diagnostic};
+use serde::Serialize;
 use serde_json::{from_str, json, Value};
 use tokio::io::{stdin, stdout, AsyncReadExt, AsyncWriteExt};
 
-pub struct LanguageServer {
-    client_capabilities: ClientCapabilities,
+pub struct Server {
+    pub(crate) client_capabilities: ClientCapabilities,
+    pub(crate) project: Option<Project>,
 }
 
-impl LanguageServer {
+impl Server {
     pub fn new() -> Self {
         Self {
             client_capabilities: ClientCapabilities::default(),
+            project: None,
         }
     }
 
-    async fn send_message(&self, msg: &str) -> Result<()> {
+    pub(crate) async fn send_stdout<T: ?Sized + Serialize>(&self, message: &T) -> Result<()> {
+        let msg = serde_json::to_string(message)?;
         let mut output = stdout();
         output
             .write_all(format!("Content-Length: {}\r\n\r\n{}", msg.len(), msg).as_bytes())
@@ -28,7 +30,16 @@ impl LanguageServer {
         Ok(())
     }
 
-    async fn log_message(&self, message: &str) -> Result<()> {
+    pub(crate) async fn send_message(&self, msg: &str) -> Result<()> {
+        let mut output = stdout();
+        output
+            .write_all(format!("Content-Length: {}\r\n\r\n{}", msg.len(), msg).as_bytes())
+            .await?;
+        output.flush().await?;
+        Ok(())
+    }
+
+    pub(crate) async fn log_message(&self, message: &str) -> Result<()> {
         let response = json!({
             "jsonrpc": "2.0",
             "method": "window/logMessage",
@@ -41,7 +52,12 @@ impl LanguageServer {
         self.send_message(&response).await
     }
 
-    async fn send_error_response(&self, id: Option<i64>, code: i32, message: &str) -> Result<()> {
+    pub(crate) async fn send_error_response(
+        &self,
+        id: Option<i64>,
+        code: i32,
+        message: &str,
+    ) -> Result<()> {
         let response = json!({
             "jsonrpc": "2.0",
             "id": id,
@@ -54,23 +70,23 @@ impl LanguageServer {
         self.send_message(&response).await
     }
 
-    async fn send_invalid_request_response(&self) -> Result<()> {
+    pub(crate) async fn send_invalid_request_response(&self) -> Result<()> {
         self.send_error_response(None, -32600, "received an invalid request")
             .await
     }
 
-    async fn send_method_not_found_response(&self, id: i64, method: &str) -> Result<()> {
+    pub(crate) async fn send_method_not_found_response(&self, id: i64, method: &str) -> Result<()> {
         self.send_error_response(Some(id), -32601, &format!("{} is not supported", method))
             .await
     }
 
     #[allow(dead_code)]
-    async fn send_parse_error_response(&self) -> Result<()> {
+    pub(crate) async fn send_parse_error_response(&self) -> Result<()> {
         self.send_error_response(None, -32700, "received an invalid JSON")
             .await
     }
 
-    async fn send_publish_diagnostics(
+    pub(crate) async fn send_publish_diagnostics(
         &self,
         uri: &str,
         diagnostics: &Vec<Diagnostic>,
@@ -98,122 +114,7 @@ impl LanguageServer {
         self.send_message(&response).await
     }
 
-    async fn handle_request(&mut self, msg: &Value, id: i64, method: &str) -> Result<()> {
-        match method {
-            "initialize" => {
-                self.log_message("Brack Language Server is initializing...")
-                    .await?;
-
-                let parms: InitializeParams =
-                    serde_json::from_value(msg.get("params").unwrap().clone())?;
-                self.client_capabilities = parms.capabilities;
-
-                let response = json!({
-                    "jsonrpc": "2.0",
-                    "id": id,
-                    "result": { "capabilities": {
-                        "textDocumentSync": 1,
-                    } }
-                })
-                .to_string();
-
-                self.send_message(&response).await
-            }
-            _ => self.send_method_not_found_response(id, method).await,
-        }
-    }
-
-    async fn handle_response(&self, _: &Value, _: i64) -> Result<()> {
-        Ok(())
-    }
-
-    async fn handle_notification_text_document_did_open(&self, msg: &Value) -> Result<()> {
-        let parms: DidOpenTextDocumentParams =
-            serde_json::from_value(msg.get("params").unwrap().clone())?;
-
-        let file_path = parms.text_document.uri.to_file_path().unwrap();
-        let uri = file_path.to_str().unwrap();
-
-        self.log_message(&format!("Did open {}", uri)).await?;
-        Ok(())
-    }
-
-    async fn handle_notification_text_document_did_change(&self, msg: &Value) -> Result<()> {
-        let parms: DidChangeTextDocumentParams =
-            serde_json::from_value(msg.get("params").unwrap().clone())?;
-
-        let file_path = parms.text_document.uri.to_file_path().unwrap();
-        let uri = file_path.to_str().unwrap();
-
-        self.log_message(&format!("Did change {}", uri)).await
-    }
-
-    async fn handle_notification_text_document_did_save(&self, msg: &Value) -> Result<()> {
-        let parms: DidSaveTextDocumentParams =
-            serde_json::from_value(msg.get("params").unwrap().clone())?;
-
-        let file_path = parms.text_document.uri.to_file_path().unwrap();
-        let uri = file_path.to_str().unwrap();
-
-        self.log_message(&format!("Did save {}", uri)).await?;
-
-        let tokens = match brack_tokenizer::tokenize::tokenize(uri) {
-            Ok(tokens) => tokens,
-            Err(e) => return self.log_message(&format!("Error: {:?}", e)).await,
-        };
-
-        let cst = brack_parser::parse::parse(&tokens)?;
-        let (_ast, errors) = brack_transformer::transform::transform(&cst);
-
-        if errors.is_empty() {
-            let diagnostics: Vec<Diagnostic> = vec![];
-            return self
-                .send_publish_diagnostics(&uri.to_string(), &diagnostics)
-                .await;
-        } else {
-            let mut diagnostics = vec![];
-            for error in errors {
-                let location = error.get_location();
-                let message = error.get_message();
-                let diagnostic = Diagnostic {
-                    range: Range {
-                        start: Position {
-                            line: location.start.line as u32,
-                            character: location.start.character as u32,
-                        },
-                        end: Position {
-                            line: location.end.line as u32,
-                            character: location.end.character as u32,
-                        },
-                    },
-                    message,
-                    ..Default::default()
-                };
-                diagnostics.push(diagnostic);
-            }
-            return self
-                .send_publish_diagnostics(&uri.to_string(), &diagnostics)
-                .await;
-        }
-    }
-
-    async fn handle_notification(&mut self, msg: &Value, method: &str) -> Result<()> {
-        match method {
-            "initialized" => {
-                self.log_message("Brack Language Server has been initialized!")
-                    .await?;
-                Ok(())
-            }
-            "textDocument/didOpen" => self.handle_notification_text_document_did_open(msg).await,
-            "textDocument/didChange" => {
-                self.handle_notification_text_document_did_change(msg).await
-            }
-            "textDocument/didSave" => self.handle_notification_text_document_did_save(msg).await,
-            _ => Ok(()),
-        }
-    }
-
-    async fn dispatch(&mut self, msg: Value) -> Result<()> {
+    pub(crate) async fn dispatch(&mut self, msg: Value) -> Result<()> {
         match (
             msg.get("id").and_then(|i| i.as_i64()),
             msg.get("method").and_then(|m| m.as_str()),

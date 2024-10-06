@@ -10,21 +10,25 @@ use std::{
 };
 use tokio::task::{self, JoinHandle};
 
+#[derive(Debug)]
 pub struct Project {
     pub config: Config,
     pub plugins_metadata: HashMap<String, PathBuf>,
+    pub root: PathBuf,
 }
 
 impl Project {
-    pub fn new() -> Self {
+    pub fn new<P: AsRef<Path>>(path: P) -> Self {
         Self {
             config: Default::default(),
             plugins_metadata: Default::default(),
+            root: path.as_ref().to_path_buf(),
         }
     }
 
     pub fn load_brack_toml(&mut self) -> Result<()> {
-        let config: Config = toml::from_str(&std::fs::read_to_string("Brack.toml")?)?;
+        let config: Config =
+            toml::from_str(&std::fs::read_to_string(self.root.join("Brack.toml"))?)?;
         self.config = config;
         Ok(())
     }
