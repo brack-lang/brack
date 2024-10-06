@@ -1,10 +1,10 @@
 use anyhow::Result;
-use brack_parser::ast::AST;
 use brack_plugin::plugin::{arg_counter, Plugins};
 use brack_sdk_rs::{Type, Value};
+use brack_transformer::ast::AST;
 use extism::convert::Json;
 
-use crate::{curly, expr, identifier, text};
+use crate::{curly, expr, ident, text};
 
 pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     let mut module_name = String::from("");
@@ -16,7 +16,7 @@ pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
             AST::Expr(_) => expr::generate(&child, plugins)?,
             AST::Curly(_) => curly::generate(&child, plugins)?,
             AST::Square(_) => generate(&child, plugins)?,
-            AST::Identifier(_) => identifier::generate(&child)?,
+            AST::Ident(_) => ident::generate(&child)?,
             AST::Text(_) => text::generate(&child)?,
             AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
             _ => anyhow::bail!("Square cannot contain Document, Stmt, Expr and Square"),

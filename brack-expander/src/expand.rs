@@ -1,7 +1,7 @@
 use anyhow::Result;
-use brack_parser::ast::AST;
 use brack_plugin::plugin::Plugins;
 use brack_sdk_rs::Type;
+use brack_transformer::ast::AST;
 use extism::convert::Json;
 
 fn expand_angle(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<AST> {
@@ -9,27 +9,21 @@ fn expand_angle(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<A
     let mut ident_name = String::from("");
 
     for child in ast.children() {
-        let res = match child {
-            AST::Identifier(ast) => {
-                let mut iter = ast.children.iter();
-                let module_name_ast = iter.next().ok_or_else(|| {
-                    anyhow::anyhow!("Failed to retrieve module or identifier name from AST.")
-                })?;
-                let ident_name_ast = iter.next().ok_or_else(|| {
-                    anyhow::anyhow!("Failed to retrieve module or identifier name from AST.")
-                })?;
-                match (module_name_ast, ident_name_ast) {
-                    (AST::Text(left), AST::Text(right)) => {
-                        (left.value.clone(), right.value.clone())
-                    }
-                    _ => anyhow::bail!("Expected module name and identifier name as text nodes."),
-                }
+        match child {
+            AST::Module(node) => {
+                module_name = node
+                    .clone()
+                    .value
+                    .ok_or_else(|| anyhow::anyhow!("No value found"))?
             }
-            _ => anyhow::bail!("Angle must be expanded by the macro expander."),
-        };
-        module_name = res.0;
-        ident_name = res.1;
-        break;
+            AST::Ident(node) => {
+                ident_name = node
+                    .clone()
+                    .value
+                    .ok_or_else(|| anyhow::anyhow!("No value found"))?
+            }
+            _ => (),
+        }
     }
 
     let (plugin, plugin_metadata_map) = plugins

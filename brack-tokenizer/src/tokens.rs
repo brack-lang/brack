@@ -7,7 +7,9 @@ pub enum Token {
     Module(String, Location),
     Ident(String, Location),
     NewLine(Location),
+    WhiteSpace(Location),
     Dot(Location),
+    BackSlash(Location),
     AngleBracketOpen(Location),
     AngleBracketClose(Location),
     SquareBracketOpen(Location),
@@ -43,7 +45,7 @@ pub fn mock_location() -> Location {
     }
 }
 
-pub fn marge_location(location1: &Location, location2: &Location) -> Location {
+pub fn merge_location(location1: &Location, location2: &Location) -> Location {
     let start = if location1.start.line < location2.start.line {
         location1.start.clone()
     } else if location1.start.line == location2.start.line {
@@ -78,7 +80,9 @@ impl Token {
             Token::Module(_, location) => location.clone(),
             Token::Ident(_, location) => location.clone(),
             Token::NewLine(location) => location.clone(),
+            Token::WhiteSpace(location) => location.clone(),
             Token::Dot(location) => location.clone(),
+            Token::BackSlash(location) => location.clone(),
             Token::AngleBracketOpen(location) => location.clone(),
             Token::AngleBracketClose(location) => location.clone(),
             Token::SquareBracketOpen(location) => location.clone(),
@@ -87,6 +91,27 @@ impl Token {
             Token::CurlyBracketClose(location) => location.clone(),
             Token::Comma(location) => location.clone(),
             Token::EOF(location) => location.clone(),
+        }
+    }
+
+    pub fn set_location(&mut self, location: Location) {
+        match self {
+            Token::Empty(l) => *l = location,
+            Token::Text(_, l) => *l = location,
+            Token::Module(_, l) => *l = location,
+            Token::Ident(_, l) => *l = location,
+            Token::NewLine(l) => *l = location,
+            Token::WhiteSpace(l) => *l = location,
+            Token::Dot(l) => *l = location,
+            Token::BackSlash(l) => *l = location,
+            Token::AngleBracketOpen(l) => *l = location,
+            Token::AngleBracketClose(l) => *l = location,
+            Token::SquareBracketOpen(l) => *l = location,
+            Token::SquareBracketClose(l) => *l = location,
+            Token::CurlyBracketOpen(l) => *l = location,
+            Token::CurlyBracketClose(l) => *l = location,
+            Token::Comma(l) => *l = location,
+            Token::EOF(l) => *l = location,
         }
     }
 }

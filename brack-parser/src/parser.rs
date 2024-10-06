@@ -1,4 +1,4 @@
-use crate::ast::AST;
+use crate::cst::CST;
 use brack_tokenizer::tokens::Token;
 
-pub type Parser = (AST, Vec<Token>);
+pub type Parser<'a> = (CST, &'a [Token]);

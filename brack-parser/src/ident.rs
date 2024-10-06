@@ -1,48 +1,44 @@
-use anyhow::Result;
-use brack_tokenizer::tokens::{mock_location, Token};
+use anyhow::{bail, Result};
+use brack_tokenizer::tokens::Token;
 
-use crate::error::{DocumentError, ParseTerminationError, ParserError};
-use crate::{
-    ast::{new_ident, new_text},
-    parser::Parser,
-    utils::consume_by_kind,
-};
+use crate::{cst::new_ident, parser::Parser};
 
-// text "." text
-pub fn parse(tokens: &Vec<Token>) -> Result<Parser, ParserError> {
-    let mut result = new_ident(vec![]);
-
-    let new_tokens = if let Token::Module(i, location) = tokens
-        .first()
-        .ok_or_else(|| ParseTerminationError::TokenNotFound(mock_location()))?
-    {
-        result.add(new_text(i.to_string(), location.clone()));
-        tokens[1..].to_vec()
-    } else {
-        return Err(
-            ParseTerminationError::MokuleNotFound(tokens.first().unwrap().get_location()).into(),
-        );
-    };
-
-    let (consumed, new_tokens_from_dot) = consume_by_kind(&new_tokens, Token::Dot(mock_location()));
-    if !consumed {
-        return Err(
-            ParseTerminationError::DotNotFound(new_tokens.first().unwrap().get_location()).into(),
-        );
+// ident
+pub fn parse<'a>(tokens: &'a [Token]) -> Result<Parser> {
+    if let Some(token) = tokens.first() {
+        match token {
+            Token::Ident(text, location) => {
+                return Ok((new_ident(text.clone(), location.clone()), &tokens[1..]));
+            }
+            token => bail!("Expected ident token, found {:?}", token),
+        }
     }
-    let new_tokens = new_tokens_from_dot;
+    bail!("Expected ident token, found none");
+}
 
-    let new_tokens = if let Token::Ident(i, location) = new_tokens
-        .first()
-        .ok_or_else(|| DocumentError::IdentifierNotFound(mock_location()))?
-    {
-        result.add(new_text(i.to_string(), location.clone()));
-        (new_tokens.clone())[1..].to_vec()
-    } else {
-        return Err(
-            DocumentError::IdentifierNotFound(new_tokens.first().unwrap().get_location()).into(),
-        );
-    };
+#[cfg(test)]
+mod tests {
+    use anyhow::Result;
+    use brack_tokenizer::tokens::{mock_location, Token};
 
-    Ok((result, new_tokens))
+    use crate::cst::{matches_kind, new_ident};
+
+    #[test]
+    fn test_ident_parse_only_ident() -> Result<()> {
+        let tokens = vec![Token::Ident("foo".to_string(), mock_location())];
+        let (cst, tokens) = super::parse(&tokens)?;
+        assert_eq!(tokens.len(), 0);
+        assert!(matches_kind(
+            &cst,
+            &new_ident("foo".to_string(), mock_location())
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn test_ident_parse_failure() {
+        let tokens = vec![Token::Dot(mock_location())];
+        let result = super::parse(&tokens);
+        assert!(result.is_err());
+    }
 }

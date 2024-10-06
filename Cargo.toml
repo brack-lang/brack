@@ -10,6 +10,7 @@ members = [
     "brack-project-manager",
     "brack-sdk-rs",
     "brack-tokenizer",
+    "brack-transformer",
 ]
 
 resolver = "2"
@@ -22,4 +23,5 @@ brack-parser = { path = "./brack-parser" }
 brack-plugin = { path = "./brack-plugin" }
 brack-project-manager = { path = "./brack-project-manager" }
 brack-tokenizer = { path = "./brack-tokenizer" }
+brack-transformer = { path = "./brack-transformer" }
 brack-sdk-rs = { path = "./brack-sdk-rs" }
