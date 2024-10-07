@@ -110,10 +110,8 @@ async fn main() -> Result<()> {
                 Ok(version) => version,
                 // FIXME: The following hard-coded version for Nix packaging now.
                 //       We should remove this when we have a better way to handle it.
-                Err(_) => "0.1.0-dev".to_string(),
+                Err(_) => "0.1.0".to_string(),
             };
             println!("Brack {}", version);
         }
     }
-    Ok(())
-}
