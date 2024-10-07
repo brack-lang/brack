@@ -1,0 +1,35 @@
+name: main
+on:
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+    branches:
+      - 'main'
+
+jobs:
+  tag:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v22
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log-in to GitHub
+        run: |
+          nix profile install nixpkgs#gh
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+      - name: Get current version
+        id: version
+        run: |
+          echo "version=$(cat ./VERSION)" >> $GITHUB_OUTPUT
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "v${{ steps.version.outputs.version }}"
+          release_name: Release "v${{ steps.version.outputs.version }}"
+          draft: false
+          prerelease: false
+

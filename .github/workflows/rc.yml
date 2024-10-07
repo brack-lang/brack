@@ -1,0 +1,46 @@
+name: Release Candidate
+on:
+  push:
+    branches:
+      - 'release/*'
+  workflow_dispatch:
+    branches:
+      - 'release/*'
+
+jobs:
+  tag:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v22
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log-in to GitHub
+        run: |
+          nix profile install nixpkgs#gh
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+      - name: Get current version
+        id: version
+        run: |
+          echo "version=$(cat ./VERSION)" >> $GITHUB_OUTPUT
+      - name: Calculate new release-candidate tag
+        id: new-tag
+        run: |
+          LATEST_TAG=$(gh release list --limit 100 | grep "v${{ steps.version.outputs.version }}-rc." | sort -V | tail -n 1 | awk '{print $3}')
+          if [ -z "$LATEST_TAG" ]; then
+            NEW_TAG="v${{ steps.version.outputs.version }}-rc.1"
+          else
+            DEV_NUMBER=$(echo $LATEST_TAG | sed -E 's/^.*-dev-([0-9]+)$/\1/')
+            NEW_TAG="v${{ steps.version.outputs.version }}-rc.$((DEV_NUMBER + 1))"
+          fi
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.new-tag.outputs.new_tag }}
+          release_name: Release ${{ steps.new-tag.outputs.new_tag }}
+          draft: false
+          prerelease: true
+

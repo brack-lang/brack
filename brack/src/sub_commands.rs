@@ -22,4 +22,5 @@ pub enum SubCommands {
     Add {
         schema: String,
     },
+    Version,
 }
