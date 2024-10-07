@@ -115,3 +115,5 @@ async fn main() -> Result<()> {
             println!("Brack {}", version);
         }
     }
+    Ok(())
+}
