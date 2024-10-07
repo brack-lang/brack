@@ -105,6 +105,15 @@ async fn main() -> Result<()> {
         }
         SubCommands::New { name } => new_project(&name)?,
         SubCommands::Add { schema } => brack_project_manager::plugin::add_plugin(&schema).await?,
+        SubCommands::Version => {
+            let version = match std::env::var("APP_VERSION") {
+                Ok(version) => version,
+                // FIXME: The following hard-coded version for Nix packaging now.
+                //       We should remove this when we have a better way to handle it.
+                Err(_) => "0.1.0".to_string(),
+            };
+            println!("Brack {}", version);
+        }
     }
     Ok(())
 }
