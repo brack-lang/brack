@@ -13,9 +13,6 @@ impl Server {
             .uri
             .to_file_path()
             .map_err(|_| anyhow::anyhow!("Invalid file path"))?;
-        let uri = file_path
-            .to_str()
-            .ok_or_else(|| anyhow::anyhow!("Invalid file path"))?;
         
         // root/docs/file.[] -> root
         let root = file_path
@@ -30,7 +27,6 @@ impl Server {
             self.project = Some(project);
         }
 
-        self.log_message(&format!("Did open: {}", uri)).await?;
         Ok(())
     }
 }
