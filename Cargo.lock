@@ -263,6 +263,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "brack-lower"
+version = "0.1.0"
+
+[[package]]
 name = "brack-parser"
 version = "0.1.0"
 dependencies = [

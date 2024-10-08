@@ -5,6 +5,7 @@ members = [
     "brack-codegen",
     "brack-expander",
     "brack-language-server",
+    "brack-lower",
     "brack-parser",
     "brack-plugin",
     "brack-project-manager",
@@ -19,6 +20,7 @@ resolver = "2"
 brack-codegen = { path = "./brack-codegen" }
 brack-expander = { path = "./brack-expander" }
 brack-language-server = { path = "./brack-language-server" }
+brack-lower = { path = "./brack-lower" }
 brack-parser = { path = "./brack-parser" }
 brack-plugin = { path = "./brack-plugin" }
 brack-project-manager = { path = "./brack-project-manager" }
