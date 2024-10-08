@@ -1,6 +1,5 @@
 use anyhow::Result;
-use brack_plugin::plugin::new_plugins;
-use brack_sdk_rs::{MetaData, Type};
+use brack_plugin::plugin::{new_plugins, Metadata, Type};
 use lsp_types::{CompletionItem, CompletionParams, CompletionResponse, InsertTextFormat};
 
 use crate::server::Server;
@@ -9,7 +8,7 @@ fn build_completion_item(
     module_name: &str,
     name: &str,
     typ: &Type,
-    command_metadata: &MetaData,
+    command_metadata: &Metadata,
 ) -> CompletionItem {
     let insert_text = Some(match typ {
         Type::TInline => format!("{}.{} $0]", module_name, name),

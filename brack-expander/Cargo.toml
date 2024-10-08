@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.86"
-brack-sdk-rs = { git = "https://github.com/brack-lang/brack", package = "brack-sdk-rs" }
 brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
 brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
 brack-transformer = { git = "https://github.com/brack-lang/brack", package = "brack-transformer" }

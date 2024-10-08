@@ -9,6 +9,5 @@ edition = "2021"
 anyhow = "1.0.86"
 brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
 brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
-brack-sdk-rs = { git = "https://github.com/brack-lang/brack", package = "brack-sdk-rs" }
 brack-transformer = { git = "https://github.com/brack-lang/brack", package = "brack-transformer" }
 extism = "1.4.1"

@@ -1,6 +1,5 @@
 use anyhow::Result;
-use brack_plugin::plugin::Plugins;
-use brack_sdk_rs::Type;
+use brack_plugin::plugin::{Plugins, Type};
 use brack_transformer::ast::AST;
 use extism::convert::Json;
 
