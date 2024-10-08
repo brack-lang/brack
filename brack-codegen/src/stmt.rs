@@ -1,6 +1,8 @@
 use anyhow::Result;
 use brack_plugin::plugin::Plugins;
+use brack_sdk_rs::Value;
 use brack_transformer::ast::AST;
+use extism::convert::Json;
 
 use crate::{curly, expr, square, text};
 
@@ -21,5 +23,13 @@ pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
         };
         result.push_str(&res);
     }
-    Ok(result + "\n")
+
+    let plugin = plugins.get_mut("_stmt_hook");
+    if let Some((plugin, _)) = plugin {
+        return Ok(
+            plugin.call::<Json<Vec<Value>>, String>("stmt", Json(vec![Value::Text(result)]))?
+        );
+    }
+
+    Ok(result)
 }
