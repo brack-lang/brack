@@ -1,6 +1,7 @@
 use crate::config::Config;
 use crate::plugin::Plugin;
 use anyhow::Result;
+use brack_plugin::plugin::FeatureFlug;
 use bytes::Bytes;
 use futures::future::join_all;
 use reqwest;
@@ -13,7 +14,7 @@ use tokio::task::{self, JoinHandle};
 #[derive(Debug)]
 pub struct Project {
     pub config: Config,
-    pub plugins_metadata: HashMap<String, PathBuf>,
+    pub plugins_metadata: HashMap<String, (PathBuf, FeatureFlug)>,
     pub root: PathBuf,
 }
 
@@ -46,8 +47,34 @@ impl Project {
             for (name, plugin) in plugins {
                 let path =
                     PathBuf::from(&format!("plugins/{}_{}.wasm", name, plugin.hash_sha256()));
+                let document_hook = if let Some(b) = match plugin {
+                    Plugin::GitHub { document_hook, .. } => document_hook,
+                } {
+                    b
+                } else {
+                    false
+                };
+                let stmt_hook = if let Some(b) = match plugin {
+                    Plugin::GitHub { stmt_hook, .. } => stmt_hook,
+                } {
+                    b
+                } else {
+                    false
+                };
+                let expr_hook = if let Some(b) = match plugin {
+                    Plugin::GitHub { expr_hook, .. } => expr_hook,
+                } {
+                    b
+                } else {
+                    false
+                };
+                let flag = FeatureFlug {
+                    document_hook,
+                    stmt_hook,
+                    expr_hook,
+                };
                 if path.exists() {
-                    self.plugins_metadata.insert(name, path.into());
+                    self.plugins_metadata.insert(name, (path, flag));
                     continue;
                 }
                 match plugin {
@@ -55,12 +82,13 @@ impl Project {
                         owner,
                         repo,
                         version,
+                        ..
                     } => {
                         let url = format!(
                             "https://github.com/{}/{}/releases/download/{}/{}.{}.wasm",
                             owner, repo, version, name, self.config.document.backend
                         );
-                        let task: JoinHandle<Result<(String, PathBuf, Bytes)>> =
+                        let task: JoinHandle<Result<(String, PathBuf, Bytes, FeatureFlug)>> =
                             task::spawn(async move {
                                 let response = reqwest::get(&url).await?;
                                 if !response.status().is_success() {
@@ -75,7 +103,7 @@ impl Project {
                                     );
                                 }
                                 let bytes = response.bytes().await?;
-                                Ok((name, path, bytes))
+                                Ok((name, path, bytes, flag))
                             });
                         tasks.push(task);
                     }
@@ -84,9 +112,9 @@ impl Project {
 
             let results = join_all(tasks).await;
             for result in results {
-                let (name, path, bytes) = result??;
+                let (name, path, bytes, flag) = result??;
                 std::fs::write(&path, &bytes)?;
-                self.plugins_metadata.insert(name, Path::new(&path).into());
+                self.plugins_metadata.insert(name, (path, flag));
             }
         }
 

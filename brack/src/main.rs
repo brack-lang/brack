@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::Result;
 use brack::sub_commands::SubCommands;
+use brack_plugin::plugin::FeatureFlug;
 use clap::Parser;
 use regex::Regex;
 
@@ -42,7 +43,7 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
         );
         if let Some(capture) = capture {
             let module_name = capture.name("module_name").unwrap().as_str();
-            pathes.insert(module_name.to_string(), path);
+            pathes.insert(module_name.to_string(), (path, FeatureFlug::default()));
         }
     }
 
