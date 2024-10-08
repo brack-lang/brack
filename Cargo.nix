@@ -105,16 +105,6 @@ rec {
       # File a bug if you depend on any for non-debug work!
       debug = internal.debugCrate { inherit packageId; };
     };
-    "brack-sdk-rs" = rec {
-      packageId = "brack-sdk-rs";
-      build = internal.buildRustCrateWithFeatures {
-        packageId = "brack-sdk-rs";
-      };
-
-      # Debug support which might change between releases.
-      # File a bug if you depend on any for non-debug work!
-      debug = internal.debugCrate { inherit packageId; };
-    };
     "brack-tokenizer" = rec {
       packageId = "brack-tokenizer";
       build = internal.buildRustCrateWithFeatures {
@@ -801,11 +791,6 @@ rec {
             rename = "brack-plugin";
           }
           {
-            name = "brack-sdk-rs";
-            packageId = "brack-sdk-rs";
-            rename = "brack-sdk-rs";
-          }
-          {
             name = "brack-transformer";
             packageId = "brack-transformer";
             rename = "brack-transformer";
@@ -841,11 +826,6 @@ rec {
             name = "brack-plugin";
             packageId = "brack-plugin";
             rename = "brack-plugin";
-          }
-          {
-            name = "brack-sdk-rs";
-            packageId = "brack-sdk-rs";
-            rename = "brack-sdk-rs";
           }
           {
             name = "brack-transformer";
@@ -888,11 +868,6 @@ rec {
             name = "brack-project-manager";
             packageId = "brack-project-manager";
             rename = "brack-project-manager";
-          }
-          {
-            name = "brack-sdk-rs";
-            packageId = "brack-sdk-rs";
-            rename = "brack-sdk-rs";
           }
           {
             name = "brack-tokenizer";
@@ -986,11 +961,6 @@ rec {
             name = "brack-parser";
             packageId = "brack-parser";
             rename = "brack-parser";
-          }
-          {
-            name = "brack-sdk-rs";
-            packageId = "brack-sdk-rs";
-            rename = "brack-sdk-rs";
           }
           {
             name = "extism";
@@ -1103,33 +1073,6 @@ rec {
         features = {
         };
         resolvedDefaultFeatures = [ "debug" "default" ];
-      };
-      "brack-sdk-rs" = rec {
-        crateName = "brack-sdk-rs";
-        version = "0.1.0";
-        edition = "2021";
-        # We can't filter paths with references in Nix 2.4
-        # See https://github.com/NixOS/nix/issues/5410
-        src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
-          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-sdk-rs; }
-          else ./brack-sdk-rs;
-        libName = "brack_sdk_rs";
-        dependencies = [
-          {
-            name = "anyhow";
-            packageId = "anyhow";
-          }
-          {
-            name = "serde";
-            packageId = "serde";
-            features = [ "derive" ];
-          }
-          {
-            name = "serde_json";
-            packageId = "serde_json";
-          }
-        ];
-
       };
       "brack-tokenizer" = rec {
         crateName = "brack-tokenizer";
