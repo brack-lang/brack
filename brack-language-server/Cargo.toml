@@ -16,4 +16,3 @@ brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brac
 brack-transformer = { git = "https://github.com/brack-lang/brack", package = "brack-transformer" }
 brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
 brack-project-manager = { git = "https://github.com/brack-lang/brack", package = "brack-project-manager" }
-brack-sdk-rs = { git = "https://github.com/brack-lang/brack", package = "brack-sdk-rs" }
