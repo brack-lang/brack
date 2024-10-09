@@ -16,6 +16,9 @@ pub enum Plugin {
         owner: String,
         repo: String,
         version: String,
+        expr_hook: Option<bool>,
+        stmt_hook: Option<bool>,
+        document_hook: Option<bool>,
     },
 }
 
@@ -30,11 +33,23 @@ impl Serialize for Plugin {
                 ref owner,
                 ref repo,
                 ref version,
+                ref expr_hook,
+                ref stmt_hook,
+                ref document_hook,
             } => {
                 s.serialize_field("schema", "github")?;
                 s.serialize_field("owner", owner)?;
                 s.serialize_field("repo", repo)?;
                 s.serialize_field("version", version)?;
+                if let Some(expr_hook) = expr_hook {
+                    s.serialize_field("expr_hook", expr_hook)?;
+                }
+                if let Some(stmt_hook) = stmt_hook {
+                    s.serialize_field("stmt_hook", stmt_hook)?;
+                }
+                if let Some(document_hook) = document_hook {
+                    s.serialize_field("document_hook", document_hook)?;
+                }
             }
         }
         s.end()
@@ -63,6 +78,9 @@ impl<'de> Deserialize<'de> for Plugin {
                 let mut owner = None;
                 let mut repo = None;
                 let mut version = None;
+                let mut expr_hook = None;
+                let mut stmt_hook = None;
+                let mut document_hook = None;
 
                 while let Some(key) = map.next_key::<String>()? {
                     match key.as_str() {
@@ -90,6 +108,24 @@ impl<'de> Deserialize<'de> for Plugin {
                             }
                             version = Some(map.next_value()?);
                         }
+                        "expr_hook" => {
+                            if expr_hook.is_some() {
+                                return Err(de::Error::duplicate_field("expr_hook"));
+                            }
+                            expr_hook = Some(map.next_value()?);
+                        }
+                        "stmt_hook" => {
+                            if stmt_hook.is_some() {
+                                return Err(de::Error::duplicate_field("stmt_hook"));
+                            }
+                            stmt_hook = Some(map.next_value()?);
+                        }
+                        "document_hook" => {
+                            if document_hook.is_some() {
+                                return Err(de::Error::duplicate_field("document_hook"));
+                            }
+                            document_hook = Some(map.next_value()?);
+                        }
                         _ => return Err(de::Error::unknown_field(&key, FIELDS)),
                     }
                 }
@@ -104,6 +140,9 @@ impl<'de> Deserialize<'de> for Plugin {
                         owner,
                         repo,
                         version,
+                        expr_hook,
+                        stmt_hook,
+                        document_hook,
                     }),
                     _ => Err(de::Error::invalid_value(
                         de::Unexpected::Str(&schema),
@@ -218,6 +257,9 @@ pub async fn add_plugin(schema: &str) -> Result<()> {
             owner: owner.to_string(),
             repo: repo.to_string(),
             version: version.to_string(),
+            expr_hook: None,
+            stmt_hook: None,
+            document_hook: None,
         },
     );
     let toml = toml::to_string(&config)?;

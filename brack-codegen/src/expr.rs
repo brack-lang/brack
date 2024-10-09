@@ -1,6 +1,8 @@
 use anyhow::Result;
 use brack_plugin::plugin::Plugins;
+use brack_sdk_rs::Value;
 use brack_transformer::ast::AST;
+use extism::convert::Json;
 
 use crate::{curly, square, text};
 
@@ -20,6 +22,13 @@ pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
             ast => anyhow::bail!("Expr cannot contain the following node\n{}", ast),
         };
         result.push_str(&res);
+    }
+
+    let plugin = plugins.get_mut("_expr_hook");
+    if let Some((plugin, _)) = plugin {
+        return Ok(
+            plugin.call::<Json<Vec<Value>>, String>("expr", Json(vec![Value::Text(result)]))?
+        );
     }
     Ok(result)
 }
