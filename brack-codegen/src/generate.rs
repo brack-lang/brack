@@ -1,7 +1,6 @@
 use anyhow::Result;
-use brack_plugin::plugin::{Plugins, Value};
+use brack_plugin::{plugins::Plugins, value::Value};
 use brack_transformer::ast::AST;
-use extism::convert::Json;
 
 use crate::{curly, expr, square, stmt, text};
 
@@ -24,11 +23,9 @@ pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
         result.push_str(&res);
     }
 
-    let plugin = plugins.get_mut("_document_hook");
-    if let Some((plugin, _)) = plugin {
-        return Ok(
-            plugin.call::<Json<Vec<Value>>, String>("document", Json(vec![Value::Text(result)]))?
-        );
+    let hook_result = plugins.call_document_hook(vec![Value::Text(result.clone())])?;
+    match hook_result {
+        Some(result) => Ok(result),
+        None => Ok(result),
     }
-    Ok(result)
 }

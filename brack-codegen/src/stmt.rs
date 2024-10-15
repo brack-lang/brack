@@ -1,11 +1,10 @@
 use anyhow::Result;
-use brack_plugin::plugin::{Plugins, Value};
+use brack_plugin::{plugins::Plugins, value::Value};
 use brack_transformer::ast::AST;
-use extism::convert::Json;
 
 use crate::{curly, expr, square, text};
 
-pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
+pub(crate) fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     match ast {
         AST::Stmt(_) => (),
         _ => anyhow::bail!("Stmt must be a stmt"),
@@ -23,12 +22,9 @@ pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
         result.push_str(&res);
     }
 
-    let plugin = plugins.get_mut("_stmt_hook");
-    if let Some((plugin, _)) = plugin {
-        return Ok(
-            plugin.call::<Json<Vec<Value>>, String>("stmt", Json(vec![Value::Text(result)]))?
-        );
+    let hook_result = plugins.call_stmt_hook(vec![Value::Text(result.clone())])?;
+    match hook_result {
+        Some(result) => Ok(result),
+        None => Ok(result),
     }
-
-    Ok(result)
 }
