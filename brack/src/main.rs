@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::Result;
 use brack::sub_commands::SubCommands;
-use brack_plugin::plugin::FeatureFlug;
+use brack_plugin::{feature_flag::FeatureFlag, plugin::Plugin, plugins::Plugins};
 use clap::Parser;
 use regex::Regex;
 
@@ -43,11 +43,16 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
         );
         if let Some(capture) = capture {
             let module_name = capture.name("module_name").unwrap().as_str();
-            pathes.insert(module_name.to_string(), (path, FeatureFlug::default()));
+            pathes.insert(module_name.to_string(), (path, FeatureFlag::default()));
         }
     }
 
-    let mut plugins = brack_plugin::plugin::new_plugins(pathes)?;
+    let mut plugin_vec = vec![];
+    for (name, (path, feature_flag)) in pathes {
+        let plugin = Plugin::new(&name, path, feature_flag)?;
+        plugin_vec.push(plugin);
+    }
+    let mut plugins = Plugins::new(plugin_vec)?;
 
     if !args.2.ends_with(".[]") {
         anyhow::bail!("Filename must end with .[]");
