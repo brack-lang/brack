@@ -34,6 +34,10 @@ jobs:
             NEW_TAG="v${{ steps.version.outputs.version }}-rc.$((DEV_NUMBER + 1))"
           fi
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+      - name: Generate release note
+        id: release-note
+        run: |
+          bash scripts/prerelease-note.sh ${{ steps.new-tag.outputs.new_tag }} 2>/dev/null | tee release_notes.md
       - name: Create release
         uses: actions/create-release@v1
         env:
@@ -41,6 +45,7 @@ jobs:
         with:
           tag_name: ${{ steps.new-tag.outputs.new_tag }}
           release_name: ${{ steps.new-tag.outputs.new_tag }}
+          body_path: release_notes.md
           draft: false
           prerelease: true
 
