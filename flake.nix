@@ -65,6 +65,8 @@
               toolchain
               rust-analyzer
               crate2nix
+              gh
+              shellcheck
             ];
         };
         checks = builtins.listToAttrs (map (name: {

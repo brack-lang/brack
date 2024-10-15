@@ -670,7 +670,7 @@ rec {
       };
       "brack" = rec {
         crateName = "brack";
-        version = "0.1.0";
+        version = "0.2.0";
         edition = "2021";
         crateBin = [
           {
@@ -767,7 +767,7 @@ rec {
       };
       "brack-codegen" = rec {
         crateName = "brack-codegen";
-        version = "0.1.0";
+        version = "0.2.0";
         edition = "2021";
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
@@ -800,7 +800,7 @@ rec {
       };
       "brack-expander" = rec {
         crateName = "brack-expander";
-        version = "0.1.0";
+        version = "0.2.0";
         edition = "2021";
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
@@ -833,7 +833,7 @@ rec {
       };
       "brack-language-server" = rec {
         crateName = "brack-language-server";
-        version = "0.1.0";
+        version = "0.2.0";
         edition = "2021";
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
@@ -893,7 +893,7 @@ rec {
       };
       "brack-parser" = rec {
         crateName = "brack-parser";
-        version = "0.1.0";
+        version = "0.2.0";
         edition = "2021";
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
@@ -936,7 +936,7 @@ rec {
       };
       "brack-plugin" = rec {
         crateName = "brack-plugin";
-        version = "0.1.0";
+        version = "0.2.0";
         edition = "2021";
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
@@ -976,7 +976,7 @@ rec {
       };
       "brack-project-manager" = rec {
         crateName = "brack-project-manager";
-        version = "0.1.0";
+        version = "0.2.0";
         edition = "2021";
         crateBin = [
           {
@@ -1068,7 +1068,7 @@ rec {
       };
       "brack-tokenizer" = rec {
         crateName = "brack-tokenizer";
-        version = "0.1.0";
+        version = "0.2.0";
         edition = "2021";
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
@@ -1099,7 +1099,7 @@ rec {
       };
       "brack-transformer" = rec {
         crateName = "brack-transformer";
-        version = "0.1.0";
+        version = "0.2.0";
         edition = "2021";
         crateBin = [
           {

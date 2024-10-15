@@ -202,7 +202,7 @@ dependencies = [
 
 [[package]]
 name = "brack"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "brack-codegen",
@@ -223,7 +223,7 @@ dependencies = [
 
 [[package]]
 name = "brack-codegen"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "brack-parser",
@@ -233,7 +233,7 @@ dependencies = [
 
 [[package]]
 name = "brack-expander"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "brack-parser",
@@ -243,7 +243,7 @@ dependencies = [
 
 [[package]]
 name = "brack-language-server"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "brack-parser",
@@ -259,7 +259,7 @@ dependencies = [
 
 [[package]]
 name = "brack-parser"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "brack-tokenizer",
@@ -271,7 +271,7 @@ dependencies = [
 
 [[package]]
 name = "brack-plugin"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "brack-transformer",
@@ -283,7 +283,7 @@ dependencies = [
 
 [[package]]
 name = "brack-project-manager"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "brack-codegen",
@@ -303,7 +303,7 @@ dependencies = [
 
 [[package]]
 name = "brack-tokenizer"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "pretty_assertions",
@@ -313,7 +313,7 @@ dependencies = [
 
 [[package]]
 name = "brack-transformer"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "brack-parser",
