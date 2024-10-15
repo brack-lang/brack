@@ -795,10 +795,6 @@ rec {
             packageId = "brack-transformer";
             rename = "brack-transformer";
           }
-          {
-            name = "extism";
-            packageId = "extism";
-          }
         ];
 
       };
@@ -831,10 +827,6 @@ rec {
             name = "brack-transformer";
             packageId = "brack-transformer";
             rename = "brack-transformer";
-          }
-          {
-            name = "extism";
-            packageId = "extism";
           }
         ];
 
@@ -958,9 +950,9 @@ rec {
             packageId = "anyhow";
           }
           {
-            name = "brack-parser";
-            packageId = "brack-parser";
-            rename = "brack-parser";
+            name = "brack-transformer";
+            packageId = "brack-transformer";
+            rename = "brack-transformer";
           }
           {
             name = "extism";
