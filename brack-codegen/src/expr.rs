@@ -1,12 +1,10 @@
 use anyhow::Result;
-use brack_plugin::plugin::Plugins;
-use brack_sdk_rs::Value;
+use brack_plugin::{plugins::Plugins, value::Value};
 use brack_transformer::ast::AST;
-use extism::convert::Json;
 
 use crate::{curly, square, text};
 
-pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
+pub(crate) fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     match ast {
         AST::Expr(_) => (),
         _ => anyhow::bail!("Expr must be an expr"),
@@ -24,11 +22,9 @@ pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
         result.push_str(&res);
     }
 
-    let plugin = plugins.get_mut("_expr_hook");
-    if let Some((plugin, _)) = plugin {
-        return Ok(
-            plugin.call::<Json<Vec<Value>>, String>("expr", Json(vec![Value::Text(result)]))?
-        );
+    let hook_result = plugins.call_expr_hook(vec![Value::Text(result.clone())])?;
+    match hook_result {
+        Some(result) => Ok(result),
+        None => Ok(result),
     }
-    Ok(result)
 }

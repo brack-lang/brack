@@ -1,5 +1,5 @@
 use anyhow::Result;
-use brack_plugin::plugin::{new_plugins, Metadata, Type};
+use brack_plugin::{metadata::Metadata, plugin::Plugin, plugins::Plugins, types::Type};
 use lsp_types::{CompletionItem, CompletionParams, CompletionResponse, InsertTextFormat};
 
 use crate::server::Server;
@@ -39,7 +39,12 @@ impl Server {
         }
         let project = self.project.as_ref().unwrap();
         let mut completion_items = vec![];
-        let plugins = new_plugins(project.plugins_metadata.clone())?;
+        let mut plugin_vec = vec![];
+        for (name, (path, feature_flag)) in &project.plugins_metadata {
+            let plugin = Plugin::new(name, path, feature_flag.clone())?;
+            plugin_vec.push(plugin);
+        }
+        let plugins = Plugins::new(plugin_vec)?;
         let start = params
             .context
             .ok_or_else(|| anyhow::anyhow!("No context"))?
@@ -48,18 +53,18 @@ impl Server {
             return Ok(None);
         }
         let start = start.unwrap();
-        for (module_name, (_, plugin_metadata)) in plugins {
-            for ((name, typ), command_metadata) in plugin_metadata {
+        for plugin in plugins.name_to_plugin.values() {
+            for ((name, typ), command_metadata) in plugin.signature_to_metadata.iter() {
                 if start == String::from("[") && matches!(typ, Type::TInline) {
                     completion_items.push(build_completion_item(
-                        &module_name,
+                        &plugin.name,
                         &name,
                         &typ,
                         &command_metadata,
                     ));
                 } else if start == String::from("{") && matches!(typ, Type::TBlock) {
                     completion_items.push(build_completion_item(
-                        &module_name,
+                        &plugin.name,
                         &name,
                         &typ,
                         &command_metadata,

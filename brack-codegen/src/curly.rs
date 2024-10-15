@@ -1,11 +1,10 @@
 use anyhow::Result;
-use brack_plugin::plugin::{arg_counter, Plugins, Type, Value};
+use brack_plugin::{plugins::Plugins, types::{arg_counter, Type}, value::Value};
 use brack_transformer::ast::AST;
-use extism::convert::Json;
 
 use crate::{expr, square, text};
 
-pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
+pub(crate) fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     match ast {
         AST::Curly(_) => (),
         _ => anyhow::bail!("Curly must be a curly"),
@@ -49,13 +48,7 @@ pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
         None => anyhow::bail!("Identifier name must be a string"),
     };
 
-    let (plugin, plugin_metadata_map) = plugins
-        .get_mut(&module_name)
-        .ok_or_else(|| anyhow::anyhow!("Module {} not found", module_name))?;
-    let plugin_metadata = plugin_metadata_map
-        .get(&(ident_name.clone(), Type::TBlock))
-        .ok_or_else(|| anyhow::anyhow!("Command {} not found", ident_name))?;
-    let arg_types = &plugin_metadata.argument_types;
+    let arg_types = plugins.argument_types(&module_name, &ident_name)?;
 
     let (min, max) = arg_counter(
         &arg_types
@@ -90,5 +83,6 @@ pub fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
         args.push(arg);
     }
 
-    Ok(plugin.call::<Json<Vec<Value>>, String>(&plugin_metadata.call_name, Json(args))?)
+    let text = plugins.call_block_command(&module_name, &ident_name, args)?;
+    Ok(text)
 }

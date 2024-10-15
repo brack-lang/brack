@@ -229,7 +229,6 @@ dependencies = [
  "brack-parser",
  "brack-plugin",
  "brack-transformer",
- "extism",
 ]
 
 [[package]]
@@ -240,7 +239,6 @@ dependencies = [
  "brack-parser",
  "brack-plugin",
  "brack-transformer",
- "extism",
 ]
 
 [[package]]
@@ -276,7 +274,7 @@ name = "brack-plugin"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "brack-parser",
+ "brack-transformer",
  "extism",
  "extism-convert",
  "serde",
