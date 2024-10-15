@@ -41,5 +41,5 @@ if [ -z "$PR_LIST" ]; then
   echo "No PRs were merged between $PREV_VERSION and $CURRENT_VERSION." >&2
 else
   echo "PRs merged between $PREV_VERSION and $CURRENT_VERSION:" >&2
-  echo "$PR_LIST"
+  echo "## What's Changed\n$PR_LIST"
 fi
