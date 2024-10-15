@@ -11,7 +11,7 @@ use serde::{
 };
 
 #[derive(Debug, Clone)]
-pub enum Plugin {
+pub enum PluginSchema {
     GitHub {
         owner: String,
         repo: String,
@@ -22,14 +22,14 @@ pub enum Plugin {
     },
 }
 
-impl Serialize for Plugin {
+impl Serialize for PluginSchema {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         let mut s = serializer.serialize_struct("Plugin", 4)?;
         match *self {
-            Plugin::GitHub {
+            PluginSchema::GitHub {
                 ref owner,
                 ref repo,
                 ref version,
@@ -56,7 +56,7 @@ impl Serialize for Plugin {
     }
 }
 
-impl<'de> Deserialize<'de> for Plugin {
+impl<'de> Deserialize<'de> for PluginSchema {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
@@ -64,13 +64,13 @@ impl<'de> Deserialize<'de> for Plugin {
         struct PluginVisitor;
 
         impl<'de> Visitor<'de> for PluginVisitor {
-            type Value = Plugin;
+            type Value = PluginSchema;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str("struct Plugin")
             }
 
-            fn visit_map<V>(self, mut map: V) -> Result<Plugin, V::Error>
+            fn visit_map<V>(self, mut map: V) -> Result<PluginSchema, V::Error>
             where
                 V: MapAccess<'de>,
             {
@@ -136,7 +136,7 @@ impl<'de> Deserialize<'de> for Plugin {
                 let version: String = version.ok_or_else(|| de::Error::missing_field("version"))?;
 
                 match schema.as_str() {
-                    "github" => Ok(Plugin::GitHub {
+                    "github" => Ok(PluginSchema::GitHub {
                         owner,
                         repo,
                         version,
@@ -157,7 +157,7 @@ impl<'de> Deserialize<'de> for Plugin {
     }
 }
 
-impl Plugin {
+impl PluginSchema {
     pub fn hash_sha256(&self) -> String {
         let mut hasher = Sha256::new();
         hasher.update(format!("{:?}", self));
@@ -253,7 +253,7 @@ pub async fn add_plugin(schema: &str) -> Result<()> {
 
     config.plugins.get_or_insert_with(|| HashMap::new()).insert(
         plugin_name.to_string(),
-        Plugin::GitHub {
+        PluginSchema::GitHub {
             owner: owner.to_string(),
             repo: repo.to_string(),
             version: version.to_string(),

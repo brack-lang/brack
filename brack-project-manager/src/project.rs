@@ -1,7 +1,7 @@
 use crate::config::Config;
-use crate::plugin::Plugin;
+use crate::plugin::PluginSchema;
 use anyhow::Result;
-use brack_plugin::plugin::FeatureFlug;
+use brack_plugin::{feature_flag::FeatureFlag, plugin::Plugin, plugins::Plugins};
 use bytes::Bytes;
 use futures::future::join_all;
 use reqwest;
@@ -14,7 +14,7 @@ use tokio::task::{self, JoinHandle};
 #[derive(Debug)]
 pub struct Project {
     pub config: Config,
-    pub plugins_metadata: HashMap<String, (PathBuf, FeatureFlug)>,
+    pub plugins_metadata: HashMap<String, (PathBuf, FeatureFlag)>,
     pub root: PathBuf,
 }
 
@@ -48,27 +48,27 @@ impl Project {
                 let path =
                     PathBuf::from(&format!("plugins/{}_{}.wasm", name, plugin.hash_sha256()));
                 let document_hook = if let Some(b) = match plugin {
-                    Plugin::GitHub { document_hook, .. } => document_hook,
+                    PluginSchema::GitHub { document_hook, .. } => document_hook,
                 } {
                     b
                 } else {
                     false
                 };
                 let stmt_hook = if let Some(b) = match plugin {
-                    Plugin::GitHub { stmt_hook, .. } => stmt_hook,
+                    PluginSchema::GitHub { stmt_hook, .. } => stmt_hook,
                 } {
                     b
                 } else {
                     false
                 };
                 let expr_hook = if let Some(b) = match plugin {
-                    Plugin::GitHub { expr_hook, .. } => expr_hook,
+                    PluginSchema::GitHub { expr_hook, .. } => expr_hook,
                 } {
                     b
                 } else {
                     false
                 };
-                let flag = FeatureFlug {
+                let flag = FeatureFlag {
                     document_hook,
                     stmt_hook,
                     expr_hook,
@@ -78,7 +78,7 @@ impl Project {
                     continue;
                 }
                 match plugin {
-                    Plugin::GitHub {
+                    PluginSchema::GitHub {
                         owner,
                         repo,
                         version,
@@ -88,7 +88,7 @@ impl Project {
                             "https://github.com/{}/{}/releases/download/{}/{}.{}.wasm",
                             owner, repo, version, name, self.config.document.backend
                         );
-                        let task: JoinHandle<Result<(String, PathBuf, Bytes, FeatureFlug)>> =
+                        let task: JoinHandle<Result<(String, PathBuf, Bytes, FeatureFlag)>> =
                             task::spawn(async move {
                                 let response = reqwest::get(&url).await?;
                                 if !response.status().is_success() {
@@ -122,7 +122,11 @@ impl Project {
     }
 
     pub fn build(&self) -> Result<()> {
-        let mut plugins = brack_plugin::plugin::new_plugins(self.plugins_metadata.clone())?;
+        let mut plugin_vec = vec![];
+        for (name, (path, feature_flag)) in self.plugins_metadata.clone() {
+            plugin_vec.push(Plugin::new(&name, path, feature_flag)?);
+        }
+        let mut plugins = Plugins::new(plugin_vec)?;
 
         let entries = std::fs::read_dir("docs")?;
         for entry in entries {
