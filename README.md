@@ -1,4 +1,4 @@
-# Brack (EN / [JA](./README-ja.md))
+# Brack (EN / [JA](./README_JA.md))
 
 ![](./brack-header.png)
 
