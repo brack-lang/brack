@@ -4,7 +4,7 @@
 
 <div align="center">
 
-[英語](./README.md) | **日本語**
+[English](./README.md) | **日本語**
 
 [![Release](https://img.shields.io/github/v/release/brack-lang/brack.svg)](https://github.com/brack-lang/brack/tree/main)
 [![Pre-Release](https://img.shields.io/github/v/release/brack-lang/brack.svg?include_prereleases&label=prerelease)](https://github.com/user/repository)
@@ -18,7 +18,7 @@
 Brackは文法がとてもシンプルで、拡張性が非常に高い**マークアップ言語**です。
 WebAssemblyバイナリを利用したプラグインシステムを備えていて、あなたが使い慣れたプログラミング言語[^1]を使って、自由にコマンドを追加できます。
 
-[^1]: ただし、WebAssemblyにコンパイルでき、かつ[Extism](https://extism.org/)のPDKが実装されている必要があります。2024年10月16日現在、ExtismのPDKが提供されているプログラミング言語はRust、JavaScript、Go、Haskell、AssemblyScript、C、Zig、.NETの8種類です。また、v0.2.0時点では、BrackのPDKはRustのみを提供しています。未サポートの言語でExtism、BrackのPDKを実装する貢献は大歓迎です。
+[^1]: ただし、WebAssemblyにコンパイルでき、かつ[Extism](https://extism.org/)のPDK（Plug-in Development Kit）が実装されている必要があります。2024年10月16日現在、ExtismのPDKが提供されているプログラミング言語はRust、JavaScript、Go、Haskell、AssemblyScript、C、Zig、.NETの8種類です。また、v0.2.0時点では、BrackのPDKはRustのみを提供しています。未サポートの言語でExtism、BrackのPDKを実装する貢献は大歓迎です。
 
 このリポジトリはBrackのコンパイラと言語サーバ、プロジェクト管理ツール、ドキュメントが含まれています。
 以下にBrackに関連するリポジトリをリストします。
@@ -53,7 +53,7 @@ occaecat cupidatat non proident,
 sunt in culpa qui officia deserunt mollit anim id est laborum.
 ```
 
-コマンド呼び出し構文は、名前と0個以上の引数を受け取って異なるデータに置換します。
+コマンド呼び出し構文が呼び出されると、名前と0個以上の引数を受け取って異なるデータに置換します。
 プラグインを識別するための**モジュール名**と、コマンドを識別するための**コマンド名**によって識別されます。
 
 ```brack
@@ -64,16 +64,15 @@ sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 Brackのコンパイラは特定の変換を実装していません。
 つまり、プラグインを入れない状態ではすべてのコマンド呼び出しはエラーになります。
-Brackの開発チームから提供される、各ターゲットに対応する`std`プラグインを使ったり、自分自身でプラグインを開発することで文章を変換できます。
+Brackの開発チームから提供される、各ターゲットに対応する`std`プラグインやサードパーティ製のプラグインを使ったり、自分自身でプラグインを開発することで文章を変換できます。
 
-例として、HTMLターゲットのプラグインである[std.html](https://github.com/brack-lang/std.html)を利用して、HTMLに変換される文章を以下に示します。
+例として、HTMLターゲットのプラグインである[std.html](https://github.com/brack-lang/std.html)を利用して、変換される文章を以下に示します。
 
 ```brack
 {std.* Hello, World!}
 
-こんにちは、これは[std.* Brack]
-<std.^ WebAssemblyによって変換規則を拡張可能なマークアップ言語>
-を使って記述された文章です。
+Hello, this is the document written using [std.* Brack]
+<std.^ A markup language whose transformation rules can be extended by WebAssembly>.
 ```
 
 std.htmlは、上の文章を次のように変換します[^not-guarantee]。
@@ -83,17 +82,16 @@ std.htmlは、上の文章を次のように変換します[^not-guarantee]。
 ```html
 <h1>Hello, World!</h1>
 <p>
-    こんにちは、これは<b>Brack</b>
+    Hello, this is the document written using <b>Brack</b>
     <sup>
         <a href="#fn-12345">[1]</a>
-    </sup>
-    を使って記述された文章です。
+    </sup>.
 </p>
 <div>
-    <div class="footnote-header">脚注</div>
+    <div class="footnote-header">Footnotes</div>
     <ol class="footnote_ordered_list">
         <li id="fn-12345">
-            WebAssemblyによって変換規則を拡張可能なマークアップ言語
+            A markup language whose transformation rules can be extended by WebAssembly
         </li>
     </ol>
 </div>
