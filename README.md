@@ -115,7 +115,7 @@ std.html converts the above document to the following[^not-guarantee].
     - The `brack` command includes both project management tools and a language server.
     - There’s no need to manage them separately; once installed, you can start using them immediately.
 
-[^container-hook]: Known as Container Hooks.
+[^container-hook]: We call it Container Hooks.
 
 ## Installation
 
