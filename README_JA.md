@@ -2,7 +2,7 @@
 
 ![](./assets/brack-header.png)
 
-<div style="text-align: center;">
+<div style="display: flex; flex-direction: column; align-items: center;">
 
 [英語](./README.md) | **日本語**
 
