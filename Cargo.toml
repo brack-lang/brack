@@ -1,25 +1,57 @@
-[workspace]
+[package]
+name = "brack"
+version = "0.2.0"
+edition = "2021"
 
+[dependencies]
+anyhow = "1.0.86"
+brack-codegen = { git = "https://github.com/brack-lang/brack", package = "brack-codegen" }
+brack-expander = { git = "https://github.com/brack-lang/brack", package = "brack-expander" }
+brack-language-server = { git = "https://github.com/brack-lang/brack", package = "brack-language-server" }
+brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
+brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
+brack-project-manager = { git = "https://github.com/brack-lang/brack", package = "brack-project-manager" }
+brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
+brack-transformer = { git = "https://github.com/brack-lang/brack", package = "brack-transformer" }
+tokio = { version = "1", features = ["full"] }
+toml = "0.8.14"
+extism = "1.4.1"
+reqwest = "0.12.5"
+regex = "1.10.6"
+
+[dependencies.clap]
+version = "4.5.7"
+features = ["derive"]
+
+[features]
+default = []
+debug = []
+
+[[bin]]
+name = "debug_compile"
+path = "src/debug/debug_compile.rs"
+required-features = ["debug"]
+
+[workspace]
 members = [
-    "brack",
-    "brack-codegen",
-    "brack-expander",
-    "brack-language-server",
-    "brack-parser",
-    "brack-plugin",
-    "brack-project-manager",
-    "brack-tokenizer",
-    "brack-transformer",
+    "crates/brack-codegen",
+    "crates/brack-expander",
+    "crates/brack-language-server",
+    "crates/brack-parser",
+    "crates/brack-plugin",
+    "crates/brack-project-manager",
+    "crates/brack-tokenizer",
+    "crates/brack-transformer",
 ]
 
 resolver = "2"
 
 [patch."https://github.com/brack-lang/brack"]
-brack-codegen = { path = "./brack-codegen" }
-brack-expander = { path = "./brack-expander" }
-brack-language-server = { path = "./brack-language-server" }
-brack-parser = { path = "./brack-parser" }
-brack-plugin = { path = "./brack-plugin" }
-brack-project-manager = { path = "./brack-project-manager" }
-brack-tokenizer = { path = "./brack-tokenizer" }
-brack-transformer = { path = "./brack-transformer" }
+brack-codegen = { path = "crates/brack-codegen" }
+brack-expander = { path = "crates/brack-expander" }
+brack-language-server = { path = "crates/brack-language-server" }
+brack-parser = { path = "crates/brack-parser" }
+brack-plugin = { path = "crates/brack-plugin" }
+brack-project-manager = { path = "crates/brack-project-manager" }
+brack-tokenizer = { path = "crates/brack-tokenizer" }
+brack-transformer = { path = "crates/brack-transformer" }
