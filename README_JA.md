@@ -2,7 +2,7 @@
 
 ![](./assets/brack-header.png)
 
-<div style="display: flex; flex-direction: column; align-items: center;">
+<p align='center'>
 
 [英語](./README.md) | **日本語**
 
@@ -13,7 +13,7 @@
 [![Discord Invite Budge](https://dcbadge.limes.pink/api/server/cH94kqUMYH?style=flat)](https://discord.gg/cH94kqUMYH)
 [![X Following Budge](https://img.shields.io/twitter/follow/:bracklanguage)](https://twitter.com/intent/user?screen_name=bracklanguage)
 
-</div>
+</p>
 
 Brackは文法がとてもシンプルで、拡張性が非常に高い**マークアップ言語**です。
 WebAssemblyバイナリを利用したプラグインシステムを備えていて、あなたが使い慣れたプログラミング言語[^1]を使って、自由にコマンドを追加できます。
