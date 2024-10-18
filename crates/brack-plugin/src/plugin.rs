@@ -31,6 +31,7 @@ impl Plugin {
         let mut exists_document_hook = false;
         let mut exists_stmt_hook = false;
         let mut exists_expr_hook = false;
+        let mut exists_text_hook = false;
 
         for metadata in metadatas {
             let command_name = metadata.command_name.clone();
@@ -53,6 +54,12 @@ impl Plugin {
                 }
                 exists_expr_hook = true;
             }
+            if command_name == "text" && feature_flag.text_hook {
+                if return_type != Type::TInline {
+                    return Err(anyhow::anyhow!("text hook must return TInline"));
+                }
+                exists_text_hook = true;
+            }
             signature_to_metadata.insert((command_name, return_type), metadata);
         }
 
@@ -64,6 +71,9 @@ impl Plugin {
         }
         if feature_flag.expr_hook && !exists_expr_hook {
             return Err(anyhow::anyhow!("expr hook not found"));
+        }
+        if feature_flag.text_hook && !exists_text_hook {
+            return Err(anyhow::anyhow!("text hook not found"));
         }
 
         Ok(Self {

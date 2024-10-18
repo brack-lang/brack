@@ -23,7 +23,7 @@ pub(crate) fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
             AST::Expr(_) => expr::generate(&child, plugins)?,
             AST::Curly(_) => curly::generate(&child, plugins)?,
             AST::Square(_) => generate(&child, plugins)?,
-            AST::Text(_) => text::generate(&child)?,
+            AST::Text(_) => text::generate(&child, plugins)?,
             AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
             ast => anyhow::bail!("Square cannot contain the following node\n{}", ast),
         };

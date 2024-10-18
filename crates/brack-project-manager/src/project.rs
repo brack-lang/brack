@@ -68,10 +68,18 @@ impl Project {
                 } else {
                     false
                 };
+                let text_hook = if let Some(b) = match plugin {
+                    PluginSchema::GitHub { text_hook, .. } => text_hook,
+                } {
+                    b
+                } else {
+                    false
+                };
                 let flag = FeatureFlag {
                     document_hook,
                     stmt_hook,
                     expr_hook,
+                    text_hook,
                 };
                 if path.exists() {
                     self.plugins_metadata.insert(name, (path, flag));
