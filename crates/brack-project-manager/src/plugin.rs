@@ -19,6 +19,7 @@ pub enum PluginSchema {
         expr_hook: Option<bool>,
         stmt_hook: Option<bool>,
         document_hook: Option<bool>,
+        text_hook: Option<bool>,
     },
 }
 
@@ -36,6 +37,7 @@ impl Serialize for PluginSchema {
                 ref expr_hook,
                 ref stmt_hook,
                 ref document_hook,
+                ref text_hook,
             } => {
                 s.serialize_field("schema", "github")?;
                 s.serialize_field("owner", owner)?;
@@ -49,6 +51,9 @@ impl Serialize for PluginSchema {
                 }
                 if let Some(document_hook) = document_hook {
                     s.serialize_field("document_hook", document_hook)?;
+                }
+                if let Some(text_hook) = text_hook {
+                    s.serialize_field("text_hook", text_hook)?;
                 }
             }
         }
@@ -81,6 +86,7 @@ impl<'de> Deserialize<'de> for PluginSchema {
                 let mut expr_hook = None;
                 let mut stmt_hook = None;
                 let mut document_hook = None;
+                let mut text_hook = None;
 
                 while let Some(key) = map.next_key::<String>()? {
                     match key.as_str() {
@@ -126,6 +132,12 @@ impl<'de> Deserialize<'de> for PluginSchema {
                             }
                             document_hook = Some(map.next_value()?);
                         }
+                        "text_hook" => {
+                            if text_hook.is_some() {
+                                return Err(de::Error::duplicate_field("text_hook"));
+                            }
+                            text_hook = Some(map.next_value()?);
+                        }
                         _ => return Err(de::Error::unknown_field(&key, FIELDS)),
                     }
                 }
@@ -143,6 +155,7 @@ impl<'de> Deserialize<'de> for PluginSchema {
                         expr_hook,
                         stmt_hook,
                         document_hook,
+                        text_hook,
                     }),
                     _ => Err(de::Error::invalid_value(
                         de::Unexpected::Str(&schema),
@@ -260,6 +273,7 @@ pub async fn add_plugin(schema: &str) -> Result<()> {
             expr_hook: None,
             stmt_hook: None,
             document_hook: None,
+            text_hook: None,
         },
     );
     let toml = toml::to_string(&config)?;
