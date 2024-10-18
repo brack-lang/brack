@@ -61,14 +61,14 @@ impl Plugins {
         })
     }
 
-    pub fn argument_types(&self, module_name: &str, command_name: &str) -> Result<Vec<(String, Type)>> {
+    pub fn argument_types(&self, module_name: &str, command_name: &str, typ: Type) -> Result<Vec<(String, Type)>> {
         let plugin = self
             .name_to_plugin
             .get(module_name)
             .ok_or_else(|| anyhow::anyhow!("plugin not found: {}", module_name))?;
         let metadata = plugin
             .signature_to_metadata
-            .get(&(command_name.to_string(), Type::TInline))
+            .get(&(command_name.to_string(), typ))
             .ok_or_else(|| anyhow::anyhow!("command not found: {}", command_name))?;
         Ok(metadata.argument_types.clone())
     }
