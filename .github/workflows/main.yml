@@ -23,6 +23,10 @@ jobs:
         id: version
         run: |
           echo "version=$(cat ./VERSION)" >> $GITHUB_OUTPUT
+      - name: Generate release note
+        id: release-note
+        run: |
+          bash scripts/release-note.sh v${{ steps.version.outputs.version }} 2>/dev/null | tee release_notes.md
       - name: Create release
         uses: actions/create-release@v1
         env:
@@ -30,6 +34,7 @@ jobs:
         with:
           tag_name: v${{ steps.version.outputs.version }}
           release_name: v${{ steps.version.outputs.version }}
+          body_path: release_notes.md
           draft: false
           prerelease: false
 
