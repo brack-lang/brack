@@ -35,7 +35,7 @@ fi
 
 echo "Comparing PRs merged between $PREV_VERSION and $CURRENT_VERSION..." >&2
 
-PR_LIST=$(gh pr list --state merged --base develop --search "merged:>$PREV_DATE" --json number,title,mergedAt,author --jq 'sort_by(.number)[] | "* \(.title) by @\(.author.login) in https://github.com/brack-lang/brack/pull/\(.number) (merged \(.mergedAt))"')
+PR_LIST=$(gh pr list --state merged --base develop --search "merged:>$PREV_DATE" --json number,title,mergedAt,author --jq 'sort_by(.number)[] | "* \(.title) by @\(.author.login) in https://github.com/brack-lang/brack/pull/\(.number)"')
 
 if [ -z "$PR_LIST" ]; then
   echo "No PRs were merged between $PREV_VERSION and $CURRENT_VERSION." >&2
