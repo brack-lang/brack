@@ -14,7 +14,7 @@ pub(crate) fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
         let res = match child {
             AST::Curly(_) => curly::generate(&child, plugins)?,
             AST::Square(_) => square::generate(&child, plugins)?,
-            AST::Text(_) => text::generate(&child)?,
+            AST::Text(_) => text::generate(&child, plugins)?,
             AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
             AST::Expr(_) => generate(&child, plugins)?,
             ast => anyhow::bail!("Expr cannot contain the following node\n{}", ast),

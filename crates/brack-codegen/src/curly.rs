@@ -23,7 +23,7 @@ pub(crate) fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
             AST::Expr(_) => expr::generate(&child, plugins)?,
             AST::Curly(_) => generate(&child, plugins)?,
             AST::Square(_) => square::generate(&child, plugins)?,
-            AST::Text(_) => text::generate(&child)?,
+            AST::Text(_) => text::generate(&child, plugins)?,
             AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
             ast => anyhow::bail!("Curly cannot contain the following node\n{}", ast),
         };
@@ -48,7 +48,7 @@ pub(crate) fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
         None => anyhow::bail!("Identifier name must be a string"),
     };
 
-    let arg_types = plugins.argument_types(&module_name, &ident_name)?;
+    let arg_types = plugins.argument_types(&module_name, &ident_name, Type::TBlock)?;
 
     let (min, max) = arg_counter(
         &arg_types

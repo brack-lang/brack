@@ -687,8 +687,8 @@ rec {
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
         src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
-          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack; }
-          else ./brack;
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./.; }
+          else ./.;
         dependencies = [
           {
             name = "anyhow";
@@ -749,7 +749,7 @@ rec {
           }
           {
             name = "reqwest";
-            packageId = "reqwest 0.12.7";
+            packageId = "reqwest 0.12.8";
           }
           {
             name = "tokio";
@@ -772,8 +772,8 @@ rec {
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
         src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
-          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-codegen; }
-          else ./brack-codegen;
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./crates/brack-codegen; }
+          else ./crates/brack-codegen;
         libName = "brack_codegen";
         dependencies = [
           {
@@ -805,8 +805,8 @@ rec {
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
         src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
-          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-expander; }
-          else ./brack-expander;
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./crates/brack-expander; }
+          else ./crates/brack-expander;
         libName = "brack_expander";
         dependencies = [
           {
@@ -838,8 +838,8 @@ rec {
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
         src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
-          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-language-server; }
-          else ./brack-language-server;
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./crates/brack-language-server; }
+          else ./crates/brack-language-server;
         libName = "brack_language_server";
         dependencies = [
           {
@@ -898,8 +898,8 @@ rec {
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
         src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
-          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-parser; }
-          else ./brack-parser;
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./crates/brack-parser; }
+          else ./crates/brack-parser;
         libName = "brack_parser";
         dependencies = [
           {
@@ -941,8 +941,8 @@ rec {
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
         src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
-          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-plugin; }
-          else ./brack-plugin;
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./crates/brack-plugin; }
+          else ./crates/brack-plugin;
         libName = "brack_plugin";
         dependencies = [
           {
@@ -993,8 +993,8 @@ rec {
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
         src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
-          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-project-manager; }
-          else ./brack-project-manager;
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./crates/brack-project-manager; }
+          else ./crates/brack-project-manager;
         libName = "brack_project_manager";
         dependencies = [
           {
@@ -1073,8 +1073,8 @@ rec {
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
         src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
-          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-tokenizer; }
-          else ./brack-tokenizer;
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./crates/brack-tokenizer; }
+          else ./crates/brack-tokenizer;
         libName = "brack_tokenizer";
         dependencies = [
           {
@@ -1111,8 +1111,8 @@ rec {
         # We can't filter paths with references in Nix 2.4
         # See https://github.com/NixOS/nix/issues/5410
         src = if ((lib.versionOlder builtins.nixVersion "2.4pre20211007") || (lib.versionOlder "2.5" builtins.nixVersion ))
-          then lib.cleanSourceWith { filter = sourceFilter;  src = ./brack-transformer; }
-          else ./brack-transformer;
+          then lib.cleanSourceWith { filter = sourceFilter;  src = ./crates/brack-transformer; }
+          else ./crates/brack-transformer;
         libName = "brack_transformer";
         dependencies = [
           {
@@ -1529,10 +1529,10 @@ rec {
       };
       "clap" = rec {
         crateName = "clap";
-        version = "4.5.16";
+        version = "4.5.20";
         edition = "2021";
         crateBin = [];
-        sha256 = "068hjwbrndn4iz4fsc6d52q4ymg1kfsymjnqbxzdil23zbzijrzd";
+        sha256 = "1s37v23gcxkjy4800qgnkxkpliz68vslpr5sgn1xar56hmnkfzxr";
         dependencies = [
           {
             name = "clap_builder";
@@ -1570,9 +1570,9 @@ rec {
       };
       "clap_builder" = rec {
         crateName = "clap_builder";
-        version = "4.5.15";
+        version = "4.5.20";
         edition = "2021";
-        sha256 = "1dmas5z20yqmlmfhykr38pn1hkcnr4jzxjw4cs2f6lkn2wmyqsi1";
+        sha256 = "0m6w10l2f65h3ch0d53lql6p26xxrh20ffipra9ysjsfsjmq1g0r";
         dependencies = [
           {
             name = "anstream";
@@ -1609,9 +1609,9 @@ rec {
       };
       "clap_derive" = rec {
         crateName = "clap_derive";
-        version = "4.5.13";
+        version = "4.5.18";
         edition = "2021";
-        sha256 = "1860xq3rbgwsqwcj9rd14cky9iiywwx86j7fvvngdjixbyfka7ah";
+        sha256 = "1ardb26bvcpg72q9myr7yir3a8c83gx7vxk1cccabsd9n73s1ija";
         procMacro = true;
         dependencies = [
           {
@@ -1771,9 +1771,9 @@ rec {
       };
       "cranelift-bforest" = rec {
         crateName = "cranelift-bforest";
-        version = "0.109.0";
+        version = "0.109.1";
         edition = "2021";
-        sha256 = "0z1ngfdv4mxnpz8ljcgcf5hxjrra5dqkb2xiksc8ga2pwzbk6sqb";
+        sha256 = "1q7i34rvf0191wliad7349cp9bvvbp4c086n5qzmi1d221n0kmzs";
         libName = "cranelift_bforest";
         authors = [
           "The Cranelift Project Developers"
@@ -1788,9 +1788,9 @@ rec {
       };
       "cranelift-codegen" = rec {
         crateName = "cranelift-codegen";
-        version = "0.109.0";
+        version = "0.109.1";
         edition = "2021";
-        sha256 = "1ap4smm5dwlx2i356f2x66vjiclw69b7hzdmqc3jvr1bn9fg3b5r";
+        sha256 = "1zsi5nah4flwp1hw53r45idqn9b33ipxf1136p31hkjarl6mn3dx";
         libName = "cranelift_codegen";
         authors = [
           "The Cranelift Project Developers"
@@ -1885,9 +1885,9 @@ rec {
       };
       "cranelift-codegen-meta" = rec {
         crateName = "cranelift-codegen-meta";
-        version = "0.109.0";
+        version = "0.109.1";
         edition = "2021";
-        sha256 = "15ycxwklgb42cir7rviwk8bhynj6hbxr20sln3wb6wrb740x6d79";
+        sha256 = "0kx87ghy0gssax4sarw2fmd5shd8c7al5v2fb8ik2jcja62sl51x";
         libName = "cranelift_codegen_meta";
         authors = [
           "The Cranelift Project Developers"
@@ -1902,9 +1902,9 @@ rec {
       };
       "cranelift-codegen-shared" = rec {
         crateName = "cranelift-codegen-shared";
-        version = "0.109.0";
+        version = "0.109.1";
         edition = "2021";
-        sha256 = "1nii54qblzi0k0lcjqppsqbksvbz30xqna7v9n2lpmdkcqjjmywa";
+        sha256 = "1vbdvi23yhnrk76gpz0i2bgg4mcv4fd3mdwkbvsrdfb3kxp34nii";
         libName = "cranelift_codegen_shared";
         authors = [
           "The Cranelift Project Developers"
@@ -1913,9 +1913,9 @@ rec {
       };
       "cranelift-control" = rec {
         crateName = "cranelift-control";
-        version = "0.109.0";
+        version = "0.109.1";
         edition = "2021";
-        sha256 = "1ylr29cj465b9572m3h7zz5mf383qpw43zv6ml0wvnjcf0xz6001";
+        sha256 = "0p2w6lqgxf8xycp5ckc5yvkz7y1nr4flwi23al1j515alnfacv40";
         libName = "cranelift_control";
         authors = [
           "The Cranelift Project Developers"
@@ -1931,9 +1931,9 @@ rec {
       };
       "cranelift-entity" = rec {
         crateName = "cranelift-entity";
-        version = "0.109.0";
+        version = "0.109.1";
         edition = "2021";
-        sha256 = "0yr0g2g483gl60z6swca24gar8dy6k9ahh70jdq9j62xbqqxrkx8";
+        sha256 = "1zkvijw8wdi5wqsvy7ww4pbya8506arrq3cj0y87zwvb2f3q8xy9";
         libName = "cranelift_entity";
         authors = [
           "The Cranelift Project Developers"
@@ -1961,9 +1961,9 @@ rec {
       };
       "cranelift-frontend" = rec {
         crateName = "cranelift-frontend";
-        version = "0.109.0";
+        version = "0.109.1";
         edition = "2021";
-        sha256 = "1d9859jcd3d2gj0bwpc6wfzmrmfr0csj6whc1hmrhbmg2r7vhx0g";
+        sha256 = "0qgv5xn90f859r3bbkp8fm6ylsm6pj95i8wr10hni8qwnsrnqcjm";
         libName = "cranelift_frontend";
         authors = [
           "The Cranelift Project Developers"
@@ -2000,9 +2000,9 @@ rec {
       };
       "cranelift-isle" = rec {
         crateName = "cranelift-isle";
-        version = "0.109.0";
+        version = "0.109.1";
         edition = "2021";
-        sha256 = "0vmw12zi1xh5g004qfi9fkfdwklcsc0jy228pnagn1g7vp9hdwxd";
+        sha256 = "132lr0zf663zkrl24hbb0rsx23i0k60z7hfdgch6y46hpa7dy1s8";
         libName = "cranelift_isle";
         authors = [
           "The Cranelift Project Developers"
@@ -2017,9 +2017,9 @@ rec {
       };
       "cranelift-native" = rec {
         crateName = "cranelift-native";
-        version = "0.109.0";
+        version = "0.109.1";
         edition = "2021";
-        sha256 = "10956mwxda7afbs5449ipyricpri65glkdn8rfdsgx5gyzgfp80y";
+        sha256 = "0qs9p3jrxvyx32j454fdg241givq08220wizda96mjq2c03lrhli";
         libName = "cranelift_native";
         authors = [
           "The Cranelift Project Developers"
@@ -2050,9 +2050,9 @@ rec {
       };
       "cranelift-wasm" = rec {
         crateName = "cranelift-wasm";
-        version = "0.109.0";
+        version = "0.109.1";
         edition = "2021";
-        sha256 = "0vapawicg2ihqh44pzxylfwy385ga8lnrf9vmkdmq1j236510jfm";
+        sha256 = "0cx52xv96m2gbzcbf4lprb24aif0ha92g8brbbgx48k2cs53xfk6";
         libName = "cranelift_wasm";
         authors = [
           "The Cranelift Project Developers"
@@ -3913,11 +3913,11 @@ rec {
         };
         resolvedDefaultFeatures = [ "client" "h2" "http1" "http2" "runtime" "socket2" "tcp" ];
       };
-      "hyper 1.4.1" = rec {
+      "hyper 1.5.0" = rec {
         crateName = "hyper";
-        version = "1.4.1";
+        version = "1.5.0";
         edition = "2021";
-        sha256 = "01ds8i3q6hw5kw56mavy544m11gkr87zi999siigdl3n1qpd5psh";
+        sha256 = "16pspkgizcnsr1qcpqvm5l45nfwk7244q9av56cqqwm40slg1gxv";
         authors = [
           "Sean McArthur <sean@seanmonstar.com>"
         ];
@@ -4013,9 +4013,9 @@ rec {
       };
       "hyper-rustls" = rec {
         crateName = "hyper-rustls";
-        version = "0.27.2";
+        version = "0.27.3";
         edition = "2021";
-        sha256 = "0ma1wyfnqnkz7zyr7wpply3xfvlijd0rqqhb6ajs28c9jhnbxr2y";
+        sha256 = "0cxkph8hsmbz693a8ih2ciy7h0xbac844rpm981y6c0iqfsxpbq8";
         libName = "hyper_rustls";
         dependencies = [
           {
@@ -4029,7 +4029,7 @@ rec {
           }
           {
             name = "hyper";
-            packageId = "hyper 1.4.1";
+            packageId = "hyper 1.5.0";
             usesDefaultFeatures = false;
           }
           {
@@ -4169,7 +4169,7 @@ rec {
           }
           {
             name = "hyper";
-            packageId = "hyper 1.4.1";
+            packageId = "hyper 1.5.0";
           }
           {
             name = "hyper-util";
@@ -4212,9 +4212,9 @@ rec {
       };
       "hyper-util" = rec {
         crateName = "hyper-util";
-        version = "0.1.7";
+        version = "0.1.9";
         edition = "2021";
-        sha256 = "1fg9h591skksq5zxnffyisj7487jhdcgj6c7bvlkckn535bhbryd";
+        sha256 = "12yhradh0bpwa9jjyyq6shrrcx9fxbdkrq06xj7ccfhqkyq6waa1";
         libName = "hyper_util";
         authors = [
           "Sean McArthur <sean@seanmonstar.com>"
@@ -4244,7 +4244,7 @@ rec {
           }
           {
             name = "hyper";
-            packageId = "hyper 1.4.1";
+            packageId = "hyper 1.5.0";
           }
           {
             name = "pin-project-lite";
@@ -4261,13 +4261,6 @@ rec {
             packageId = "tokio";
             optional = true;
             usesDefaultFeatures = false;
-          }
-          {
-            name = "tower";
-            packageId = "tower";
-            optional = true;
-            usesDefaultFeatures = false;
-            features = [ "make" "util" ];
           }
           {
             name = "tower-service";
@@ -4289,7 +4282,7 @@ rec {
           }
           {
             name = "hyper";
-            packageId = "hyper 1.4.1";
+            packageId = "hyper 1.5.0";
             features = [ "full" ];
           }
           {
@@ -4299,15 +4292,15 @@ rec {
           }
         ];
         features = {
-          "client" = [ "hyper/client" "dep:tracing" "dep:futures-channel" "dep:tower" "dep:tower-service" ];
+          "client" = [ "hyper/client" "dep:tracing" "dep:futures-channel" "dep:tower-service" ];
           "client-legacy" = [ "client" "dep:socket2" "tokio/sync" ];
           "full" = [ "client" "client-legacy" "server" "server-auto" "server-graceful" "service" "http1" "http2" "tokio" ];
           "http1" = [ "hyper/http1" ];
           "http2" = [ "hyper/http2" ];
           "server" = [ "hyper/server" ];
           "server-auto" = [ "server" "http1" "http2" ];
-          "server-graceful" = [ "server" "tokio/sync" ];
-          "service" = [ "dep:tower" "dep:tower-service" ];
+          "server-graceful" = [ "server" "tokio/sync" "futures-util/alloc" ];
+          "service" = [ "dep:tower-service" ];
           "tokio" = [ "dep:tokio" "tokio/net" "tokio/rt" "tokio/time" ];
         };
         resolvedDefaultFeatures = [ "client" "client-legacy" "default" "http1" "http2" "tokio" ];
@@ -5566,44 +5559,6 @@ rec {
         };
         resolvedDefaultFeatures = [ "alloc" "default" "std" ];
       };
-      "pin-project" = rec {
-        crateName = "pin-project";
-        version = "1.1.5";
-        edition = "2021";
-        sha256 = "1cxl146x0q7lawp0m1826wsgj8mmmfs6ja8q7m6f7ff5j6vl7gxn";
-        libName = "pin_project";
-        dependencies = [
-          {
-            name = "pin-project-internal";
-            packageId = "pin-project-internal";
-          }
-        ];
-
-      };
-      "pin-project-internal" = rec {
-        crateName = "pin-project-internal";
-        version = "1.1.5";
-        edition = "2021";
-        sha256 = "0r9r4ivwiyqf45sv6b30l1dx282lxaax2f6gl84jwa3q590s8f1g";
-        procMacro = true;
-        libName = "pin_project_internal";
-        dependencies = [
-          {
-            name = "proc-macro2";
-            packageId = "proc-macro2";
-          }
-          {
-            name = "quote";
-            packageId = "quote";
-          }
-          {
-            name = "syn";
-            packageId = "syn 2.0.76";
-            features = [ "full" "visit-mut" ];
-          }
-        ];
-
-      };
       "pin-project-lite" = rec {
         crateName = "pin-project-lite";
         version = "0.2.14";
@@ -6596,11 +6551,11 @@ rec {
         };
         resolvedDefaultFeatures = [ "__tls" "default" "default-tls" "hyper-tls" "native-tls-crate" "tokio-native-tls" ];
       };
-      "reqwest 0.12.7" = rec {
+      "reqwest 0.12.8" = rec {
         crateName = "reqwest";
-        version = "0.12.7";
+        version = "0.12.8";
         edition = "2021";
-        sha256 = "0qsymmmgam6whjcymnlpf5kvk3ylc4bs92lygz63hp7g95b9bx7q";
+        sha256 = "0yra0j7fa0f99psrx5nfbdicc14cwk4vhwrc7591wdljprzi84zp";
         authors = [
           "Sean McArthur <sean@seanmonstar.com>"
         ];
@@ -6651,7 +6606,7 @@ rec {
           }
           {
             name = "hyper";
-            packageId = "hyper 1.4.1";
+            packageId = "hyper 1.5.0";
             target = { target, features }: (!("wasm32" == target."arch" or null));
             features = [ "http1" "client" ];
           }
@@ -6719,7 +6674,7 @@ rec {
           }
           {
             name = "rustls-pemfile";
-            packageId = "rustls-pemfile 2.1.3";
+            packageId = "rustls-pemfile 2.2.0";
             optional = true;
             target = { target, features }: (!("wasm32" == target."arch" or null));
           }
@@ -6805,7 +6760,7 @@ rec {
           }
           {
             name = "hyper";
-            packageId = "hyper 1.4.1";
+            packageId = "hyper 1.5.0";
             usesDefaultFeatures = false;
             target = {target, features}: (!("wasm32" == target."arch" or null));
             features = [ "http1" "http2" "client" "server" ];
@@ -7231,19 +7186,13 @@ rec {
         ];
 
       };
-      "rustls-pemfile 2.1.3" = rec {
+      "rustls-pemfile 2.2.0" = rec {
         crateName = "rustls-pemfile";
-        version = "2.1.3";
+        version = "2.2.0";
         edition = "2018";
-        sha256 = "09bl873pkibmb2da49kkbm9jlagscjvzrv257q6k01p101my2vqr";
+        sha256 = "0l3f3mrfkgdjrava7ibwzgwc4h3dljw3pdkbsi9rkwz3zvji9qyw";
         libName = "rustls_pemfile";
         dependencies = [
-          {
-            name = "base64";
-            packageId = "base64 0.22.1";
-            usesDefaultFeatures = false;
-            features = [ "alloc" ];
-          }
           {
             name = "rustls-pki-types";
             packageId = "rustls-pki-types";
@@ -7252,15 +7201,15 @@ rec {
         ];
         features = {
           "default" = [ "std" ];
-          "std" = [ "base64/std" ];
+          "std" = [ "pki-types/std" ];
         };
         resolvedDefaultFeatures = [ "default" "std" ];
       };
       "rustls-pki-types" = rec {
         crateName = "rustls-pki-types";
-        version = "1.8.0";
+        version = "1.10.0";
         edition = "2021";
-        sha256 = "1w6a1x8h61p5ddlnijfvj5fvs516h5xr5rw1pc0m8rgq8vk2q2pw";
+        sha256 = "0jv78c32pgf1i0bn7rzf4xdr9qh5wsvigp6akc1yhzls7hdj1w8n";
         libName = "rustls_pki_types";
         features = {
           "default" = [ "alloc" ];
@@ -8716,109 +8665,6 @@ rec {
         };
         resolvedDefaultFeatures = [ "default" "display" "parse" "serde" ];
       };
-      "tower" = rec {
-        crateName = "tower";
-        version = "0.4.13";
-        edition = "2018";
-        sha256 = "073wncyqav4sak1p755hf6vl66njgfc1z1g1di9rxx3cvvh9pymq";
-        authors = [
-          "Tower Maintainers <team@tower-rs.com>"
-        ];
-        dependencies = [
-          {
-            name = "futures-core";
-            packageId = "futures-core";
-            optional = true;
-          }
-          {
-            name = "futures-util";
-            packageId = "futures-util";
-            optional = true;
-            usesDefaultFeatures = false;
-            features = [ "alloc" ];
-          }
-          {
-            name = "pin-project";
-            packageId = "pin-project";
-            optional = true;
-          }
-          {
-            name = "pin-project-lite";
-            packageId = "pin-project-lite";
-            optional = true;
-          }
-          {
-            name = "tokio";
-            packageId = "tokio";
-            optional = true;
-            features = [ "sync" ];
-          }
-          {
-            name = "tower-layer";
-            packageId = "tower-layer";
-          }
-          {
-            name = "tower-service";
-            packageId = "tower-service";
-          }
-        ];
-        devDependencies = [
-          {
-            name = "pin-project-lite";
-            packageId = "pin-project-lite";
-          }
-          {
-            name = "tokio";
-            packageId = "tokio";
-            features = [ "macros" "sync" "test-util" "rt-multi-thread" ];
-          }
-        ];
-        features = {
-          "__common" = [ "futures-core" "pin-project-lite" ];
-          "balance" = [ "discover" "load" "ready-cache" "make" "rand" "slab" ];
-          "buffer" = [ "__common" "tokio/sync" "tokio/rt" "tokio-util" "tracing" ];
-          "default" = [ "log" ];
-          "discover" = [ "__common" ];
-          "filter" = [ "__common" "futures-util" ];
-          "full" = [ "balance" "buffer" "discover" "filter" "hedge" "limit" "load" "load-shed" "make" "ready-cache" "reconnect" "retry" "spawn-ready" "steer" "timeout" "util" ];
-          "futures-core" = [ "dep:futures-core" ];
-          "futures-util" = [ "dep:futures-util" ];
-          "hdrhistogram" = [ "dep:hdrhistogram" ];
-          "hedge" = [ "util" "filter" "futures-util" "hdrhistogram" "tokio/time" "tracing" ];
-          "indexmap" = [ "dep:indexmap" ];
-          "limit" = [ "__common" "tokio/time" "tokio/sync" "tokio-util" "tracing" ];
-          "load" = [ "__common" "tokio/time" "tracing" ];
-          "load-shed" = [ "__common" ];
-          "log" = [ "tracing/log" ];
-          "make" = [ "futures-util" "pin-project-lite" "tokio/io-std" ];
-          "pin-project" = [ "dep:pin-project" ];
-          "pin-project-lite" = [ "dep:pin-project-lite" ];
-          "rand" = [ "dep:rand" ];
-          "ready-cache" = [ "futures-core" "futures-util" "indexmap" "tokio/sync" "tracing" "pin-project-lite" ];
-          "reconnect" = [ "make" "tokio/io-std" "tracing" ];
-          "retry" = [ "__common" "tokio/time" ];
-          "slab" = [ "dep:slab" ];
-          "spawn-ready" = [ "__common" "futures-util" "tokio/sync" "tokio/rt" "util" "tracing" ];
-          "timeout" = [ "pin-project-lite" "tokio/time" ];
-          "tokio" = [ "dep:tokio" ];
-          "tokio-stream" = [ "dep:tokio-stream" ];
-          "tokio-util" = [ "dep:tokio-util" ];
-          "tracing" = [ "dep:tracing" ];
-          "util" = [ "__common" "futures-util" "pin-project" ];
-        };
-        resolvedDefaultFeatures = [ "__common" "futures-core" "futures-util" "make" "pin-project" "pin-project-lite" "tokio" "util" ];
-      };
-      "tower-layer" = rec {
-        crateName = "tower-layer";
-        version = "0.3.3";
-        edition = "2018";
-        sha256 = "03kq92fdzxin51w8iqix06dcfgydyvx7yr6izjq0p626v9n2l70j";
-        libName = "tower_layer";
-        authors = [
-          "Tower Maintainers <team@tower-rs.com>"
-        ];
-
-      };
       "tower-service" = rec {
         crateName = "tower-service";
         version = "0.3.3";
@@ -9932,9 +9778,9 @@ rec {
       };
       "wasmtime" = rec {
         crateName = "wasmtime";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "0i9v15lblbpcmvdbsj9z729myzikcyb5nmdybry92m2dg9g8nvbq";
+        sha256 = "15cnqbh7gzx1r5asqiwz3l90bvvrfwi25vzvv2nwnmx0bas9gqwx";
         authors = [
           "The Wasmtime Project Developers"
         ];
@@ -10220,9 +10066,9 @@ rec {
       };
       "wasmtime-asm-macros" = rec {
         crateName = "wasmtime-asm-macros";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "0pixap57rsc8dpri1q5fb7mkw8sd2817mbzkfbxryjhx6jfdk5yn";
+        sha256 = "0s83clxch5kgkcfh53inzxzzfwc6qizypaahp7c28h32gli8371p";
         libName = "wasmtime_asm_macros";
         authors = [
           "The Wasmtime Project Developers"
@@ -10237,9 +10083,9 @@ rec {
       };
       "wasmtime-cache" = rec {
         crateName = "wasmtime-cache";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "1ymdl4l17f83aa3j01nkjfq017xs8xi2xfjvnbg24v4smvwi0rli";
+        sha256 = "1ifnyc82vvbfg86cqcn71wj4l3860azkhbbgfrljmrvl24pgnqq2";
         libName = "wasmtime_cache";
         authors = [
           "The Wasmtime Project Developers"
@@ -10310,9 +10156,9 @@ rec {
       };
       "wasmtime-component-macro" = rec {
         crateName = "wasmtime-component-macro";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "1jpyaa56jy69g4kvw9kbpz53fnbyyhkjl2dfgyrbawwf0qmld6xj";
+        sha256 = "1r5sm8lm31qr1kzafprl2dbbcfjz57lh3l1ri43hbz0773x9wmrg";
         procMacro = true;
         libName = "wasmtime_component_macro";
         authors = [
@@ -10356,9 +10202,9 @@ rec {
       };
       "wasmtime-component-util" = rec {
         crateName = "wasmtime-component-util";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "07jz2x7iq6npdfjh7fbk58dnihzrg5svvpw0nf24j1fracn93lpr";
+        sha256 = "1p1a88ky7rsq1jpdw432xxcr033bfakrxpc0by4rxirrxj6k8dg9";
         libName = "wasmtime_component_util";
         authors = [
           "The Wasmtime Project Developers"
@@ -10367,9 +10213,9 @@ rec {
       };
       "wasmtime-cranelift" = rec {
         crateName = "wasmtime-cranelift";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "0r9sibr59d5p21jh4xsg40vjjdz0zk0cfma3m1xla050zvm5v5x3";
+        sha256 = "0hvlssqdhx50y9gdk0qzp2v3jqk8c83m8z6fk266m29zyn5cd3lf";
         libName = "wasmtime_cranelift";
         authors = [
           "The Wasmtime Project Developers"
@@ -10462,9 +10308,9 @@ rec {
       };
       "wasmtime-environ" = rec {
         crateName = "wasmtime-environ";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "0qdyalx18cc7wzxzhgv67qm69bwjbdprp552m3c89f28x00fji7l";
+        sha256 = "1c3x3lcs0p78ikr0jbphjzh09g1072h6y43bk0k99jrwfn5vl6z4";
         libName = "wasmtime_environ";
         authors = [
           "The Wasmtime Project Developers"
@@ -10570,9 +10416,9 @@ rec {
       };
       "wasmtime-fiber" = rec {
         crateName = "wasmtime-fiber";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "17c2zb81a5gnfcflyl8isx80pcf4amqcs31d339drw0v5pmmivad";
+        sha256 = "157l4s591llf52zh8kzksnxj1d2q9j5i42wsn9x9apsd5dxajz1l";
         libName = "wasmtime_fiber";
         authors = [
           "The Wasmtime Project Developers"
@@ -10623,9 +10469,9 @@ rec {
       };
       "wasmtime-jit-debug" = rec {
         crateName = "wasmtime-jit-debug";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "04cd12p6c2l5g1kxng1p9pgd2y60m0xznpm82210j3vjqsc43icv";
+        sha256 = "059s2x6w1zwnxaizfiwf4n44dyy6yj681lbz01fi4g7ibdabgciy";
         libName = "wasmtime_jit_debug";
         authors = [
           "The Wasmtime Project Developers"
@@ -10667,9 +10513,9 @@ rec {
       };
       "wasmtime-jit-icache-coherence" = rec {
         crateName = "wasmtime-jit-icache-coherence";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "148a9fjdnf8gkswwd4vw9vg6lfw0vbympdd1rx5rlbslk422zzjs";
+        sha256 = "0z8wlqrjbqppa438kmdvaynk2rdgqlvr325wgbxz9zsxbpawrrx0";
         libName = "wasmtime_jit_icache_coherence";
         authors = [
           "The Wasmtime Project Developers"
@@ -10701,9 +10547,9 @@ rec {
       };
       "wasmtime-slab" = rec {
         crateName = "wasmtime-slab";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "1rv927rfqm5rj0pljq6zf7k4mj4x0ifchq9fadfv7fy5pvrf2z8a";
+        sha256 = "14zhg1fxkk2jcb2bfb9w5pgggj6ci7r9f3a560iz3rhi3qafbx3x";
         libName = "wasmtime_slab";
         authors = [
           "The Wasmtime Project Developers"
@@ -10712,9 +10558,9 @@ rec {
       };
       "wasmtime-types" = rec {
         crateName = "wasmtime-types";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "0r39xa9ci0390cmw5zr97qahrhhk4a6n4j5yarlcy50f03ln6921";
+        sha256 = "1l1jpvdazc6lc3slnf55g7wq0gih3psgaafcjh7l94bsgsj7w0dj";
         libName = "wasmtime_types";
         authors = [
           "The Wasmtime Project Developers"
@@ -10753,9 +10599,9 @@ rec {
       };
       "wasmtime-versioned-export-macros" = rec {
         crateName = "wasmtime-versioned-export-macros";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "0vw26rz6ck72m5irciv8njar1ssb1d7bxqz8x5lb3vjcyk29nnny";
+        sha256 = "15ld1ryjaf2x9wr4hdad680rsxd2dv3yiincqalsd2x0c80c6ps5";
         procMacro = true;
         libName = "wasmtime_versioned_export_macros";
         authors = [
@@ -10780,9 +10626,9 @@ rec {
       };
       "wasmtime-winch" = rec {
         crateName = "wasmtime-winch";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "0rj4ah3y2amlh56qk1dqdkmg49vslfrigbbrbz8z4794l0wb4kgd";
+        sha256 = "0mzg81r2blnv9lxpg1hb2mp6arl7szi6qp0qg5qv29f7fv5dyryy";
         libName = "wasmtime_winch";
         authors = [
           "The Wasmtime Project Developers"
@@ -10841,9 +10687,9 @@ rec {
       };
       "wasmtime-wit-bindgen" = rec {
         crateName = "wasmtime-wit-bindgen";
-        version = "22.0.0";
+        version = "22.0.1";
         edition = "2021";
-        sha256 = "1p4glqi6rc2by3nhmp3c863njajk455iv82v5qk8i0mk0rrhgp3h";
+        sha256 = "10rphanzm2k2pfw0mh77n26rfwlnvlfq5wmnpqh9xwfvq7p97f76";
         libName = "wasmtime_wit_bindgen";
         authors = [
           "The Wasmtime Project Developers"
@@ -11622,9 +11468,9 @@ rec {
       };
       "winch-codegen" = rec {
         crateName = "winch-codegen";
-        version = "0.20.0";
+        version = "0.20.1";
         edition = "2021";
-        sha256 = "1aixpkz92pqk7kypa5hn38i6kjvl8jv8rw4c1pdv4cg7hic93il5";
+        sha256 = "1wmf9m22a3rwpbvyn6nzsd9y4nivahf9z427vglpr3x9vqxq47dm";
         libName = "winch_codegen";
         authors = [
           "The Winch Project Developers"

@@ -12,6 +12,7 @@ pub struct Plugins {
     document_hook_plugin_name: Option<String>,
     stmt_hook_plugin_name: Option<String>,
     expr_hook_plugin_name: Option<String>,
+    text_hook_plugin_name: Option<String>,
 }
 
 impl Plugins {
@@ -20,6 +21,7 @@ impl Plugins {
         let mut document_hook_plugin_name = None;
         let mut stmt_hook_plugin_name = None;
         let mut expr_hook_plugin_name = None;
+        let mut text_hook_plugin_name = None;
 
         for plugin in plugins {
             let name = plugin.name.clone();
@@ -41,6 +43,12 @@ impl Plugins {
                 }
                 expr_hook_plugin_name = Some(name.clone());
             }
+            if plugin.feature_flag.text_hook {
+                if text_hook_plugin_name.is_some() {
+                    return Err(anyhow::anyhow!("only one text hook is allowed"));
+                }
+                text_hook_plugin_name = Some(name.clone());
+            }
             name_to_plugin.insert(name, plugin);
         }
 
@@ -49,17 +57,18 @@ impl Plugins {
             document_hook_plugin_name,
             stmt_hook_plugin_name,
             expr_hook_plugin_name,
+            text_hook_plugin_name,
         })
     }
 
-    pub fn argument_types(&self, module_name: &str, command_name: &str) -> Result<Vec<(String, Type)>> {
+    pub fn argument_types(&self, module_name: &str, command_name: &str, typ: Type) -> Result<Vec<(String, Type)>> {
         let plugin = self
             .name_to_plugin
             .get(module_name)
             .ok_or_else(|| anyhow::anyhow!("plugin not found: {}", module_name))?;
         let metadata = plugin
             .signature_to_metadata
-            .get(&(command_name.to_string(), Type::TInline))
+            .get(&(command_name.to_string(), typ))
             .ok_or_else(|| anyhow::anyhow!("command not found: {}", command_name))?;
         Ok(metadata.argument_types.clone())
     }
@@ -148,6 +157,15 @@ impl Plugins {
         let expr_hook_plugin_name = self.expr_hook_plugin_name.clone();
         if let Some(plugin_name) = expr_hook_plugin_name {
             let result = self.call_inline_command(&plugin_name, "expr", args)?;
+            return Ok(Some(result));
+        }
+        Ok(None)
+    }
+
+    pub fn call_text_hook(&mut self, args: Vec<Value>) -> Result<Option<String>> {
+        let text_hook_plugin_name = self.text_hook_plugin_name.clone();
+        if let Some(plugin_name) = text_hook_plugin_name {
+            let result = self.call_inline_command(&plugin_name, "text", args)?;
             return Ok(Some(result));
         }
         Ok(None)
