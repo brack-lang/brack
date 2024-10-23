@@ -86,7 +86,7 @@ impl AST {
         }
     }
 
-    pub fn add(&mut self, ast: AST) -> () {
+    pub fn add(&mut self, ast: AST) {
         match self {
             AST::Document(node)
             | AST::Stmt(node)
@@ -153,54 +153,54 @@ impl AST {
         let ident_str = "  ".repeat(ident);
         match self {
             AST::Document(node) => {
-                write!(f, "{}Document\n", ident_str)?;
+                writeln!(f, "{}Document", ident_str)?;
                 for child in &node.children {
                     child.display_with_ident(f, ident + 1)?;
                 }
                 Ok(())
             }
             AST::Stmt(node) => {
-                write!(f, "{}Stmt\n", ident_str)?;
+                writeln!(f, "{}Stmt", ident_str)?;
                 for child in &node.children {
                     child.display_with_ident(f, ident + 1)?;
                 }
                 Ok(())
             }
             AST::Expr(node) => {
-                write!(f, "{}Expr\n", ident_str)?;
+                writeln!(f, "{}Expr", ident_str)?;
                 for child in &node.children {
                     child.display_with_ident(f, ident + 1)?;
                 }
                 Ok(())
             }
             AST::Angle(node) => {
-                write!(f, "{}Angle\n", ident_str)?;
+                writeln!(f, "{}Angle", ident_str)?;
                 for child in &node.children {
                     child.display_with_ident(f, ident + 1)?;
                 }
                 Ok(())
             }
             AST::Square(node) => {
-                write!(f, "{}Square\n", ident_str)?;
+                writeln!(f, "{}Square", ident_str)?;
                 for child in &node.children {
                     child.display_with_ident(f, ident + 1)?;
                 }
                 Ok(())
             }
             AST::Curly(node) => {
-                write!(f, "{}Curly\n", ident_str)?;
+                writeln!(f, "{}Curly", ident_str)?;
                 for child in &node.children {
                     child.display_with_ident(f, ident + 1)?;
                 }
                 Ok(())
             }
-            AST::Ident(node) => write!(f, "{}Ident: {}\n", ident_str, node.value.as_ref().unwrap()),
+            AST::Ident(node) => writeln!(f, "{}Ident: {}", ident_str, node.value.as_ref().unwrap()),
             AST::Module(node) => {
-                write!(f, "{}Module: {}\n", ident_str, node.value.as_ref().unwrap())
+                writeln!(f, "{}Module: {}", ident_str, node.value.as_ref().unwrap())
             }
-            AST::Text(node) => write!(f, "{}Text: {}\n", ident_str, node.value.as_ref().unwrap()),
-            AST::Invalid(_) => write!(f, "{}Invalid\n", ident_str),
-            AST::Ignored(_) => write!(f, "{}Ignored\n", ident_str),
+            AST::Text(node) => writeln!(f, "{}Text: {}", ident_str, node.value.as_ref().unwrap()),
+            AST::Invalid(_) => writeln!(f, "{}Invalid", ident_str),
+            AST::Ignored(_) => writeln!(f, "{}Ignored", ident_str),
         }
     }
 }
@@ -315,18 +315,18 @@ pub fn assert_ast_eq(node1: &AST, node2: &AST) {
 }
 
 pub fn matches_kind(node1: &AST, node2: &AST) -> bool {
-    match (node1, node2) {
-        (AST::Document(_), AST::Document(_)) => true,
-        (AST::Stmt(_), AST::Stmt(_)) => true,
-        (AST::Expr(_), AST::Expr(_)) => true,
-        (AST::Angle(_), AST::Angle(_)) => true,
-        (AST::Curly(_), AST::Curly(_)) => true,
-        (AST::Square(_), AST::Square(_)) => true,
-        (AST::Module(_), AST::Module(_)) => true,
-        (AST::Ident(_), AST::Ident(_)) => true,
-        (AST::Text(_), AST::Text(_)) => true,
-        (AST::Invalid(_), AST::Invalid(_)) => true,
-        (AST::Ignored(_), AST::Ignored(_)) => true,
-        _ => false,
-    }
+    matches!(
+        (node1, node2),
+        (AST::Document(_), AST::Document(_))
+            | (AST::Stmt(_), AST::Stmt(_))
+            | (AST::Expr(_), AST::Expr(_))
+            | (AST::Angle(_), AST::Angle(_))
+            | (AST::Curly(_), AST::Curly(_))
+            | (AST::Square(_), AST::Square(_))
+            | (AST::Module(_), AST::Module(_))
+            | (AST::Ident(_), AST::Ident(_))
+            | (AST::Text(_), AST::Text(_))
+            | (AST::Invalid(_), AST::Invalid(_))
+            | (AST::Ignored(_), AST::Ignored(_))
+    )
 }
