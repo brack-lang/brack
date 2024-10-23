@@ -10,7 +10,7 @@ use crate::{
 };
 
 pub fn transform(cst: &CST) -> (AST, Vec<TransformError>) {
-    let (cst, errors) = simplify::simplify(&cst);
+    let (cst, errors) = simplify::simplify(cst);
 
     fn aux(cst: &CST) -> AST {
         match cst {

@@ -2,7 +2,7 @@ use brack_parser::cst::{new_expr, CST};
 
 use crate::error::TransformError;
 
-pub fn check_if_module_or_angle_bracket(csts: &Vec<CST>) -> Vec<TransformError> {
+pub fn check_if_module_or_angle_bracket(csts: &[CST]) -> Vec<TransformError> {
     if csts.len() < 2 {
         return vec![];
     }
@@ -14,7 +14,7 @@ pub fn check_if_module_or_angle_bracket(csts: &Vec<CST>) -> Vec<TransformError> 
     }
 }
 
-pub fn check_if_dot(csts: &Vec<CST>) -> Vec<TransformError> {
+pub fn check_if_dot(csts: &[CST]) -> Vec<TransformError> {
     if csts.len() < 3 {
         return vec![];
     }
@@ -25,7 +25,7 @@ pub fn check_if_dot(csts: &Vec<CST>) -> Vec<TransformError> {
     }
 }
 
-pub fn check_if_ident_or_angle_bracket(csts: &Vec<CST>) -> Vec<TransformError> {
+pub fn check_if_ident_or_angle_bracket(csts: &[CST]) -> Vec<TransformError> {
     if csts.len() < 4 {
         return vec![];
     }
@@ -37,7 +37,7 @@ pub fn check_if_ident_or_angle_bracket(csts: &Vec<CST>) -> Vec<TransformError> {
     }
 }
 
-pub fn remove_elements_not_included_ast(csts: &Vec<CST>) -> Vec<CST> {
+pub fn remove_elements_not_included_ast(csts: &[CST]) -> Vec<CST> {
     let mut new_csts = vec![];
     for cst in csts {
         match cst {
@@ -58,9 +58,9 @@ pub fn remove_elements_not_included_ast(csts: &Vec<CST>) -> Vec<CST> {
     new_csts
 }
 
-pub fn check_valid_arguments(csts: &Vec<CST>) -> (Vec<CST>, Vec<TransformError>) {
+pub fn check_valid_arguments(csts: &[CST]) -> (Vec<CST>, Vec<TransformError>) {
     if csts.len() < 4 {
-        return (csts.clone(), vec![]);
+        return (csts.to_vec(), vec![]);
     }
     let mut errors = vec![];
     let mut new_csts = csts[0..4].to_vec(); // [AngleBracketOpen, Module, Dot, Ident
@@ -103,13 +103,11 @@ pub fn check_valid_arguments(csts: &Vec<CST>) -> (Vec<CST>, Vec<TransformError>)
     (new_csts, errors)
 }
 
-pub fn check_unexpected_dot(csts: &Vec<CST>) -> Vec<TransformError> {
+pub fn check_unexpected_dot(csts: &[CST]) -> Vec<TransformError> {
     let mut errors = vec![];
-    for i in 3..csts.len() {
-        let cst = csts[i].clone();
-        match cst {
-            CST::Dot(_) => errors.push(TransformError::UnexpectedDot(cst.location())),
-            _ => (),
+    for cst in csts.iter().skip(3) {
+        if let CST::Dot(_) = cst {
+            errors.push(TransformError::UnexpectedDot(cst.location()));
         }
     }
     errors

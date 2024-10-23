@@ -16,18 +16,18 @@ pub(crate) fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     let mut arguments = vec![];
     let module = ast
         .children()
-        .get(0)
+        .first()
         .ok_or_else(|| anyhow::anyhow!("Curly must contain module"))?;
     let ident = ast
         .children()
         .get(1)
         .ok_or_else(|| anyhow::anyhow!("Curly must contain identifier"))?;
-    for (_, child) in ast.children().iter().skip(2).enumerate() {
+    for child in ast.children().iter().skip(2) {
         let res = match child {
-            AST::Expr(_) => expr::generate(&child, plugins)?,
-            AST::Curly(_) => generate(&child, plugins)?,
-            AST::Square(_) => square::generate(&child, plugins)?,
-            AST::Text(_) => text::generate(&child, plugins)?,
+            AST::Expr(_) => expr::generate(child, plugins)?,
+            AST::Curly(_) => generate(child, plugins)?,
+            AST::Square(_) => square::generate(child, plugins)?,
+            AST::Text(_) => text::generate(child, plugins)?,
             AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
             ast => anyhow::bail!("Curly cannot contain the following node\n{}", ast),
         };
@@ -81,7 +81,7 @@ pub(crate) fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
                     Value::TextOption(None)
                 }
             }
-            Type::TArray(_) => Value::TextArray(arguments[i..].iter().map(|s| s.clone()).collect()),
+            Type::TArray(_) => Value::TextArray(arguments[i..].to_vec()),
             _ => Value::Text(arguments[i].clone()),
         };
         args.push(arg);

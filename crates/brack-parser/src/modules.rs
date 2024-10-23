@@ -4,7 +4,7 @@ use brack_tokenizer::tokens::Token;
 use crate::{cst::new_module, parser::Parser};
 
 // text
-pub fn parse<'a>(tokens: &'a [Token]) -> Result<Parser> {
+pub fn parse(tokens: &[Token]) -> Result<Parser> {
     if let Some(token) = tokens.first() {
         match token {
             Token::Module(text, location) => {
