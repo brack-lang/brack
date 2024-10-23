@@ -15,6 +15,9 @@ pub enum SubCommands {
 
         #[clap(long, default_value_t = 5)]
         output_level: u8,
+
+        #[clap(long)]
+        json: bool,
     },
     Build,
     LanguageServer,

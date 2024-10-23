@@ -18,6 +18,8 @@ toml = "0.8.14"
 extism = "1.4.1"
 reqwest = "0.12.5"
 regex = "1.10.6"
+serde_json = "1.0.132"
+serde = { version = "1.0.213", features = ["derive"] }
 
 [dependencies.clap]
 version = "4.5.7"

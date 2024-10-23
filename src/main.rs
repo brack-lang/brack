@@ -1,10 +1,12 @@
-use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
+use std::{any, collections::HashMap};
 
 use anyhow::Result;
 use brack::sub_commands::SubCommands;
 use brack_plugin::{feature_flag::FeatureFlag, plugin::Plugin, plugins::Plugins};
 use clap::Parser;
 use regex::Regex;
+use serde_json;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -15,13 +17,14 @@ struct Args {
 pub fn run_compile(subcommand: SubCommands) -> Result<()> {
     let mut pathes = HashMap::new();
 
-    let (plugins_dir_path, backend, filename, output_level) = match subcommand {
+    let (plugins_dir_path, backend, filename, output_level, json) = match subcommand {
         SubCommands::Compile {
             plugins_dir_path,
             backend,
             filename,
             output_level,
-        } => (plugins_dir_path, backend, filename, output_level),
+            json,
+        } => (plugins_dir_path, backend, filename, output_level, json),
         _ => unreachable!(),
     };
 
@@ -59,44 +62,71 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
         anyhow::bail!("Filename must end with .[]");
     }
 
-    let tokens = brack_tokenizer::tokenize::tokenize(&filename)?;
-
-    if output_level == 1 {
-        for token in &tokens {
-            println!("{:?}", token);
-        }
-        return Ok(());
-    }
-
-    let cst = brack_parser::parse::parse(&tokens)?;
-
-    if output_level == 2 {
-        println!("{:?}", cst);
-        return Ok(());
-    }
-
-    let (ast, _errors) = brack_transformer::transform::transform(&cst);
-
-    if output_level == 3 {
-        if _errors.len() > 0 {
-            for error in _errors {
-                println!("{:?}", error);
+    match output_level {
+        1 => {
+            let tokens = brack_tokenizer::tokenize::tokenize(&filename)?;
+            if json {
+                let json = serde_json::to_string(&tokens)?;
+                println!("{}", json);
+            } else {
+                for token in tokens {
+                    println!("{:?}", token);
+                }
             }
-        } else {
-            println!("{:?}", ast);
         }
-        return Ok(());
+        2 => {
+            let tokens = brack_tokenizer::tokenize::tokenize(&filename)?;
+            let cst = brack_parser::parse::parse(&tokens)?;
+            if json {
+                let json = serde_json::to_string(&cst)?;
+                println!("{}", json);
+            } else {
+                println!("{:?}", cst);
+            }
+        }
+        3 => {
+            let tokens = brack_tokenizer::tokenize::tokenize(&filename)?;
+            let cst = brack_parser::parse::parse(&tokens)?;
+            let (ast, _errors) = brack_transformer::transform::transform(&cst);
+            if json {
+                let json = serde_json::to_string(&ast)?;
+                println!("{}", json);
+            } else {
+                if _errors.len() > 0 {
+                    for error in _errors {
+                        println!("{:?}", error);
+                    }
+                } else {
+                    println!("{:?}", ast);
+                }
+            }
+        }
+        4 => {
+            let tokens = brack_tokenizer::tokenize::tokenize(&filename)?;
+            let cst = brack_parser::parse::parse(&tokens)?;
+            let (ast, _errors) = brack_transformer::transform::transform(&cst);
+            let expanded_ast = brack_expander::expand::expander(&ast, &mut plugins)?;
+            if json {
+                let json = serde_json::to_string(&expanded_ast)?;
+                println!("{}", json);
+            } else {
+                println!("{:?}", expanded_ast);
+            }
+        }
+        5 => {
+            if json {
+                anyhow::bail!("Cannot output JSON at output level 5.")
+            }
+            let tokens = brack_tokenizer::tokenize::tokenize(&filename)?;
+            let cst = brack_parser::parse::parse(&tokens)?;
+            let (ast, _errors) = brack_transformer::transform::transform(&cst);
+            let expanded_ast = brack_expander::expand::expander(&ast, &mut plugins)?;
+            let gen = brack_codegen::generate::generate(&expanded_ast, &mut plugins)?;
+            println!("{}", gen);
+        }
+        _ => anyhow::bail!("Invalid output level."),
     }
 
-    let expanded_ast = brack_expander::expand::expander(&ast, &mut plugins)?;
-
-    if output_level == 4 {
-        println!("{:?}", expanded_ast);
-        return Ok(());
-    }
-
-    let gen = brack_codegen::generate::generate(&expanded_ast, &mut plugins)?;
-    println!("{}", gen);
     Ok(())
 }
 
