@@ -15,7 +15,7 @@ struct Args {
 pub fn run_compile(subcommand: SubCommands) -> Result<()> {
     let mut pathes = HashMap::new();
 
-    let args = match subcommand {
+    let (plugins_dir_path, backend, filename, output_level) = match subcommand {
         SubCommands::Compile {
             plugins_dir_path,
             backend,
@@ -25,7 +25,7 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
         _ => unreachable!(),
     };
 
-    let plugins_dir_path = match args.0 {
+    let plugins_dir_path = match plugins_dir_path {
         Some(path) => path,
         None => match std::env::var("BRACK_PLUGINS_PATH") {
             Ok(path) => path,
@@ -55,13 +55,13 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
     }
     let mut plugins = Plugins::new(plugin_vec)?;
 
-    if !args.2.ends_with(".[]") {
+    if !filename.ends_with(".[]") {
         anyhow::bail!("Filename must end with .[]");
     }
 
-    let tokens = brack_tokenizer::tokenize::tokenize(&args.2)?;
+    let tokens = brack_tokenizer::tokenize::tokenize(&filename)?;
 
-    if args.3 == 1 {
+    if output_level == 1 {
         for token in &tokens {
             println!("{:?}", token);
         }
@@ -70,14 +70,14 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
 
     let cst = brack_parser::parse::parse(&tokens)?;
 
-    if args.3 == 2 {
+    if output_level == 2 {
         println!("{:?}", cst);
         return Ok(());
     }
 
     let (ast, _errors) = brack_transformer::transform::transform(&cst);
 
-    if args.3 == 3 {
+    if output_level == 3 {
         if _errors.len() > 0 {
             for error in _errors {
                 println!("{:?}", error);
@@ -90,7 +90,7 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
 
     let expanded_ast = brack_expander::expand::expander(&ast, &mut plugins)?;
 
-    if args.3 == 4 {
+    if output_level == 4 {
         println!("{:?}", expanded_ast);
         return Ok(());
     }
