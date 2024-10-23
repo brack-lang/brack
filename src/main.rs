@@ -5,7 +5,6 @@ use brack::sub_commands::SubCommands;
 use brack_plugin::{feature_flag::FeatureFlag, plugin::Plugin, plugins::Plugins};
 use clap::Parser;
 use regex::Regex;
-use serde_json;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -87,14 +86,12 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
             if json {
                 let json = serde_json::to_string(&ast)?;
                 println!("{}", json);
-            } else {
-                if _errors.len() > 0 {
-                    for error in _errors {
-                        println!("{:?}", error);
-                    }
-                } else {
-                    println!("{:?}", ast);
+            } else if !_errors.is_empty() {
+                for error in _errors {
+                    println!("{:?}", error);
                 }
+            } else {
+                println!("{:?}", ast);
             }
         }
         4 => {
