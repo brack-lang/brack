@@ -49,16 +49,20 @@ impl Project {
                     PathBuf::from(&format!("plugins/{}_{}.wasm", name, plugin.hash_sha256()));
                 let document_hook = (match plugin {
                     PluginSchema::GitHub { document_hook, .. } => document_hook,
-                }).unwrap_or_default();
+                })
+                .unwrap_or_default();
                 let stmt_hook = (match plugin {
                     PluginSchema::GitHub { stmt_hook, .. } => stmt_hook,
-                }).unwrap_or_default();
+                })
+                .unwrap_or_default();
                 let expr_hook = (match plugin {
                     PluginSchema::GitHub { expr_hook, .. } => expr_hook,
-                }).unwrap_or_default();
+                })
+                .unwrap_or_default();
                 let text_hook = (match plugin {
                     PluginSchema::GitHub { text_hook, .. } => text_hook,
-                }).unwrap_or_default();
+                })
+                .unwrap_or_default();
                 let flag = FeatureFlag {
                     document_hook,
                     stmt_hook,

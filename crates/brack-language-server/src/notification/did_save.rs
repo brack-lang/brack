@@ -29,9 +29,7 @@ impl Server {
 
         if errors.is_empty() {
             let diagnostics: Vec<Diagnostic> = vec![];
-            return self
-                .send_publish_diagnostics(uri, &diagnostics)
-                .await;
+            return self.send_publish_diagnostics(uri, &diagnostics).await;
         }
 
         let mut diagnostics = vec![];
@@ -54,7 +52,6 @@ impl Server {
             };
             diagnostics.push(diagnostic);
         }
-        self.send_publish_diagnostics(uri, &diagnostics)
-            .await
+        self.send_publish_diagnostics(uri, &diagnostics).await
     }
 }
