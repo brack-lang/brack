@@ -30,7 +30,7 @@ impl Server {
         if errors.is_empty() {
             let diagnostics: Vec<Diagnostic> = vec![];
             return self
-                .send_publish_diagnostics(&uri.to_string(), &diagnostics)
+                .send_publish_diagnostics(uri, &diagnostics)
                 .await;
         }
 
@@ -54,7 +54,7 @@ impl Server {
             };
             diagnostics.push(diagnostic);
         }
-        self.send_publish_diagnostics(&uri.to_string(), &diagnostics)
+        self.send_publish_diagnostics(uri, &diagnostics)
             .await
     }
 }

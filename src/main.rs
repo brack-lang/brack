@@ -106,7 +106,7 @@ async fn main() -> Result<()> {
         }
         SubCommands::Compile { .. } => run_compile(args.subcommand)?,
         SubCommands::LanguageServer => {
-            let mut language_server = brack_language_server::server::Server::new();
+            let mut language_server = brack_language_server::server::Server::default();
             language_server.run().await?;
         }
         SubCommands::New { name } => new_project(&name)?,

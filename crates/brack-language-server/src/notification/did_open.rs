@@ -22,7 +22,7 @@ impl Server {
             .ok_or_else(|| anyhow::anyhow!("Invalid file path"))?;
 
         let mut project = Project::new(root);
-        if let Ok(_) = project.load_brack_toml() {
+        if project.load_brack_toml().is_ok() {
             project.download_plugins_using_config().await?;
             self.project = Some(project);
         }
