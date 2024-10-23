@@ -91,7 +91,7 @@ impl CST {
         }
     }
 
-    pub fn set_location(&mut self, location: Location) -> () {
+    pub fn set_location(&mut self, location: Location) {
         match self {
             CST::Document(node)
             | CST::Stmt(node)
@@ -140,7 +140,7 @@ impl CST {
         }
     }
 
-    pub fn add(&mut self, cst: CST) -> () {
+    pub fn add(&mut self, cst: CST) {
         match self {
             CST::Document(node)
             | CST::Stmt(node)
@@ -276,30 +276,30 @@ impl CST {
 }
 
 pub fn matches_kind(cst: &CST, kind: &CST) -> bool {
-    match (cst, kind) {
+    matches!(
+        (cst, kind),
         (CST::Document(_), CST::Document(_))
-        | (CST::Stmt(_), CST::Stmt(_))
-        | (CST::Expr(_), CST::Expr(_))
-        | (CST::Angle(_), CST::Angle(_))
-        | (CST::Curly(_), CST::Curly(_))
-        | (CST::Square(_), CST::Square(_))
-        | (CST::AngleBracketOpen(_), CST::AngleBracketOpen(_))
-        | (CST::AngleBracketClose(_), CST::AngleBracketClose(_))
-        | (CST::SquareBracketOpen(_), CST::SquareBracketOpen(_))
-        | (CST::SquareBracketClose(_), CST::SquareBracketClose(_))
-        | (CST::CurlyBracketOpen(_), CST::CurlyBracketOpen(_))
-        | (CST::CurlyBracketClose(_), CST::CurlyBracketClose(_))
-        | (CST::Module(_), CST::Module(_))
-        | (CST::Ident(_), CST::Ident(_))
-        | (CST::Text(_), CST::Text(_))
-        | (CST::Whitespace(_), CST::Whitespace(_))
-        | (CST::Newline(_), CST::Newline(_))
-        | (CST::BackSlash(_), CST::BackSlash(_))
-        | (CST::Dot(_), CST::Dot(_))
-        | (CST::Comma(_), CST::Comma(_))
-        | (CST::EOF(_), CST::EOF(_)) => true,
-        _ => false,
-    }
+            | (CST::Stmt(_), CST::Stmt(_))
+            | (CST::Expr(_), CST::Expr(_))
+            | (CST::Angle(_), CST::Angle(_))
+            | (CST::Curly(_), CST::Curly(_))
+            | (CST::Square(_), CST::Square(_))
+            | (CST::AngleBracketOpen(_), CST::AngleBracketOpen(_))
+            | (CST::AngleBracketClose(_), CST::AngleBracketClose(_))
+            | (CST::SquareBracketOpen(_), CST::SquareBracketOpen(_))
+            | (CST::SquareBracketClose(_), CST::SquareBracketClose(_))
+            | (CST::CurlyBracketOpen(_), CST::CurlyBracketOpen(_))
+            | (CST::CurlyBracketClose(_), CST::CurlyBracketClose(_))
+            | (CST::Module(_), CST::Module(_))
+            | (CST::Ident(_), CST::Ident(_))
+            | (CST::Text(_), CST::Text(_))
+            | (CST::Whitespace(_), CST::Whitespace(_))
+            | (CST::Newline(_), CST::Newline(_))
+            | (CST::BackSlash(_), CST::BackSlash(_))
+            | (CST::Dot(_), CST::Dot(_))
+            | (CST::Comma(_), CST::Comma(_))
+            | (CST::EOF(_), CST::EOF(_))
+    )
 }
 
 pub fn new_document() -> CST {

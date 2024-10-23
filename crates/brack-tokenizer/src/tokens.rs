@@ -61,7 +61,7 @@ pub fn merge_location(location1: &Location, location2: &Location) -> Location {
         Ordering::Equal => match location1.end.line.cmp(&location2.end.character) {
             Ordering::Greater => location1.end.clone(),
             _ => location2.end.clone(),
-        }
+        },
         Ordering::Greater => location1.end.clone(),
     };
 

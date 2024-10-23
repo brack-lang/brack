@@ -3,7 +3,7 @@ use anyhow::Result;
 use brack_tokenizer::tokens::Token;
 
 // expr_or_close (newline expr_or_close)*
-pub fn parse<'a>(tokens: &'a [Token]) -> Result<Parser> {
+pub fn parse(tokens: &[Token]) -> Result<Parser> {
     let mut stmt = new_stmt();
     let (cst, mut tokens) = expr_or_close::parse(tokens)?;
     stmt.add(cst);
