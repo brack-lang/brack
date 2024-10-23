@@ -76,6 +76,14 @@
             };
           })
           workspaceMemberNames);
+        packages.cargo-fmt =
+          pkgs.runCommand "cargo-fmt-check" {
+            buildInputs = with pkgs; [cargo rustfmt];
+            src = ./.;
+          } ''
+            mkdir -p $out
+            cargo fmt --all --check --manifest-path $src/Cargo.toml
+          '';
         packages.brack = generatedBuild.workspaceMembers."brack".build;
         packages.default = packages.brack;
         apps.${system}.default = {
