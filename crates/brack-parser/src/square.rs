@@ -8,7 +8,7 @@ use crate::{
 };
 
 // square_bracket_open (expr | newline)* square_bracket_close?
-pub fn parse<'a>(tokens: &'a [Token]) -> Result<Parser> {
+pub fn parse(tokens: &[Token]) -> Result<Parser> {
     let mut result = new_square();
 
     let bracket_open_location = if let Some(token) = tokens.first() {
@@ -54,7 +54,7 @@ pub fn parse<'a>(tokens: &'a [Token]) -> Result<Parser> {
 }
 
 // square_bracket_open
-fn parse_square_bracket_open<'a>(tokens: &'a [Token]) -> Result<Parser> {
+fn parse_square_bracket_open(tokens: &[Token]) -> Result<Parser> {
     if let Some(token) = tokens.first() {
         match token {
             Token::SquareBracketOpen(location) => {
@@ -67,7 +67,7 @@ fn parse_square_bracket_open<'a>(tokens: &'a [Token]) -> Result<Parser> {
 }
 
 // square_bracket_close
-fn parse_square_bracket_close<'a>(tokens: &'a [Token]) -> Result<Parser> {
+fn parse_square_bracket_close(tokens: &[Token]) -> Result<Parser> {
     if let Some(token) = tokens.first() {
         match token {
             Token::SquareBracketClose(location) => {

@@ -55,19 +55,14 @@ impl Server {
         let start = start.unwrap();
         for plugin in plugins.name_to_plugin.values() {
             for ((name, typ), command_metadata) in plugin.signature_to_metadata.iter() {
-                if start == String::from("[") && matches!(typ, Type::TInline) {
+                if (start == *"[" && matches!(typ, Type::TInline))
+                    || (start == *"{" && matches!(typ, Type::TBlock))
+                {
                     completion_items.push(build_completion_item(
                         &plugin.name,
-                        &name,
-                        &typ,
-                        &command_metadata,
-                    ));
-                } else if start == String::from("{") && matches!(typ, Type::TBlock) {
-                    completion_items.push(build_completion_item(
-                        &plugin.name,
-                        &name,
-                        &typ,
-                        &command_metadata,
+                        name,
+                        typ,
+                        command_metadata,
                     ));
                 }
             }

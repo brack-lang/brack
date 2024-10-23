@@ -7,7 +7,7 @@ use crate::{
 };
 
 // (stmt newline newline+)* stmt? newline* EOF
-pub fn parse<'a>(tokens: &'a [Token]) -> Result<CST> {
+pub fn parse(tokens: &[Token]) -> Result<CST> {
     let mut tokens = tokens;
     let mut cst = new_document();
 
@@ -29,13 +29,9 @@ pub fn parse<'a>(tokens: &'a [Token]) -> Result<CST> {
             break;
         }
 
-        loop {
-            if let Ok((cst3, new_tokens)) = newline::parse(tokens1) {
-                tokens1 = new_tokens;
-                csts.push(cst3);
-            } else {
-                break;
-            }
+        while let Ok((cst3, new_tokens)) = newline::parse(tokens1) {
+            tokens1 = new_tokens;
+            csts.push(cst3);
         }
 
         tokens = tokens1;
@@ -49,13 +45,9 @@ pub fn parse<'a>(tokens: &'a [Token]) -> Result<CST> {
         tokens = new_tokens;
     }
 
-    loop {
-        if let Ok((cst1, new_tokens)) = newline::parse(tokens) {
-            cst.add(cst1);
-            tokens = new_tokens;
-        } else {
-            break;
-        }
+    while let Ok((cst1, new_tokens)) = newline::parse(tokens) {
+        cst.add(cst1);
+        tokens = new_tokens;
     }
 
     let (cst1, _) = eof::parse(tokens)?;

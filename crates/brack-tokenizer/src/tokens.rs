@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
@@ -46,27 +47,22 @@ pub fn mock_location() -> Location {
 }
 
 pub fn merge_location(location1: &Location, location2: &Location) -> Location {
-    let start = if location1.start.line < location2.start.line {
-        location1.start.clone()
-    } else if location1.start.line == location2.start.line {
-        if location1.start.character < location2.start.character {
-            location1.start.clone()
-        } else {
-            location2.start.clone()
-        }
-    } else {
-        location2.start.clone()
+    let start = match location1.start.line.cmp(&location2.start.line) {
+        Ordering::Less => location1.start.clone(),
+        Ordering::Equal => match location1.start.character.cmp(&location2.start.character) {
+            Ordering::Less => location1.start.clone(),
+            _ => location2.start.clone(),
+        },
+        Ordering::Greater => location2.start.clone(),
     };
-    let end = if location1.end.line > location2.end.line {
-        location1.end.clone()
-    } else if location1.end.line == location2.end.line {
-        if location1.end.character > location2.end.character {
-            location1.end.clone()
-        } else {
-            location2.end.clone()
-        }
-    } else {
-        location2.end.clone()
+
+    let end = match location1.end.line.cmp(&location2.end.line) {
+        Ordering::Less => location2.end.clone(),
+        Ordering::Equal => match location1.end.line.cmp(&location2.end.character) {
+            Ordering::Greater => location1.end.clone(),
+            _ => location2.end.clone(),
+        },
+        Ordering::Greater => location1.end.clone(),
     };
 
     Location { start, end }

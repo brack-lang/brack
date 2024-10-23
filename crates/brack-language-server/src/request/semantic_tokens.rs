@@ -62,7 +62,7 @@ fn separate(tokens: &Vec<Token>) -> Vec<SemanticToken> {
             delta_line,
             delta_start,
             length: (location.end.character - location.start.character) as u32,
-            token_type: token_kind_to_type(&token),
+            token_type: token_kind_to_type(token),
             token_modifiers_bitset: 0,
         });
 

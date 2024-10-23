@@ -26,10 +26,7 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
 
     let plugins_dir_path = match args.0 {
         Some(path) => path,
-        None => match std::env::var("BRACK_PLUGINS_PATH") {
-            Ok(path) => path,
-            Err(_) => String::new(),
-        },
+        None => std::env::var("BRACK_PLUGINS_PATH").unwrap_or_default(),
     };
 
     let pattern = Regex::new(r"(?<module_name>[[:alpha:]]+)_[[:alnum:]]+.wasm").unwrap();
@@ -106,7 +103,7 @@ async fn main() -> Result<()> {
         }
         SubCommands::Compile { .. } => run_compile(args.subcommand)?,
         SubCommands::LanguageServer => {
-            let mut language_server = brack_language_server::server::Server::new();
+            let mut language_server = brack_language_server::server::Server::default();
             language_server.run().await?;
         }
         SubCommands::New { name } => new_project(&name)?,
