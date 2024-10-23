@@ -30,8 +30,8 @@ jobs:
           if [ -z "$LATEST_TAG" ]; then
             NEW_TAG="v${{ steps.version.outputs.version }}-rc.1"
           else
-            DEV_NUMBER=$(echo $LATEST_TAG | sed -E 's/^.*-dev-([0-9]+)$/\1/')
-            NEW_TAG="v${{ steps.version.outputs.version }}-rc.$((DEV_NUMBER + 1))"
+            RC_NUMBER=$(echo $LATEST_TAG | sed -E 's/^.*-rc-([0-9]+)$/\1/')
+            NEW_TAG="v${{ steps.version.outputs.version }}-rc.$((RC_NUMBER + 1))"
           fi
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
       - name: Generate release note
