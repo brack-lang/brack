@@ -1,5 +1,4 @@
-use serde::{Deserialize, Serialize};
-use std::{any, collections::HashMap};
+use std::collections::HashMap;
 
 use anyhow::Result;
 use brack::sub_commands::SubCommands;
@@ -17,7 +16,7 @@ struct Args {
 pub fn run_compile(subcommand: SubCommands) -> Result<()> {
     let mut pathes = HashMap::new();
 
-    let (plugins_dir_path, backend, filename, output_level, json) = match subcommand {
+    let (plugins_dir_path, _, filename, output_level, json) = match subcommand {
         SubCommands::Compile {
             plugins_dir_path,
             backend,
