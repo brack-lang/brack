@@ -24,7 +24,8 @@ fn expand_angle(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<A
         }
     }
 
-    let new_ast = plugins.call_macro_command(&module_name, &ident_name, overall_ast.clone(), ast.id())?;
+    let new_ast =
+        plugins.call_macro_command(&module_name, &ident_name, overall_ast.clone(), ast.id())?;
     Ok(new_ast)
 }
 

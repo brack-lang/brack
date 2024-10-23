@@ -13,7 +13,7 @@ impl Server {
             .uri
             .to_file_path()
             .map_err(|_| anyhow::anyhow!("Invalid file path"))?;
-        
+
         // root/docs/file.[] -> root
         let root = file_path
             .parent()

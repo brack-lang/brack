@@ -11,7 +11,7 @@ fn token_kind_to_type(token: &Token) -> u32 {
         Token::AngleBracketOpen(_) | Token::AngleBracketClose(_) => SemanticTokenType::MACRO,
         Token::CurlyBracketOpen(_) | Token::CurlyBracketClose(_) => SemanticTokenType::METHOD,
         Token::SquareBracketOpen(_) | Token::SquareBracketClose(_) => SemanticTokenType::FUNCTION,
-        _ => return 100 // no decoration
+        _ => return 100, // no decoration
     };
     token_type_as_u32(typ)
 }
