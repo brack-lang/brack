@@ -1,6 +1,9 @@
 use anyhow::Result;
 use lsp_types::{
-    CompletionOptions, CompletionParams, InitializeParams, InitializeResult, SemanticTokenModifier, SemanticTokenType, SemanticTokensFullOptions, SemanticTokensLegend, SemanticTokensOptions, SemanticTokensParams, SemanticTokensServerCapabilities, ServerCapabilities, ServerInfo, TextDocumentSyncCapability, TextDocumentSyncKind
+    CompletionOptions, CompletionParams, InitializeParams, InitializeResult, SemanticTokenModifier,
+    SemanticTokenType, SemanticTokensFullOptions, SemanticTokensLegend, SemanticTokensOptions,
+    SemanticTokensParams, SemanticTokensServerCapabilities, ServerCapabilities, ServerInfo,
+    TextDocumentSyncCapability, TextDocumentSyncKind,
 };
 use serde::Deserialize;
 use serde_json::Value;

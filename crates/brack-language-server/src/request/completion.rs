@@ -35,7 +35,7 @@ impl Server {
     ) -> Result<Option<CompletionResponse>> {
         if self.project.is_none() {
             // BLS doesn't support single-file mode now.
-            return Ok(None)
+            return Ok(None);
         }
         let project = self.project.as_ref().unwrap();
         let mut completion_items = vec![];

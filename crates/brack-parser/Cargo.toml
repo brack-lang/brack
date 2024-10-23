@@ -19,9 +19,3 @@ features = ["v4", "fast-rng", "macro-diagnostics", "serde"]
 [features]
 default = []
 debug = []
-
-[[bin]]
-name = "debug_parse"
-path = "src/debug/debug_parse.rs"
-required-features = ["debug"]
-

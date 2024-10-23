@@ -1,5 +1,9 @@
 use anyhow::Result;
-use brack_plugin::{plugins::Plugins, types::{arg_counter, Type}, value::Value};
+use brack_plugin::{
+    plugins::Plugins,
+    types::{arg_counter, Type},
+    value::Value,
+};
 use brack_transformer::ast::AST;
 
 use crate::{expr, square, text};
