@@ -26,10 +26,7 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
 
     let plugins_dir_path = match args.0 {
         Some(path) => path,
-        None => match std::env::var("BRACK_PLUGINS_PATH") {
-            Ok(path) => path,
-            Err(_) => String::new(),
-        },
+        None => std::env::var("BRACK_PLUGINS_PATH").unwrap_or_default(),
     };
 
     let pattern = Regex::new(r"(?<module_name>[[:alpha:]]+)_[[:alnum:]]+.wasm").unwrap();
