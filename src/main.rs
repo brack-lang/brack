@@ -20,7 +20,8 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
             plugins_dir_path,
             backend,
             filename,
-        } => (plugins_dir_path, backend, filename),
+            output_level,
+        } => (plugins_dir_path, backend, filename, output_level),
         _ => unreachable!(),
     };
 
@@ -59,9 +60,41 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
     }
 
     let tokens = brack_tokenizer::tokenize::tokenize(&args.2)?;
+
+    if args.3 == 1 {
+        for token in &tokens {
+            println!("{:?}", token);
+        }
+        return Ok(());
+    }
+
     let cst = brack_parser::parse::parse(&tokens)?;
+
+    if args.3 == 2 {
+        println!("{:?}", cst);
+        return Ok(());
+    }
+
     let (ast, _errors) = brack_transformer::transform::transform(&cst);
+
+    if args.3 == 3 {
+        if _errors.len() > 0 {
+            for error in _errors {
+                println!("{:?}", error);
+            }
+        } else {
+            println!("{:?}", ast);
+        }
+        return Ok(());
+    }
+
     let expanded_ast = brack_expander::expand::expander(&ast, &mut plugins)?;
+
+    if args.3 == 4 {
+        println!("{:?}", expanded_ast);
+        return Ok(());
+    }
+
     let gen = brack_codegen::generate::generate(&expanded_ast, &mut plugins)?;
     println!("{}", gen);
     Ok(())

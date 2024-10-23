@@ -12,6 +12,9 @@ pub enum SubCommands {
 
         #[clap(short, long)]
         filename: String,
+
+        #[clap(long, default_value_t = 5)]
+        output_level: u8,
     },
     Build,
     LanguageServer,
