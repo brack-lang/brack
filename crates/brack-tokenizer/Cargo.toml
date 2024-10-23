@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.86"
-unicode-segmentation = "1.11"
+unicode-segmentation = "1.12"
 serde = { version = "1.0.203", features = ["derive"] }
 pretty_assertions = "1.4.0"
