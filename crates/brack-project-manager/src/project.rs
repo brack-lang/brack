@@ -47,34 +47,18 @@ impl Project {
             for (name, plugin) in plugins {
                 let path =
                     PathBuf::from(&format!("plugins/{}_{}.wasm", name, plugin.hash_sha256()));
-                let document_hook = if let Some(b) = match plugin {
+                let document_hook = (match plugin {
                     PluginSchema::GitHub { document_hook, .. } => document_hook,
-                } {
-                    b
-                } else {
-                    false
-                };
-                let stmt_hook = if let Some(b) = match plugin {
+                }).unwrap_or_default();
+                let stmt_hook = (match plugin {
                     PluginSchema::GitHub { stmt_hook, .. } => stmt_hook,
-                } {
-                    b
-                } else {
-                    false
-                };
-                let expr_hook = if let Some(b) = match plugin {
+                }).unwrap_or_default();
+                let expr_hook = (match plugin {
                     PluginSchema::GitHub { expr_hook, .. } => expr_hook,
-                } {
-                    b
-                } else {
-                    false
-                };
-                let text_hook = if let Some(b) = match plugin {
+                }).unwrap_or_default();
+                let text_hook = (match plugin {
                     PluginSchema::GitHub { text_hook, .. } => text_hook,
-                } {
-                    b
-                } else {
-                    false
-                };
+                }).unwrap_or_default();
                 let flag = FeatureFlag {
                     document_hook,
                     stmt_hook,
@@ -146,7 +130,7 @@ impl Project {
                 .to_str()
                 .ok_or_else(|| anyhow::anyhow!("Could not convert file name to string."))?;
             if path.extension() == Some("[]".as_ref()) {
-                let tokenized = brack_tokenizer::tokenize::tokenize(&path.to_str().unwrap())?;
+                let tokenized = brack_tokenizer::tokenize::tokenize(path.to_str().unwrap())?;
                 let parsed = brack_parser::parse::parse(&tokenized)?;
                 let (ast, _errors) = brack_transformer::transform::transform(&parsed);
                 let expanded = brack_expander::expand::expander(&ast, &mut plugins)?;
