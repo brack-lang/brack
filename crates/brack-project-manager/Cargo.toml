@@ -9,7 +9,7 @@ edition = "2021"
 anyhow = "1.0.86"
 reqwest = "0.12.8"
 serde = { version = "1.0.203", features = ["derive"] }
-tokio = { version = "1.38.0", features = ["macros"] }
+tokio = { version = "1.41.0", features = ["macros"] }
 toml = "0.8.14"
 brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
 brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
