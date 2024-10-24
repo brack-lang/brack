@@ -4,7 +4,7 @@ version = "0.2.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.91"
 brack-codegen = { git = "https://github.com/brack-lang/brack", package = "brack-codegen" }
 brack-expander = { git = "https://github.com/brack-lang/brack", package = "brack-expander" }
 brack-language-server = { git = "https://github.com/brack-lang/brack", package = "brack-language-server" }

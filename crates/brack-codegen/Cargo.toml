@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.91"
 brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
 brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
 brack-transformer = { git = "https://github.com/brack-lang/brack", package = "brack-transformer" }
