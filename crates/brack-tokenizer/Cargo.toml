@@ -9,4 +9,4 @@ edition = "2021"
 anyhow = "1.0.91"
 unicode-segmentation = "1.12"
 serde = { version = "1.0.203", features = ["derive"] }
-pretty_assertions = "1.4.0"
+pretty_assertions = "1.4.1"
