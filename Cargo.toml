@@ -4,7 +4,7 @@ version = "0.2.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.91"
 brack-codegen = { git = "https://github.com/brack-lang/brack", package = "brack-codegen" }
 brack-expander = { git = "https://github.com/brack-lang/brack", package = "brack-expander" }
 brack-language-server = { git = "https://github.com/brack-lang/brack", package = "brack-language-server" }
@@ -16,8 +16,8 @@ brack-transformer = { git = "https://github.com/brack-lang/brack", package = "br
 tokio = { version = "1", features = ["full"] }
 toml = "0.8.14"
 extism = "1.4.1"
-reqwest = "0.12.5"
-regex = "1.10.6"
+reqwest = "0.12.8"
+regex = "1.11.0"
 serde_json = "1.0.132"
 serde = { version = "1.0.213", features = ["derive"] }
 
