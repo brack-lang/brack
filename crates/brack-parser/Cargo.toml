@@ -10,7 +10,7 @@ anyhow = "1.0.94"
 brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
 serde = { version = "1.0.216", features = ["derive"] }
 serde_json = "1.0.134"
-thiserror = "2.0.8"
+thiserror = "2.0.12"
 
 [dependencies.uuid]
 version = "1.11.0"
