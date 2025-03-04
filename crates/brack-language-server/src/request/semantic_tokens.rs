@@ -78,16 +78,18 @@ impl Server {
         &self,
         params: SemanticTokensParams,
     ) -> Result<Option<SemanticTokens>> {
-        let path = to_url(params.text_document.uri)?.to_file_path().map_err(|e| {
-            anyhow::anyhow!("Failed to convert URI to file path: {:?}", e)
-        })?;
+        let path = to_url(params.text_document.uri)?
+            .to_file_path()
+            .map_err(|e| anyhow::anyhow!("Failed to convert URI to file path: {:?}", e))?;
 
-        self.log_message(&format!("[SemanticTokens]: {:?}", path)).await?;
         let tokens = match tokenize(&path) {
             Ok(tokens) => tokens,
             Err(e) => {
-                self.log_message(&format!("[SemanticTokens]: Failed to tokenize file: {:?}", e))
-                    .await?;
+                self.log_message(&format!(
+                    "[SemanticTokens]: Failed to tokenize file: {:?}",
+                    e
+                ))
+                .await?;
                 return Ok(None);
             }
         };

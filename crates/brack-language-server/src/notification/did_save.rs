@@ -11,10 +11,12 @@ impl Server {
         &self,
         param: DidSaveTextDocumentParams,
     ) -> Result<()> {
-        let path = to_url(param.text_document.uri)?.to_file_path().map_err(|e| {
-            anyhow::anyhow!("Failed to convert URI to file path: {:?}", e)
-        })?;
-        let path_str = path.to_str().ok_or_else(|| anyhow::anyhow!("Invalid file path"))?;
+        let path = to_url(param.text_document.uri)?
+            .to_file_path()
+            .map_err(|e| anyhow::anyhow!("Failed to convert URI to file path: {:?}", e))?;
+        let path_str = path
+            .to_str()
+            .ok_or_else(|| anyhow::anyhow!("Invalid file path"))?;
 
         let tokens = match tokenize(&path) {
             Ok(tokens) => tokens,
