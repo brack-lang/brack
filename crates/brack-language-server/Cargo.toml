@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.94"
+anyhow = "1.0.97"
 serde = "1.0.218"
 serde_json = "1.0.134"
 tokio = { version = "1", features = ["full"] }
