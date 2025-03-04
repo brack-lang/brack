@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.97"
-reqwest = "0.12.9"
+reqwest = "0.12.12"
 serde = { version = "1.0.218", features = ["derive"] }
 tokio = { version = "1.42.0", features = ["macros"] }
 toml = "0.8.14"
