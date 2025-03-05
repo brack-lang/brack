@@ -64,7 +64,7 @@ fn rewrite_all_cargo_toml(next_version: &SemVer) -> Result<()> {
         "crates/brack-transformer/Cargo.toml",
     ];
     for path in cargo_toml_paths.iter() {
-        rewrite_version(path, &next_version)?;
+        rewrite_version(path, next_version)?;
     }
     Ok(())
 }
