@@ -1,15 +1,18 @@
-use std::path::Path;
-use std::fs::read_to_string;
 use anyhow::Result;
-use toml_edit::{DocumentMut, value};
+use std::fs::read_to_string;
+use std::path::Path;
 use tokio::process::Command;
+use toml_edit::{value, DocumentMut};
 
 use clap::{Parser, Subcommand, ValueEnum};
 
 mod git;
 mod semver;
 
-use crate::git::{create_git_tag, git_commit_all, git_merge_no_ff, git_push, git_push_tags, git_switch, git_switch_new, git_pull};
+use crate::git::{
+    create_git_tag, git_commit_all, git_merge_no_ff, git_pull, git_push, git_push_tags, git_switch,
+    git_switch_new,
+};
 use crate::semver::SemVer;
 
 #[derive(Parser, Debug)]
@@ -107,11 +110,18 @@ async fn main() -> Result<()> {
                     git_switch_new(&format!("release/v{}", except_rc_version)).await?;
                     rewrite_all_cargo_toml(&next_version)?;
                     rewrite_version_file("VERSION", &next_version)?;
-                    git_commit_all(&format!("update: prepare for next version: {}", next_version)).await?;
+                    git_commit_all(&format!(
+                        "update: prepare for next version: {}",
+                        next_version
+                    ))
+                    .await?;
                     create_git_tag(&next_version).await?;
                     git_push("origin", &format!("release/v{}", except_rc_version)).await?;
                     git_push_tags("origin").await?;
-                    println!("🎉 Successfully updated version: {} and pre-released", next_version);
+                    println!(
+                        "🎉 Successfully updated version: {} and pre-released",
+                        next_version
+                    );
                 }
                 SemVerKind::RC => {
                     let except_rc_version = next_version.release()?;
@@ -121,11 +131,18 @@ async fn main() -> Result<()> {
                     git_merge_no_ff("develop").await?;
                     rewrite_all_cargo_toml(&next_version)?;
                     rewrite_version_file("VERSION", &next_version)?;
-                    git_commit_all(&format!("update: prepare for next version: {}", next_version)).await?;
+                    git_commit_all(&format!(
+                        "update: prepare for next version: {}",
+                        next_version
+                    ))
+                    .await?;
                     create_git_tag(&next_version).await?;
                     git_push("origin", &format!("release/v{}", except_rc_version)).await?;
                     git_push_tags("origin").await?;
-                    println!("🎉 Successfully updated version: {} and pre-released", next_version);
+                    println!(
+                        "🎉 Successfully updated version: {} and pre-released",
+                        next_version
+                    );
                 }
             }
         }
@@ -151,7 +168,11 @@ async fn main() -> Result<()> {
             let next_version = current_version.release()?;
             rewrite_all_cargo_toml(&next_version)?;
             rewrite_version_file("VERSION", &next_version)?;
-            git_commit_all(&format!("update: prepare for next version: {}", next_version)).await?;
+            git_commit_all(&format!(
+                "update: prepare for next version: {}",
+                next_version
+            ))
+            .await?;
             git_switch("main").await?;
             git_pull("origin", "main").await?;
             git_merge_no_ff(&format!("release/v{}", next_version)).await?;
@@ -163,4 +184,3 @@ async fn main() -> Result<()> {
     }
     Ok(())
 }
-

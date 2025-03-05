@@ -1,5 +1,5 @@
-use anyhow::{bail, Result};
 use crate::semver::SemVer;
+use anyhow::{bail, Result};
 use tokio::process::Command;
 
 pub async fn git_switch(branch: &str) -> Result<()> {
@@ -48,7 +48,10 @@ pub async fn git_merge_no_ff(branch: &str) -> Result<()> {
         .status()
         .await?;
     if !status.success() {
-        bail!("Failed to merge branch '{}'. Possibly a merge conflict?", branch);
+        bail!(
+            "Failed to merge branch '{}'. Possibly a merge conflict?",
+            branch
+        );
     }
     Ok(())
 }
