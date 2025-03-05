@@ -16,3 +16,5 @@ brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brac
 brack-transformer = { git = "https://github.com/brack-lang/brack", package = "brack-transformer" }
 brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
 brack-project-manager = { git = "https://github.com/brack-lang/brack", package = "brack-project-manager" }
+urlencoding = "2.1.3"
+url = "2.5.4"
