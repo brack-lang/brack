@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::Result;
-use brack::sub_commands::SubCommands;
+use brack::{new_project::new_project, sub_commands::SubCommands};
 use brack_plugin::{feature_flag::FeatureFlag, plugin::Plugin, plugins::Plugins};
 use clap::Parser;
 use regex::Regex;
@@ -120,34 +120,6 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
         _ => anyhow::bail!("Invalid output level."),
     }
 
-    Ok(())
-}
-
-fn new_project(name: &str) -> Result<()> {
-    std::fs::create_dir(name)?;
-    std::fs::create_dir(format!("{}/docs", name))?;
-    std::fs::write(format!("{}/docs/main.[]", name), "")?;
-    std::fs::write(
-        format!("{}/Brack.toml", name),
-        format!(
-            r#"[document]
-name = "{}"
-version = "0.1.0"
-backend = ""
-extension = ""
-authors = ["your name <your email>"]
-
-[plugins]
-"#,
-            name
-        ),
-    )?;
-    std::fs::write(
-        format!("{}/.gitignore", name),
-        r#"plugins
-out
-"#,
-    )?;
     Ok(())
 }
 

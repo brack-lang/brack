@@ -6,10 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.93"
-reqwest = "0.12.9"
-serde = { version = "1.0.214", features = ["derive"] }
-tokio = { version = "1.41.1", features = ["macros"] }
+anyhow = "1.0.97"
+reqwest = "0.12.12"
+serde = { version = "1.0.218", features = ["derive"] }
+tokio = { version = "1.42.0", features = ["macros"] }
 toml = "0.8.14"
 brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
 brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
@@ -19,7 +19,8 @@ brack-transformer = { git = "https://github.com/brack-lang/brack", package = "br
 brack-codegen = { git = "https://github.com/brack-lang/brack", package = "brack-codegen" }
 futures = "0.3.31"
 sha2 = "0.10.8"
-bytes = "1.8.0"
+bytes = "1.9.0"
+walkdir = "2.5.0"
 
 
 [features]

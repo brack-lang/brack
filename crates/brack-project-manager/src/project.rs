@@ -34,6 +34,10 @@ impl Project {
         Ok(())
     }
 
+    pub fn load_brack_toml_with_config(&mut self, config: Config) {
+        self.config = config;
+    }
+
     pub fn clear_plugins(&mut self) -> Result<()> {
         std::fs::remove_dir_all("plugins")?;
         std::fs::create_dir("plugins")?;
@@ -124,10 +128,14 @@ impl Project {
         }
         let mut plugins = Plugins::new(plugin_vec)?;
 
-        let entries = std::fs::read_dir("docs")?;
+        let mut output_paths = vec![];
+        let entries = walkdir::WalkDir::new("docs")
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_type().is_file());
         for entry in entries {
-            let entry = entry?;
             let path = entry.path();
+            let relative_path = path.strip_prefix("docs")?;
             let file_stem = path
                 .file_stem()
                 .ok_or_else(|| anyhow::anyhow!("Could not get file name from path."))?
@@ -139,24 +147,19 @@ impl Project {
                 let (ast, _errors) = brack_transformer::transform::transform(&parsed);
                 let expanded = brack_expander::expand::expander(&ast, &mut plugins)?;
                 let gen = brack_codegen::generate::generate(&expanded, &mut plugins)?;
-                std::fs::create_dir_all("out")?;
-                std::fs::write(
-                    format!("out/{}.{}", file_stem, self.config.document.extension),
-                    gen,
-                )?;
+                let output_dir = std::path::Path::new("out")
+                    .join(relative_path.parent().unwrap_or(std::path::Path::new("")));
+                std::fs::create_dir_all(&output_dir)?;
+                let output_path =
+                    output_dir.join(format!("{}.{}", file_stem, self.config.document.extension));
+                std::fs::write(&output_path, gen)?;
+                output_paths.push(output_path.to_string_lossy().to_string());
             }
         }
 
         println!("Build succeeded.");
-        for out in std::fs::read_dir("out")? {
-            let out = out?;
-            let path = out.path();
-            let file_stem = path
-                .file_name()
-                .ok_or_else(|| anyhow::anyhow!("Could not get file name from path."))?
-                .to_str()
-                .ok_or_else(|| anyhow::anyhow!("Could not convert file name to string."))?;
-            println!("  - ./out/{}", file_stem);
+        for output_path in output_paths {
+            println!("  - {}", output_path);
         }
         Ok(())
     }
