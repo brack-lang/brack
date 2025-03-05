@@ -35,10 +35,7 @@ impl SemVer {
             .next()
             .ok_or_else(|| anyhow::anyhow!("No version found"))?
             .split('.');
-        let rc = version_split_rc
-            .next()
-            .map(|rc| rc.parse())
-            .transpose()?;
+        let rc = version_split_rc.next().map(|rc| rc.parse()).transpose()?;
         let major = version
             .next()
             .ok_or_else(|| anyhow::anyhow!("No major version found"))?
@@ -59,28 +56,39 @@ impl SemVer {
 
     pub fn next_major(&self) -> Result<Self> {
         match self.rc {
-            Some(_) => Err(anyhow::anyhow!("You have to release before bumping major version")),
+            Some(_) => Err(anyhow::anyhow!(
+                "You have to release before bumping major version"
+            )),
             None => Ok(Self::new_with_rc(self.major + 1, 0, 0, 1)),
         }
     }
 
     pub fn next_minor(&self) -> Result<Self> {
         match self.rc {
-            Some(_) => Err(anyhow::anyhow!("You have to release before bumping minor version")),
+            Some(_) => Err(anyhow::anyhow!(
+                "You have to release before bumping minor version"
+            )),
             None => Ok(Self::new_with_rc(self.major, self.minor + 1, 0, 1)),
         }
     }
 
     pub fn next_patch(&self) -> Result<Self> {
         match self.rc {
-            Some(_) => Err(anyhow::anyhow!("You have to release before bumping patch version")),
+            Some(_) => Err(anyhow::anyhow!(
+                "You have to release before bumping patch version"
+            )),
             None => Ok(Self::new_with_rc(self.major, self.minor, self.patch + 1, 1)),
         }
     }
 
     pub fn next_rc(&self) -> Result<Self> {
         match self.rc {
-            Some(rc) => Ok(Self::new_with_rc(self.major, self.minor, self.patch, rc + 1)),
+            Some(rc) => Ok(Self::new_with_rc(
+                self.major,
+                self.minor,
+                self.patch,
+                rc + 1,
+            )),
             None => Err(anyhow::anyhow!("Not release candidate version")),
         }
     }

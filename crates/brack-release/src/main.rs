@@ -80,7 +80,11 @@ async fn main() -> Result<()> {
     let args = Args::parse();
     match args.sub_commands {
         SubCommands::Update { semver_kind } => {
-            let status = Command::new("git").arg("status").arg("--porcelain").output().await?;
+            let status = Command::new("git")
+                .arg("status")
+                .arg("--porcelain")
+                .output()
+                .await?;
             if !status.stdout.is_empty() {
                 println!("Please commit all changes before updating version");
                 return Ok(());
@@ -106,7 +110,10 @@ async fn main() -> Result<()> {
                     Command::new("git")
                         .arg("commit")
                         .arg("-am")
-                        .arg(format!("update: prepare for next version: {}", next_version))
+                        .arg(format!(
+                            "update: prepare for next version: {}",
+                            next_version
+                        ))
                         .status()
                         .await?;
                     Command::new("git")
@@ -120,7 +127,10 @@ async fn main() -> Result<()> {
                         .arg(format!("release/v{}", except_rc_version))
                         .status()
                         .await?;
-                    println!("🎉 Successfully updated version: {} and pre-released", next_version);
+                    println!(
+                        "🎉 Successfully updated version: {} and pre-released",
+                        next_version
+                    );
                 }
                 SemVerKind::RC => {
                     let except_rc_version = next_version.release()?;
@@ -151,7 +161,10 @@ async fn main() -> Result<()> {
                     Command::new("git")
                         .arg("commit")
                         .arg("-am")
-                        .arg(format!("update: prepare for next version: {}", next_version))
+                        .arg(format!(
+                            "update: prepare for next version: {}",
+                            next_version
+                        ))
                         .status()
                         .await?;
                     Command::new("git")
@@ -165,7 +178,10 @@ async fn main() -> Result<()> {
                         .arg(format!("release/v{}", except_rc_version))
                         .status()
                         .await?;
-                    println!("🎉 Successfully updated version: {} and pre-released", next_version);
+                    println!(
+                        "🎉 Successfully updated version: {} and pre-released",
+                        next_version
+                    );
                 }
             }
         }
@@ -175,7 +191,11 @@ async fn main() -> Result<()> {
             rewrite_version_file("VERSION", &next_version)?;
         }
         SubCommands::Release => {
-            let status = Command::new("git").arg("status").arg("--porcelain").output().await?;
+            let status = Command::new("git")
+                .arg("status")
+                .arg("--porcelain")
+                .output()
+                .await?;
             if !status.stdout.is_empty() {
                 println!("Please commit all changes before updating version");
                 return Ok(());
@@ -187,7 +207,10 @@ async fn main() -> Result<()> {
             Command::new("git")
                 .arg("commit")
                 .arg("-am")
-                .arg(format!("update: prepare for next version: {}", next_version))
+                .arg(format!(
+                    "update: prepare for next version: {}",
+                    next_version
+                ))
                 .status()
                 .await?;
             Command::new("git")
