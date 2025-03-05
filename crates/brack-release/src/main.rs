@@ -127,6 +127,12 @@ async fn main() -> Result<()> {
                         .arg(format!("release/v{}", except_rc_version))
                         .status()
                         .await?;
+                    Command::new("git")
+                        .arg("push")
+                        .arg("origin")
+                        .arg("--tags")
+                        .status()
+                        .await?;
                     println!(
                         "🎉 Successfully updated version: {} and pre-released",
                         next_version
@@ -176,6 +182,12 @@ async fn main() -> Result<()> {
                         .arg("push")
                         .arg("origin")
                         .arg(format!("release/v{}", except_rc_version))
+                        .status()
+                        .await?;
+                    Command::new("git")
+                        .arg("push")
+                        .arg("origin")
+                        .arg("--tags")
                         .status()
                         .await?;
                     println!(
@@ -239,6 +251,12 @@ async fn main() -> Result<()> {
                 .arg("push")
                 .arg("origin")
                 .arg("main")
+                .status()
+                .await?;
+            Command::new("git")
+                .arg("push")
+                .arg("origin")
+                .arg("--tags")
                 .status()
                 .await?;
             Command::new("git")
