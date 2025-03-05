@@ -8,4 +8,3 @@ fn main() {
         eprintln!("Failed to read VERSION file");
     }
 }
-

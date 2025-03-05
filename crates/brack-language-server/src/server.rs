@@ -7,19 +7,13 @@ use serde::Serialize;
 use serde_json::{from_str, json, Value};
 use tokio::io::{stdin, stdout, AsyncReadExt, AsyncWriteExt};
 
+#[derive(Default)]
 pub struct Server {
     pub(crate) client_capabilities: ClientCapabilities,
     pub(crate) project: Option<Project>,
 }
 
 impl Server {
-    pub fn new() -> Self {
-        Self {
-            client_capabilities: ClientCapabilities::default(),
-            project: None,
-        }
-    }
-
     pub(crate) async fn send_stdout<T: ?Sized + Serialize>(&self, message: &T) -> Result<()> {
         let msg = serde_json::to_string(message)?;
         let mut output = stdout();

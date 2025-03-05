@@ -7,7 +7,7 @@ use crate::{
 };
 
 // angle_bracket_close | square_bracket_close | curly_bracket_close
-pub fn parse<'a>(tokens: &'a [Token]) -> Result<Parser> {
+pub fn parse(tokens: &[Token]) -> Result<Parser> {
     if let Some(token) = tokens.first() {
         match token {
             Token::AngleBracketClose(location) => {

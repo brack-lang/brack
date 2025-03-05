@@ -2,7 +2,7 @@ use anyhow::Result;
 use brack_tokenizer::{tokenize::tokenize, tokens::Token};
 use lsp_types::{SemanticToken, SemanticTokenType, SemanticTokens, SemanticTokensParams};
 
-use crate::server::Server;
+use crate::{server::Server, utils::to_url};
 
 fn token_kind_to_type(token: &Token) -> u32 {
     let typ = match token {
@@ -11,7 +11,7 @@ fn token_kind_to_type(token: &Token) -> u32 {
         Token::AngleBracketOpen(_) | Token::AngleBracketClose(_) => SemanticTokenType::MACRO,
         Token::CurlyBracketOpen(_) | Token::CurlyBracketClose(_) => SemanticTokenType::METHOD,
         Token::SquareBracketOpen(_) | Token::SquareBracketClose(_) => SemanticTokenType::FUNCTION,
-        _ => return 100 // no decoration
+        _ => return 100, // no decoration
     };
     token_type_as_u32(typ)
 }
@@ -62,7 +62,7 @@ fn separate(tokens: &Vec<Token>) -> Vec<SemanticToken> {
             delta_line,
             delta_start,
             length: (location.end.character - location.start.character) as u32,
-            token_type: token_kind_to_type(&token),
+            token_type: token_kind_to_type(token),
             token_modifiers_bitset: 0,
         });
 
@@ -78,21 +78,18 @@ impl Server {
         &self,
         params: SemanticTokensParams,
     ) -> Result<Option<SemanticTokens>> {
-        let file_path = params.text_document.uri.to_file_path().map_err(|_| {
-            anyhow::anyhow!(
-                "Failed to convert URI to file path: {:?}",
-                params.text_document.uri
-            )
-        })?;
-        let uri = file_path.to_str().ok_or_else(|| {
-            anyhow::anyhow!("Failed to convert file path to string: {:?}", file_path)
-        })?;
+        let path = to_url(params.text_document.uri)?
+            .to_file_path()
+            .map_err(|e| anyhow::anyhow!("Failed to convert URI to file path: {:?}", e))?;
 
-        let tokens = match tokenize(uri) {
+        let tokens = match tokenize(&path) {
             Ok(tokens) => tokens,
             Err(e) => {
-                self.log_message(&format!("Failed to tokenize file: {:?}", e))
-                    .await?;
+                self.log_message(&format!(
+                    "[SemanticTokens]: Failed to tokenize file: {:?}",
+                    e
+                ))
+                .await?;
                 return Ok(None);
             }
         };

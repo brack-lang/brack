@@ -10,7 +10,7 @@ use crate::cst::CST;
 use crate::parser::Parser;
 
 // backslash (dot | comma | bracket_open | bracket_close | backslash | .)
-pub fn parse<'a>(tokens: &'a [Token]) -> Result<Parser> {
+pub fn parse(tokens: &[Token]) -> Result<Parser> {
     if let Some(token) = tokens.first() {
         match token {
             Token::BackSlash(location) => {

@@ -11,7 +11,7 @@ use crate::{
     },
 };
 
-fn check_if_the_first_and_last_node_are_brackets(csts: &Vec<CST>) -> Vec<TransformError> {
+fn check_if_the_first_and_last_node_are_brackets(csts: &[CST]) -> Vec<TransformError> {
     let mut errors = vec![];
     match (csts[0].clone(), csts[csts.len() - 1].clone()) {
         (CST::SquareBracketOpen(_), CST::SquareBracketClose(_)) => (),

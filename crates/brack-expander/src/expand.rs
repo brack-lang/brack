@@ -24,7 +24,8 @@ fn expand_angle(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<A
         }
     }
 
-    let new_ast = plugins.call_macro_command(&module_name, &ident_name, overall_ast.clone(), ast.id())?;
+    let new_ast =
+        plugins.call_macro_command(&module_name, &ident_name, overall_ast.clone(), ast.id())?;
     Ok(new_ast)
 }
 
@@ -44,8 +45,8 @@ fn expand_other(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<A
     }
     for child in ast.children() {
         match child {
-            AST::Angle(_) => children.push(expand_angle(overall_ast, &child, plugins)?),
-            _ => children.push(expand_other(overall_ast, &child, plugins)?),
+            AST::Angle(_) => children.push(expand_angle(overall_ast, child, plugins)?),
+            _ => children.push(expand_other(overall_ast, child, plugins)?),
         }
     }
     Ok(ast.clone())
@@ -53,5 +54,5 @@ fn expand_other(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<A
 
 pub fn expander(ast: &AST, plugins: &mut Plugins) -> Result<AST> {
     let overall_ast = ast.clone();
-    Ok(expand_other(&overall_ast, ast, plugins)?)
+    expand_other(&overall_ast, ast, plugins)
 }

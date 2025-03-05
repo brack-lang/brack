@@ -4,23 +4,21 @@ use brack_tokenizer::tokenize::tokenize;
 use brack_transformer::transform::transform;
 use lsp_types::{Diagnostic, DidSaveTextDocumentParams};
 
-use crate::server::Server;
+use crate::{server::Server, utils::to_url};
 
 impl Server {
     pub(crate) async fn handle_text_document_did_save(
         &self,
         param: DidSaveTextDocumentParams,
     ) -> Result<()> {
-        let file_path = param
-            .text_document
-            .uri
+        let path = to_url(param.text_document.uri)?
             .to_file_path()
-            .map_err(|_| anyhow::anyhow!("Invalid file path"))?;
-        let uri = file_path
+            .map_err(|e| anyhow::anyhow!("Failed to convert URI to file path: {:?}", e))?;
+        let path_str = path
             .to_str()
             .ok_or_else(|| anyhow::anyhow!("Invalid file path"))?;
 
-        let tokens = match tokenize(uri) {
+        let tokens = match tokenize(&path) {
             Ok(tokens) => tokens,
             Err(e) => return self.log_message(&format!("Tokenize failed: {}", e)).await,
         };
@@ -29,9 +27,7 @@ impl Server {
 
         if errors.is_empty() {
             let diagnostics: Vec<Diagnostic> = vec![];
-            return self
-                .send_publish_diagnostics(&uri.to_string(), &diagnostics)
-                .await;
+            return self.send_publish_diagnostics(path_str, &diagnostics).await;
         }
 
         let mut diagnostics = vec![];
@@ -54,7 +50,6 @@ impl Server {
             };
             diagnostics.push(diagnostic);
         }
-        self.send_publish_diagnostics(&uri.to_string(), &diagnostics)
-            .await
+        self.send_publish_diagnostics(path_str, &diagnostics).await
     }
 }

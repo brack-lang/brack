@@ -165,7 +165,7 @@ impl<'de> Deserialize<'de> for PluginSchema {
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["schema", "owner", "repo", "version"];
+        const FIELDS: &[&str] = &["schema", "owner", "repo", "version"];
         deserializer.deserialize_struct("Plugin", FIELDS, PluginVisitor)
     }
 }
@@ -190,11 +190,11 @@ pub async fn add_plugin(schema: &str) -> Result<()> {
 
     let repository_type = schema
         .split(':')
-        .nth(0)
+        .next()
         .ok_or_else(|| anyhow::anyhow!("Repository type is not found."))?;
     let owner = schema
         .split('/')
-        .nth(0)
+        .next()
         .ok_or_else(|| anyhow::anyhow!("Owner is not found."))?
         .split(':')
         .nth(1)
@@ -204,7 +204,7 @@ pub async fn add_plugin(schema: &str) -> Result<()> {
         .nth(1)
         .ok_or_else(|| anyhow::anyhow!("Repository is not found."))?
         .split('@')
-        .nth(0)
+        .next()
         .ok_or_else(|| anyhow::anyhow!("Repository is not found."))?;
     let version = schema
         .split('@')
@@ -232,10 +232,11 @@ pub async fn add_plugin(schema: &str) -> Result<()> {
         .next()
         .ok_or_else(|| anyhow::anyhow!("First element of repository name is not found."))?;
 
-    if let Some(_) = config
+    if config
         .plugins
         .as_ref()
         .and_then(|plugins| plugins.get(plugin_name))
+        .is_some()
     {
         return Err(anyhow::anyhow!("Plugin already exists."));
     }
@@ -264,7 +265,7 @@ pub async fn add_plugin(schema: &str) -> Result<()> {
     let mut out = File::create(format!("plugins/{}.wasm", repository_name))?;
     io::copy(&mut bytes.as_ref(), &mut out)?;
 
-    config.plugins.get_or_insert_with(|| HashMap::new()).insert(
+    config.plugins.get_or_insert_with(HashMap::new).insert(
         plugin_name.to_string(),
         PluginSchema::GitHub {
             owner: owner.to_string(),

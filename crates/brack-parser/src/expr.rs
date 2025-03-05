@@ -6,7 +6,7 @@ use crate::{
 };
 
 // (escaped | module | ident | bracket | dot | comma | whitespace | text)+
-pub fn parse<'a>(tokens: &'a [Token]) -> Result<Parser> {
+pub fn parse(tokens: &[Token]) -> Result<Parser> {
     let mut tokens = tokens;
     let mut expr = new_expr();
 

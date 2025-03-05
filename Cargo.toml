@@ -1,10 +1,10 @@
 [package]
 name = "brack"
-version = "0.2.0"
+version = "0.2.0-rc.2"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.97"
 brack-codegen = { git = "https://github.com/brack-lang/brack", package = "brack-codegen" }
 brack-expander = { git = "https://github.com/brack-lang/brack", package = "brack-expander" }
 brack-language-server = { git = "https://github.com/brack-lang/brack", package = "brack-language-server" }
@@ -15,12 +15,15 @@ brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brac
 brack-transformer = { git = "https://github.com/brack-lang/brack", package = "brack-transformer" }
 tokio = { version = "1", features = ["full"] }
 toml = "0.8.14"
-extism = "1.4.1"
-reqwest = "0.12.5"
-regex = "1.10.6"
+extism = "1.9.1"
+reqwest = "0.12.12"
+regex = "1.11.1"
+serde_json = "1.0.134"
+serde = { version = "1.0.218", features = ["derive"] }
+toml_edit = "0.22.22"
 
 [dependencies.clap]
-version = "4.5.7"
+version = "4.5.28"
 features = ["derive"]
 
 [features]
@@ -32,6 +35,10 @@ name = "debug_compile"
 path = "src/debug/debug_compile.rs"
 required-features = ["debug"]
 
+[[bin]]
+name = "brack-release"
+path = "crates/brack-release/src/main.rs"
+
 [workspace]
 members = [
     "crates/brack-codegen",
@@ -39,7 +46,7 @@ members = [
     "crates/brack-language-server",
     "crates/brack-parser",
     "crates/brack-plugin",
-    "crates/brack-project-manager",
+    "crates/brack-project-manager", "crates/brack-release",
     "crates/brack-tokenizer",
     "crates/brack-transformer",
 ]

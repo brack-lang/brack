@@ -1,4 +1,4 @@
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 use anyhow::Result;
 use brack_transformer::ast::AST;
@@ -61,7 +61,12 @@ impl Plugins {
         })
     }
 
-    pub fn argument_types(&self, module_name: &str, command_name: &str, typ: Type) -> Result<Vec<(String, Type)>> {
+    pub fn argument_types(
+        &self,
+        module_name: &str,
+        command_name: &str,
+        typ: Type,
+    ) -> Result<Vec<(String, Type)>> {
         let plugin = self
             .name_to_plugin
             .get(module_name)
