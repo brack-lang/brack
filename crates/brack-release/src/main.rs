@@ -75,6 +75,21 @@ fn rewrite_version_file<P: AsRef<Path> + Copy>(path: P, version: &SemVer) -> Res
     Ok(())
 }
 
+async fn create_git_tag(version: &SemVer) -> Result<()> {
+    let status = Command::new("git")
+        .arg("tag")
+        .arg("-a")
+        .arg(format!("v{}", version))
+        .arg("-m")
+        .arg(format!("release version: {}", version))
+        .status()
+        .await?;
+    if !status.success() {
+        anyhow::bail!("Failed to create git tag: {:?}", status);
+    }
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Args::parse();
@@ -116,11 +131,7 @@ async fn main() -> Result<()> {
                         ))
                         .status()
                         .await?;
-                    Command::new("git")
-                        .arg("tag")
-                        .arg(format!("v{}", next_version))
-                        .status()
-                        .await?;
+                    create_git_tag(&next_version).await?;
                     Command::new("git")
                         .arg("push")
                         .arg("origin")
@@ -173,11 +184,7 @@ async fn main() -> Result<()> {
                         ))
                         .status()
                         .await?;
-                    Command::new("git")
-                        .arg("tag")
-                        .arg(format!("v{}", next_version))
-                        .status()
-                        .await?;
+                    create_git_tag(&next_version).await?;
                     Command::new("git")
                         .arg("push")
                         .arg("origin")
@@ -242,11 +249,7 @@ async fn main() -> Result<()> {
                 .arg(format!("release/v{}", next_version))
                 .status()
                 .await?;
-            Command::new("git")
-                .arg("tag")
-                .arg(format!("v{}", next_version))
-                .status()
-                .await?;
+            create_git_tag(&next_version).await?;
             Command::new("git")
                 .arg("push")
                 .arg("origin")
