@@ -1077,6 +1077,15 @@ rec {
             packageId = "clap";
             features = [ "derive" ];
           }
+          {
+            name = "tokio";
+            packageId = "tokio";
+            features = [ "full" ];
+          }
+          {
+            name = "toml_edit";
+            packageId = "toml_edit";
+          }
         ];
 
       };

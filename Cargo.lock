@@ -305,6 +305,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "tokio",
+ "toml_edit",
 ]
 
 [[package]]
