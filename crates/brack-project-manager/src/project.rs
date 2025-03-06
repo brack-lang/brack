@@ -51,7 +51,10 @@ fn get_task_download_plugin_from_github(
     task
 }
 
-fn get_task_download_plugin_from_local(path: &str, dest_path: PathBuf) -> JoinHandle<Result<(String, PathBuf, Bytes, FeatureFlag)>> {
+fn get_task_download_plugin_from_local(
+    path: &str,
+    dest_path: PathBuf,
+) -> JoinHandle<Result<(String, PathBuf, Bytes, FeatureFlag)>> {
     let path = String::from(path);
     let task: JoinHandle<Result<(String, PathBuf, Bytes, FeatureFlag)>> = task::spawn(async move {
         let bytes = std::fs::read(&path)?;
@@ -90,12 +93,11 @@ impl Project {
     pub async fn download_plugins_using_config(&mut self) -> Result<()> {
         let plugins = match self.config.plugins.clone() {
             Some(plugins) => plugins,
-            None => return Ok(())
+            None => return Ok(()),
         };
         let mut tasks = vec![];
         for (name, ref plugin) in plugins {
-            let dest_path =
-                PathBuf::from(&format!("plugins/{}.wasm", plugin.hash_sha256()));
+            let dest_path = PathBuf::from(&format!("plugins/{}.wasm", plugin.hash_sha256()));
             let hook = match plugin {
                 PluginSchema::GitHub { hook, .. } => hook,
                 PluginSchema::Local { hook, .. } => hook,
@@ -126,7 +128,7 @@ impl Project {
                         dest_path,
                         flag,
                     ));
-                },
+                }
                 PluginSchema::Local { path, .. } => {
                     tasks.push(get_task_download_plugin_from_local(&path, dest_path));
                 }

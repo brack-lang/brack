@@ -144,7 +144,7 @@ async fn main() -> Result<()> {
             let mut project = brack_project_manager::project::Project::new(".");
             project.load_brack_toml()?;
             project.download_plugins_using_config().await?;
-        },
+        }
         SubCommands::Version => {
             let version = match std::env::var("APP_VERSION") {
                 Ok(version) => version,

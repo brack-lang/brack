@@ -76,10 +76,7 @@ impl Serialize for PluginSchema {
                 s.serialize_field("version", version)?;
                 s.serialize_hook_fields(hook)?;
             }
-            PluginSchema::Local {
-                ref path,
-                ref hook,
-            } => {
+            PluginSchema::Local { ref path, ref hook } => {
                 s.serialize_field("schema", "local")?;
                 s.serialize_field("path", path)?;
                 s.serialize_hook_fields(hook)?;
@@ -208,10 +205,7 @@ impl<'de> Deserialize<'de> for PluginSchema {
                         version,
                         hook,
                     }),
-                    "local" => Ok(PluginSchema::Local {
-                        path,
-                        hook,
-                    }),
+                    "local" => Ok(PluginSchema::Local { path, hook }),
                     _ => Err(de::Error::invalid_value(
                         de::Unexpected::Str(&schema),
                         &"github or local",
@@ -330,14 +324,17 @@ fn add_plugin_local(schema: &str) -> Result<Config> {
             .ok_or_else(|| anyhow::anyhow!("First element of file stem is not found."))?
             .to_string(),
         PluginSchema::Local {
-            path: path.to_str().ok_or_else(|| anyhow::anyhow!("Path is not found."))?.to_string(),
+            path: path
+                .to_str()
+                .ok_or_else(|| anyhow::anyhow!("Path is not found."))?
+                .to_string(),
             hook: Hook {
                 expr: None,
                 stmt: None,
                 document: None,
                 text: None,
             },
-        }
+        },
     );
     Ok(config)
 }
