@@ -4,14 +4,14 @@ use anyhow::Result;
 use brack_plugin::{feature_flag::FeatureFlag, plugin::Plugin, plugins::Plugins};
 use bytes::Bytes;
 use futures::future::join_all;
+use futures_util::StreamExt;
+use indicatif::{ProgressBar, ProgressStyle};
 use reqwest;
 use std::{
     collections::HashMap,
     path::{Path, PathBuf},
 };
 use tokio::task::{self, JoinHandle};
-use indicatif::{ProgressBar, ProgressStyle};
-use futures_util::StreamExt;
 
 #[derive(Debug)]
 pub struct Project {
