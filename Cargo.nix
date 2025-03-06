@@ -1025,8 +1025,17 @@ rec {
             packageId = "futures";
           }
           {
+            name = "futures-util";
+            packageId = "futures-util";
+          }
+          {
+            name = "indicatif";
+            packageId = "indicatif";
+          }
+          {
             name = "reqwest";
             packageId = "reqwest";
+            features = [ "json" "stream" ];
           }
           {
             name = "serde";
@@ -1698,6 +1707,47 @@ rec {
         edition = "2021";
         sha256 = "1439m3r3jy3xqck8aa13q658visn71ki76qa93cy55wkmalwlqsv";
 
+      };
+      "console" = rec {
+        crateName = "console";
+        version = "0.15.11";
+        edition = "2021";
+        sha256 = "1n5gmsjk6isbnw6qss043377kln20lfwlmdk3vswpwpr21dwnk05";
+        authors = [
+          "Armin Ronacher <armin.ronacher@active-4.com>"
+        ];
+        dependencies = [
+          {
+            name = "encode_unicode";
+            packageId = "encode_unicode";
+            target = { target, features }: (target."windows" or false);
+          }
+          {
+            name = "libc";
+            packageId = "libc";
+          }
+          {
+            name = "once_cell";
+            packageId = "once_cell";
+          }
+          {
+            name = "unicode-width";
+            packageId = "unicode-width";
+            optional = true;
+          }
+          {
+            name = "windows-sys";
+            packageId = "windows-sys 0.59.0";
+            target = { target, features }: (target."windows" or false);
+            features = [ "Win32_Foundation" "Win32_System_Console" "Win32_Storage_FileSystem" "Win32_UI_Input_KeyboardAndMouse" ];
+          }
+        ];
+        features = {
+          "default" = [ "unicode-width" "ansi-parsing" ];
+          "unicode-width" = [ "dep:unicode-width" ];
+          "windows-console-colors" = [ "ansi-parsing" ];
+        };
+        resolvedDefaultFeatures = [ "ansi-parsing" "unicode-width" ];
       };
       "core-foundation" = rec {
         crateName = "core-foundation";
@@ -2479,6 +2529,20 @@ rec {
           "std" = [ "alloc" ];
         };
         resolvedDefaultFeatures = [ "alloc" ];
+      };
+      "encode_unicode" = rec {
+        crateName = "encode_unicode";
+        version = "1.0.0";
+        edition = "2021";
+        sha256 = "1h5j7j7byi289by63s3w4a8b3g6l5ccdrws7a67nn07vdxj77ail";
+        authors = [
+          "Torbjørn Birch Moltu <t.b.moltu@lyse.net>"
+        ];
+        features = {
+          "ascii" = [ "dep:ascii" ];
+          "default" = [ "std" ];
+        };
+        resolvedDefaultFeatures = [ "default" "std" ];
       };
       "encoding_rs" = rec {
         crateName = "encoding_rs";
@@ -3294,7 +3358,7 @@ rec {
           "unstable" = [ "futures-core/unstable" "futures-task/unstable" ];
           "write-all-vectored" = [ "io" ];
         };
-        resolvedDefaultFeatures = [ "alloc" "async-await" "async-await-macro" "channel" "futures-channel" "futures-io" "futures-macro" "futures-sink" "io" "memchr" "sink" "slab" "std" ];
+        resolvedDefaultFeatures = [ "alloc" "async-await" "async-await-macro" "channel" "default" "futures-channel" "futures-io" "futures-macro" "futures-sink" "io" "memchr" "sink" "slab" "std" ];
       };
       "fxhash" = rec {
         crateName = "fxhash";
@@ -4717,6 +4781,50 @@ rec {
         };
         resolvedDefaultFeatures = [ "default" "serde" "std" ];
       };
+      "indicatif" = rec {
+        crateName = "indicatif";
+        version = "0.17.11";
+        edition = "2021";
+        sha256 = "0db2b2r79r9x8x4lysq1ci9xm13c0xg0sqn3z960yh2bk2430fqq";
+        dependencies = [
+          {
+            name = "console";
+            packageId = "console";
+            usesDefaultFeatures = false;
+            features = [ "ansi-parsing" ];
+          }
+          {
+            name = "number_prefix";
+            packageId = "number_prefix";
+          }
+          {
+            name = "portable-atomic";
+            packageId = "portable-atomic";
+          }
+          {
+            name = "unicode-width";
+            packageId = "unicode-width";
+            optional = true;
+          }
+          {
+            name = "web-time";
+            packageId = "web-time";
+            target = { target, features }: ("wasm32" == target."arch" or null);
+          }
+        ];
+        features = {
+          "default" = [ "unicode-width" "console/unicode-width" ];
+          "futures" = [ "dep:futures-core" ];
+          "improved_unicode" = [ "unicode-segmentation" "unicode-width" "console/unicode-width" ];
+          "in_memory" = [ "vt100" ];
+          "rayon" = [ "dep:rayon" ];
+          "tokio" = [ "dep:tokio" ];
+          "unicode-segmentation" = [ "dep:unicode-segmentation" ];
+          "unicode-width" = [ "dep:unicode-width" ];
+          "vt100" = [ "dep:vt100" ];
+        };
+        resolvedDefaultFeatures = [ "default" "unicode-width" ];
+      };
       "io-extras" = rec {
         crateName = "io-extras";
         version = "0.18.4";
@@ -5519,6 +5627,19 @@ rec {
         };
         resolvedDefaultFeatures = [ "std" ];
       };
+      "number_prefix" = rec {
+        crateName = "number_prefix";
+        version = "0.4.0";
+        edition = "2015";
+        sha256 = "1wvh13wvlajqxkb1filsfzbrnq0vrmrw298v2j3sy82z1rm282w3";
+        authors = [
+          "Benjamin Sago <ogham@bsago.me>"
+        ];
+        features = {
+          "default" = [ "std" ];
+        };
+        resolvedDefaultFeatures = [ "default" "std" ];
+      };
       "object" = rec {
         crateName = "object";
         version = "0.36.7";
@@ -5844,6 +5965,19 @@ rec {
           "Alex Crichton <alex@alexcrichton.com>"
         ];
 
+      };
+      "portable-atomic" = rec {
+        crateName = "portable-atomic";
+        version = "1.11.0";
+        edition = "2018";
+        sha256 = "0glb2wngflvfmg789qbf6dbnwcf6ai212fs7n0lf1c66rd49n3im";
+        libName = "portable_atomic";
+        features = {
+          "critical-section" = [ "dep:critical-section" ];
+          "default" = [ "fallback" ];
+          "serde" = [ "dep:serde" ];
+        };
+        resolvedDefaultFeatures = [ "default" "fallback" ];
       };
       "postcard" = rec {
         crateName = "postcard";
@@ -6861,6 +6995,14 @@ rec {
             target = { target, features }: (!("wasm32" == target."arch" or null));
           }
           {
+            name = "tokio-util";
+            packageId = "tokio-util";
+            optional = true;
+            usesDefaultFeatures = false;
+            target = { target, features }: (!("wasm32" == target."arch" or null));
+            features = [ "codec" "io" ];
+          }
+          {
             name = "tower";
             packageId = "tower";
             usesDefaultFeatures = false;
@@ -6883,6 +7025,12 @@ rec {
           {
             name = "wasm-bindgen-futures";
             packageId = "wasm-bindgen-futures";
+            target = { target, features }: ("wasm32" == target."arch" or null);
+          }
+          {
+            name = "wasm-streams";
+            packageId = "wasm-streams";
+            optional = true;
             target = { target, features }: ("wasm32" == target."arch" or null);
           }
           {
@@ -6978,7 +7126,7 @@ rec {
           "stream" = [ "tokio/fs" "dep:tokio-util" "dep:wasm-streams" ];
           "zstd" = [ "dep:async-compression" "async-compression?/zstd" "dep:tokio-util" ];
         };
-        resolvedDefaultFeatures = [ "__tls" "charset" "default" "default-tls" "h2" "http2" "macos-system-configuration" ];
+        resolvedDefaultFeatures = [ "__tls" "charset" "default" "default-tls" "h2" "http2" "json" "macos-system-configuration" "stream" ];
       };
       "ring" = rec {
         crateName = "ring";
@@ -10081,6 +10229,48 @@ rec {
         };
         resolvedDefaultFeatures = [ "component-model" "std" ];
       };
+      "wasm-streams" = rec {
+        crateName = "wasm-streams";
+        version = "0.4.2";
+        edition = "2021";
+        sha256 = "0rddn007hp6k2cm91mm9y33n79b0jxv0c3znzszcvv67hn6ks18m";
+        libName = "wasm_streams";type = [ "cdylib" "rlib" ];
+        authors = [
+          "Mattias Buelens <mattias@buelens.com>"
+        ];
+        dependencies = [
+          {
+            name = "futures-util";
+            packageId = "futures-util";
+            features = [ "io" "sink" ];
+          }
+          {
+            name = "js-sys";
+            packageId = "js-sys";
+          }
+          {
+            name = "wasm-bindgen";
+            packageId = "wasm-bindgen";
+          }
+          {
+            name = "wasm-bindgen-futures";
+            packageId = "wasm-bindgen-futures";
+          }
+          {
+            name = "web-sys";
+            packageId = "web-sys";
+            features = [ "AbortSignal" "QueuingStrategy" "ReadableStream" "ReadableStreamType" "ReadableWritablePair" "ReadableStreamByobReader" "ReadableStreamReaderMode" "ReadableStreamReadResult" "ReadableStreamByobRequest" "ReadableStreamDefaultReader" "ReadableByteStreamController" "ReadableStreamGetReaderOptions" "ReadableStreamDefaultController" "StreamPipeOptions" "TransformStream" "TransformStreamDefaultController" "Transformer" "UnderlyingSink" "UnderlyingSource" "WritableStream" "WritableStreamDefaultController" "WritableStreamDefaultWriter" ];
+          }
+        ];
+        devDependencies = [
+          {
+            name = "web-sys";
+            packageId = "web-sys";
+            features = [ "console" "AbortSignal" "ErrorEvent" "PromiseRejectionEvent" "Response" "ReadableStream" "Window" ];
+          }
+        ];
+
+      };
       "wasmparser 0.221.3" = rec {
         crateName = "wasmparser";
         version = "0.221.3";
@@ -11733,7 +11923,30 @@ rec {
           "default" = [ "std" ];
           "std" = [ "wasm-bindgen/std" "js-sys/std" ];
         };
-        resolvedDefaultFeatures = [ "AbortController" "AbortSignal" "Blob" "BlobPropertyBag" "Event" "EventTarget" "File" "FormData" "Headers" "MessageEvent" "ReadableStream" "Request" "RequestCredentials" "RequestInit" "RequestMode" "Response" "ServiceWorkerGlobalScope" "Window" "Worker" "WorkerGlobalScope" "default" "std" ];
+        resolvedDefaultFeatures = [ "AbortController" "AbortSignal" "Blob" "BlobPropertyBag" "Event" "EventTarget" "File" "FormData" "Headers" "MessageEvent" "QueuingStrategy" "ReadableByteStreamController" "ReadableStream" "ReadableStreamByobReader" "ReadableStreamByobRequest" "ReadableStreamDefaultController" "ReadableStreamDefaultReader" "ReadableStreamGetReaderOptions" "ReadableStreamReadResult" "ReadableStreamReaderMode" "ReadableStreamType" "ReadableWritablePair" "Request" "RequestCredentials" "RequestInit" "RequestMode" "Response" "ServiceWorkerGlobalScope" "StreamPipeOptions" "TransformStream" "TransformStreamDefaultController" "Transformer" "UnderlyingSink" "UnderlyingSource" "Window" "Worker" "WorkerGlobalScope" "WritableStream" "WritableStreamDefaultController" "WritableStreamDefaultWriter" "default" "std" ];
+      };
+      "web-time" = rec {
+        crateName = "web-time";
+        version = "1.1.0";
+        edition = "2021";
+        sha256 = "1fx05yqx83dhx628wb70fyy10yjfq1jpl20qfqhdkymi13rq0ras";
+        libName = "web_time";
+        dependencies = [
+          {
+            name = "js-sys";
+            packageId = "js-sys";
+            target = { target, features }: ((builtins.elem "wasm" target."family") && ("unknown" == target."os" or null));
+          }
+          {
+            name = "wasm-bindgen";
+            packageId = "wasm-bindgen";
+            usesDefaultFeatures = false;
+            target = { target, features }: ((builtins.elem "wasm" target."family") && ("unknown" == target."os" or null));
+          }
+        ];
+        features = {
+          "serde" = [ "dep:serde" ];
+        };
       };
       "webpki-roots" = rec {
         crateName = "webpki-roots";
@@ -12628,7 +12841,7 @@ rec {
           "Win32_Web" = [ "Win32" ];
           "Win32_Web_InternetExplorer" = [ "Win32_Web" ];
         };
-        resolvedDefaultFeatures = [ "Wdk" "Wdk_Foundation" "Wdk_Storage" "Wdk_Storage_FileSystem" "Win32" "Win32_Foundation" "Win32_NetworkManagement" "Win32_NetworkManagement_IpHelper" "Win32_Networking" "Win32_Networking_WinSock" "Win32_Security" "Win32_Security_Authentication" "Win32_Security_Authentication_Identity" "Win32_Security_Credentials" "Win32_Security_Cryptography" "Win32_Storage" "Win32_Storage_FileSystem" "Win32_System" "Win32_System_Console" "Win32_System_Diagnostics" "Win32_System_Diagnostics_Debug" "Win32_System_IO" "Win32_System_Ioctl" "Win32_System_Kernel" "Win32_System_LibraryLoader" "Win32_System_Memory" "Win32_System_Performance" "Win32_System_Pipes" "Win32_System_SystemInformation" "Win32_System_SystemServices" "Win32_System_Threading" "Win32_System_WindowsProgramming" "default" ];
+        resolvedDefaultFeatures = [ "Wdk" "Wdk_Foundation" "Wdk_Storage" "Wdk_Storage_FileSystem" "Win32" "Win32_Foundation" "Win32_NetworkManagement" "Win32_NetworkManagement_IpHelper" "Win32_Networking" "Win32_Networking_WinSock" "Win32_Security" "Win32_Security_Authentication" "Win32_Security_Authentication_Identity" "Win32_Security_Credentials" "Win32_Security_Cryptography" "Win32_Storage" "Win32_Storage_FileSystem" "Win32_System" "Win32_System_Console" "Win32_System_Diagnostics" "Win32_System_Diagnostics_Debug" "Win32_System_IO" "Win32_System_Ioctl" "Win32_System_Kernel" "Win32_System_LibraryLoader" "Win32_System_Memory" "Win32_System_Performance" "Win32_System_Pipes" "Win32_System_SystemInformation" "Win32_System_SystemServices" "Win32_System_Threading" "Win32_System_WindowsProgramming" "Win32_UI" "Win32_UI_Input" "Win32_UI_Input_KeyboardAndMouse" "default" ];
       };
       "windows-targets" = rec {
         crateName = "windows-targets";

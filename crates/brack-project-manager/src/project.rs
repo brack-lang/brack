@@ -37,8 +37,9 @@ fn get_task_download_plugin_from_github(
     let pb = ProgressBar::new(0);
     pb.set_style(
         ProgressStyle::default_bar()
-            .template("[{elapsed_precise}] {bar:40} {bytes}/{total_bytes} ({eta}) {msg}")
+            .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {pos:>3}/{len:3} {msg}")
             .unwrap()
+            .progress_chars("=>-"),
     );
     pb.set_message(format!("Downloading {}", name));
     let task: JoinHandle<Result<(String, PathBuf, Bytes, FeatureFlag)>> = task::spawn(async move {
