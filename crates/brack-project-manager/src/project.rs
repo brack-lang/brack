@@ -120,9 +120,9 @@ impl Project {
                     ..
                 } => {
                     tasks.push(get_task_download_plugin_from_github(
-                        &owner,
-                        &repo,
-                        &version,
+                        owner,
+                        repo,
+                        version,
                         &name,
                         &self.config.document.backend,
                         dest_path,
@@ -130,7 +130,7 @@ impl Project {
                     ));
                 }
                 PluginSchema::Local { path, .. } => {
-                    tasks.push(get_task_download_plugin_from_local(&path, dest_path));
+                    tasks.push(get_task_download_plugin_from_local(path, dest_path));
                 }
             }
         }
