@@ -140,6 +140,7 @@ async fn main() -> Result<()> {
         }
         SubCommands::New { name } => new_project(&name)?,
         SubCommands::Add { schema } => {
+            // FIXME: if the process fails, the schema should not be added to the project.
             brack_project_manager::plugin::add_plugin(&schema).await?;
             let mut project = brack_project_manager::project::Project::new(".");
             project.load_brack_toml()?;

@@ -121,6 +121,7 @@ impl Project {
             Some(plugins) => plugins,
             None => return Ok(()),
         };
+        std::fs::create_dir("plugins")?;
         let mut tasks = vec![];
         for (name, ref plugin) in plugins {
             let dest_path = PathBuf::from(&format!("plugins/{}.wasm", plugin.hash_sha256()));
