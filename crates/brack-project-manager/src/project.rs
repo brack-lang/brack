@@ -67,8 +67,6 @@ fn get_task_download_plugin_from_github(
             let chunk = chunk?;
             pb.inc(chunk.len() as u64);
             downloaded_data.extend_from_slice(&chunk);
-            // sleep
-            tokio::time::sleep(std::time::Duration::from_millis(10)).await;
         }
 
         pb.finish_with_message(format!("Downloaded {}", name));
