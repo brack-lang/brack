@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.97"
-reqwest = "0.12.12"
+reqwest = { version = "0.12.12", features = ["json", "stream"] }
 serde = { version = "1.0.218", features = ["derive"] }
 tokio = { version = "1.42.0", features = ["macros"] }
 toml = "0.8.14"
@@ -21,7 +21,8 @@ futures = "0.3.31"
 sha2 = "0.10.8"
 bytes = "1.9.0"
 walkdir = "2.5.0"
-
+indicatif = "0.17.11"
+futures-util = "0.3"
 
 [features]
 default = []

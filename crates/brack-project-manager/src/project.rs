@@ -10,6 +10,8 @@ use std::{
     path::{Path, PathBuf},
 };
 use tokio::task::{self, JoinHandle};
+use indicatif::{ProgressBar, ProgressStyle};
+use futures_util::StreamExt;
 
 #[derive(Debug)]
 pub struct Project {
@@ -32,9 +34,17 @@ fn get_task_download_plugin_from_github(
         owner, repo, version, name, backend
     );
     let name = String::from(name);
+    let pb = ProgressBar::new(0);
+    pb.set_style(
+        ProgressStyle::default_bar()
+            .template("[{elapsed_precise}] {bar:40} {bytes}/{total_bytes} ({eta}) {msg}")
+            .unwrap()
+    );
+    pb.set_message(format!("Downloading {}", name));
     let task: JoinHandle<Result<(String, PathBuf, Bytes, FeatureFlag)>> = task::spawn(async move {
         let response = reqwest::get(&url).await?;
         if !response.status().is_success() {
+            pb.finish_and_clear();
             anyhow::bail!(
                 "Failed to download plugin from {}.\nStatus: {} - {}",
                 url,
@@ -45,8 +55,23 @@ fn get_task_download_plugin_from_github(
                     .unwrap_or("Unknown error")
             );
         }
-        let bytes = response.bytes().await?;
-        Ok((name, dest_path, bytes, flag))
+        if let Some(size) = response.content_length() {
+            pb.set_length(size);
+        }
+
+        let mut stream = response.bytes_stream();
+        let mut downloaded_data = Vec::new();
+
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            pb.inc(chunk.len() as u64);
+            downloaded_data.extend_from_slice(&chunk);
+            // sleep
+            tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+        }
+
+        pb.finish_with_message(format!("Downloaded {}", name));
+        Ok((name, dest_path, Bytes::from(downloaded_data), flag))
     });
     task
 }

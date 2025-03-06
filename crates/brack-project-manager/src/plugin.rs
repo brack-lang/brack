@@ -1,7 +1,8 @@
 use crate::config::Config;
 use core::fmt;
 use sha2::{Digest, Sha256};
-use std::{collections::HashMap, path::Path};
+use std::collections::HashMap;
+use std::path::Path;
 
 use anyhow::Result;
 use serde::{
