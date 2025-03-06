@@ -1,7 +1,7 @@
 use crate::config::Config;
 use core::fmt;
 use sha2::{Digest, Sha256};
-use std::{collections::HashMap, fs::File, io, path::Path};
+use std::{collections::HashMap, path::Path};
 
 use anyhow::Result;
 use serde::{
@@ -11,16 +11,50 @@ use serde::{
 };
 
 #[derive(Debug, Clone)]
+pub struct Hook {
+    pub expr: Option<bool>,
+    pub stmt: Option<bool>,
+    pub document: Option<bool>,
+    pub text: Option<bool>,
+}
+
+#[derive(Debug, Clone)]
 pub enum PluginSchema {
     GitHub {
         owner: String,
         repo: String,
         version: String,
-        expr_hook: Option<bool>,
-        stmt_hook: Option<bool>,
-        document_hook: Option<bool>,
-        text_hook: Option<bool>,
+        hook: Hook,
     },
+    Local {
+        path: String,
+        hook: Hook,
+    },
+}
+
+trait SerializeHookFields: SerializeStruct {
+    fn serialize_hook_fields(&mut self, hook: &Hook) -> Result<(), Self::Error>;
+}
+
+impl<T> SerializeHookFields for T
+where
+    T: SerializeStruct,
+{
+    fn serialize_hook_fields(&mut self, hook: &Hook) -> Result<(), T::Error> {
+        if let Some(expr_hook) = hook.expr {
+            self.serialize_field("expr_hook", &expr_hook)?;
+        }
+        if let Some(stmt_hook) = hook.stmt {
+            self.serialize_field("stmt_hook", &stmt_hook)?;
+        }
+        if let Some(document_hook) = hook.document {
+            self.serialize_field("document_hook", &document_hook)?;
+        }
+        if let Some(text_hook) = hook.text {
+            self.serialize_field("text_hook", &text_hook)?;
+        }
+        Ok(())
+    }
 }
 
 impl Serialize for PluginSchema {
@@ -34,27 +68,21 @@ impl Serialize for PluginSchema {
                 ref owner,
                 ref repo,
                 ref version,
-                ref expr_hook,
-                ref stmt_hook,
-                ref document_hook,
-                ref text_hook,
+                ref hook,
             } => {
                 s.serialize_field("schema", "github")?;
                 s.serialize_field("owner", owner)?;
                 s.serialize_field("repo", repo)?;
                 s.serialize_field("version", version)?;
-                if let Some(expr_hook) = expr_hook {
-                    s.serialize_field("expr_hook", expr_hook)?;
-                }
-                if let Some(stmt_hook) = stmt_hook {
-                    s.serialize_field("stmt_hook", stmt_hook)?;
-                }
-                if let Some(document_hook) = document_hook {
-                    s.serialize_field("document_hook", document_hook)?;
-                }
-                if let Some(text_hook) = text_hook {
-                    s.serialize_field("text_hook", text_hook)?;
-                }
+                s.serialize_hook_fields(hook)?;
+            }
+            PluginSchema::Local {
+                ref path,
+                ref hook,
+            } => {
+                s.serialize_field("schema", "local")?;
+                s.serialize_field("path", path)?;
+                s.serialize_hook_fields(hook)?;
             }
         }
         s.end()
@@ -83,6 +111,7 @@ impl<'de> Deserialize<'de> for PluginSchema {
                 let mut owner = None;
                 let mut repo = None;
                 let mut version = None;
+                let mut path = None;
                 let mut expr_hook = None;
                 let mut stmt_hook = None;
                 let mut document_hook = None;
@@ -114,6 +143,12 @@ impl<'de> Deserialize<'de> for PluginSchema {
                             }
                             version = Some(map.next_value()?);
                         }
+                        "path" => {
+                            if path.is_some() {
+                                return Err(de::Error::duplicate_field("path"));
+                            }
+                            path = Some(map.next_value()?);
+                        }
                         "expr_hook" => {
                             if expr_hook.is_some() {
                                 return Err(de::Error::duplicate_field("expr_hook"));
@@ -143,29 +178,59 @@ impl<'de> Deserialize<'de> for PluginSchema {
                 }
 
                 let schema: String = schema.ok_or_else(|| de::Error::missing_field("schema"))?;
-                let owner: String = owner.ok_or_else(|| de::Error::missing_field("owner"))?;
-                let repo: String = repo.ok_or_else(|| de::Error::missing_field("repo"))?;
-                let version: String = version.ok_or_else(|| de::Error::missing_field("version"))?;
+                let owner: String = match schema.as_str() {
+                    "github" => owner.ok_or_else(|| de::Error::missing_field("owner"))?,
+                    _ => "".to_string(),
+                };
+                let repo: String = match schema.as_str() {
+                    "github" => repo.ok_or_else(|| de::Error::missing_field("repo"))?,
+                    _ => "".to_string(),
+                };
+                let version: String = match schema.as_str() {
+                    "github" => version.ok_or_else(|| de::Error::missing_field("version"))?,
+                    _ => "".to_string(),
+                };
+                let path: String = match schema.as_str() {
+                    "local" => path.ok_or_else(|| de::Error::missing_field("path"))?,
+                    _ => "".to_string(),
+                };
+                let hook = Hook {
+                    expr: expr_hook,
+                    stmt: stmt_hook,
+                    document: document_hook,
+                    text: text_hook,
+                };
 
                 match schema.as_str() {
                     "github" => Ok(PluginSchema::GitHub {
                         owner,
                         repo,
                         version,
-                        expr_hook,
-                        stmt_hook,
-                        document_hook,
-                        text_hook,
+                        hook,
+                    }),
+                    "local" => Ok(PluginSchema::Local {
+                        path,
+                        hook,
                     }),
                     _ => Err(de::Error::invalid_value(
                         de::Unexpected::Str(&schema),
-                        &"github",
+                        &"github or local",
                     )),
                 }
             }
         }
 
-        const FIELDS: &[&str] = &["schema", "owner", "repo", "version"];
+        const FIELDS: &[&str] = &[
+            "schema",
+            "owner",
+            "repo",
+            "version",
+            "path",
+            "expr_hook",
+            "stmt_hook",
+            "document_hook",
+            "text_hook",
+        ];
         deserializer.deserialize_struct("Plugin", FIELDS, PluginVisitor)
     }
 }
@@ -183,15 +248,8 @@ fn check_existence_brack_toml() -> bool {
     path.exists()
 }
 
-pub async fn add_plugin(schema: &str) -> Result<()> {
-    if !check_existence_brack_toml() {
-        return Err(anyhow::anyhow!("Brack.toml is not found."));
-    }
-
-    let repository_type = schema
-        .split(':')
-        .next()
-        .ok_or_else(|| anyhow::anyhow!("Repository type is not found."))?;
+async fn add_plugin_github(schema: &str) -> Result<Config> {
+    // github:owner/repo@version
     let owner = schema
         .split('/')
         .next()
@@ -210,15 +268,7 @@ pub async fn add_plugin(schema: &str) -> Result<()> {
         .split('@')
         .nth(1)
         .ok_or_else(|| anyhow::anyhow!("Version is not found."))?;
-    let url = match repository_type {
-        "github" => format!("https://github.com/{}/{}", owner, repo),
-        _ => {
-            return Err(anyhow::anyhow!(
-                "Repository type '{}' is not supported.",
-                repository_type
-            ))
-        }
-    };
+    let url = format!("https://github.com/{}/{}", owner, repo);
 
     let mut config: Config = toml::from_str(&std::fs::read_to_string("Brack.toml")?)?;
 
@@ -241,42 +291,73 @@ pub async fn add_plugin(schema: &str) -> Result<()> {
         return Err(anyhow::anyhow!("Plugin already exists."));
     }
 
-    let download_url = format!(
-        "{}/releases/download/{}/{}.wasm",
-        url, version, repository_name
-    );
-
-    let response = reqwest::get(&download_url).await?;
-
-    if !response.status().is_success() {
-        return Err(anyhow::anyhow!(
-            "Failed to download plugin from {}.\nStatus: {} - {}",
-            download_url,
-            response.status().as_str(),
-            response
-                .status()
-                .canonical_reason()
-                .unwrap_or("Unknown error")
-        ));
-    }
-
-    let bytes = response.bytes().await?;
-    std::fs::create_dir_all("plugins")?;
-    let mut out = File::create(format!("plugins/{}.wasm", repository_name))?;
-    io::copy(&mut bytes.as_ref(), &mut out)?;
-
     config.plugins.get_or_insert_with(HashMap::new).insert(
         plugin_name.to_string(),
         PluginSchema::GitHub {
             owner: owner.to_string(),
             repo: repo.to_string(),
             version: version.to_string(),
-            expr_hook: None,
-            stmt_hook: None,
-            document_hook: None,
-            text_hook: None,
+            hook: Hook {
+                expr: None,
+                stmt: None,
+                document: None,
+                text: None,
+            },
         },
     );
+    Ok(config)
+}
+
+fn add_plugin_local(schema: &str) -> Result<Config> {
+    // local:path/to/plugin.wasm
+    let path = schema
+        .split(':')
+        .nth(1)
+        .ok_or_else(|| anyhow::anyhow!("Path is not found."))?;
+    let path = Path::new(path);
+    if !path.exists() {
+        return Err(anyhow::anyhow!("Plugin file is not found."));
+    }
+
+    let mut config: Config = toml::from_str(&std::fs::read_to_string("Brack.toml")?)?;
+    config.plugins.get_or_insert_with(HashMap::new).insert(
+        path.file_stem()
+            .ok_or_else(|| anyhow::anyhow!("File stem is not found."))?
+            .to_str()
+            .ok_or_else(|| anyhow::anyhow!("File stem is not found."))?
+            .split('.')
+            .next()
+            .ok_or_else(|| anyhow::anyhow!("First element of file stem is not found."))?
+            .to_string(),
+        PluginSchema::Local {
+            path: path.to_str().ok_or_else(|| anyhow::anyhow!("Path is not found."))?.to_string(),
+            hook: Hook {
+                expr: None,
+                stmt: None,
+                document: None,
+                text: None,
+            },
+        }
+    );
+    Ok(config)
+}
+
+pub async fn add_plugin(schema: &str) -> Result<()> {
+    if !check_existence_brack_toml() {
+        return Err(anyhow::anyhow!("Brack.toml is not found."));
+    }
+
+    let schema_type = schema
+        .split(':')
+        .next()
+        .ok_or_else(|| anyhow::anyhow!("Repository type is not found."))?;
+
+    let config = match schema_type {
+        "github" => add_plugin_github(schema).await?,
+        "local" => add_plugin_local(schema)?,
+        _ => return Err(anyhow::anyhow!("Unknown repository type.")),
+    };
+
     let toml = toml::to_string(&config)?;
     std::fs::write("Brack.toml", toml)?;
 

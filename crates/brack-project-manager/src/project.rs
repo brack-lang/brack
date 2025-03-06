@@ -18,6 +18,48 @@ pub struct Project {
     pub root: PathBuf,
 }
 
+fn get_task_download_plugin_from_github(
+    owner: &str,
+    repo: &str,
+    version: &str,
+    name: &str,
+    backend: &str,
+    dest_path: PathBuf,
+    flag: FeatureFlag,
+) -> JoinHandle<Result<(String, PathBuf, Bytes, FeatureFlag)>> {
+    let url = format!(
+        "https://github.com/{}/{}/releases/download/{}/{}.{}.wasm",
+        owner, repo, version, name, backend
+    );
+    let name = String::from(name);
+    let task: JoinHandle<Result<(String, PathBuf, Bytes, FeatureFlag)>> = task::spawn(async move {
+        let response = reqwest::get(&url).await?;
+        if !response.status().is_success() {
+            anyhow::bail!(
+                "Failed to download plugin from {}.\nStatus: {} - {}",
+                url,
+                response.status().as_str(),
+                response
+                    .status()
+                    .canonical_reason()
+                    .unwrap_or("Unknown error")
+            );
+        }
+        let bytes = response.bytes().await?;
+        Ok((name, dest_path, bytes, flag))
+    });
+    task
+}
+
+fn get_task_download_plugin_from_local(path: &str, dest_path: PathBuf) -> JoinHandle<Result<(String, PathBuf, Bytes, FeatureFlag)>> {
+    let path = String::from(path);
+    let task: JoinHandle<Result<(String, PathBuf, Bytes, FeatureFlag)>> = task::spawn(async move {
+        let bytes = std::fs::read(&path)?;
+        Ok((path, dest_path, bytes.into(), FeatureFlag::default()))
+    });
+    task
+}
+
 impl Project {
     pub fn new<P: AsRef<Path>>(path: P) -> Self {
         Self {
@@ -46,78 +88,57 @@ impl Project {
     }
 
     pub async fn download_plugins_using_config(&mut self) -> Result<()> {
-        if let Some(plugins) = self.config.plugins.clone() {
-            let mut tasks = vec![];
-            for (name, plugin) in plugins {
-                let path =
-                    PathBuf::from(&format!("plugins/{}_{}.wasm", name, plugin.hash_sha256()));
-                let document_hook = (match plugin {
-                    PluginSchema::GitHub { document_hook, .. } => document_hook,
-                })
-                .unwrap_or_default();
-                let stmt_hook = (match plugin {
-                    PluginSchema::GitHub { stmt_hook, .. } => stmt_hook,
-                })
-                .unwrap_or_default();
-                let expr_hook = (match plugin {
-                    PluginSchema::GitHub { expr_hook, .. } => expr_hook,
-                })
-                .unwrap_or_default();
-                let text_hook = (match plugin {
-                    PluginSchema::GitHub { text_hook, .. } => text_hook,
-                })
-                .unwrap_or_default();
-                let flag = FeatureFlag {
-                    document_hook,
-                    stmt_hook,
-                    expr_hook,
-                    text_hook,
-                };
-                if path.exists() {
-                    self.plugins_metadata.insert(name, (path, flag));
-                    continue;
-                }
-                match plugin {
-                    PluginSchema::GitHub {
-                        owner,
-                        repo,
-                        version,
-                        ..
-                    } => {
-                        let url = format!(
-                            "https://github.com/{}/{}/releases/download/{}/{}.{}.wasm",
-                            owner, repo, version, name, self.config.document.backend
-                        );
-                        let task: JoinHandle<Result<(String, PathBuf, Bytes, FeatureFlag)>> =
-                            task::spawn(async move {
-                                let response = reqwest::get(&url).await?;
-                                if !response.status().is_success() {
-                                    anyhow::bail!(
-                                        "Failed to download plugin from {}.\nStatus: {} - {}",
-                                        url,
-                                        response.status().as_str(),
-                                        response
-                                            .status()
-                                            .canonical_reason()
-                                            .unwrap_or("Unknown error")
-                                    );
-                                }
-                                let bytes = response.bytes().await?;
-                                Ok((name, path, bytes, flag))
-                            });
-                        tasks.push(task);
-                    }
-                }
+        let plugins = match self.config.plugins.clone() {
+            Some(plugins) => plugins,
+            None => return Ok(())
+        };
+        let mut tasks = vec![];
+        for (name, ref plugin) in plugins {
+            let dest_path =
+                PathBuf::from(&format!("plugins/{}.wasm", plugin.hash_sha256()));
+            let hook = match plugin {
+                PluginSchema::GitHub { hook, .. } => hook,
+                PluginSchema::Local { hook, .. } => hook,
+            };
+            let flag = FeatureFlag {
+                document_hook: hook.document.unwrap_or_default(),
+                stmt_hook: hook.stmt.unwrap_or_default(),
+                expr_hook: hook.expr.unwrap_or_default(),
+                text_hook: hook.text.unwrap_or_default(),
+            };
+            if dest_path.exists() {
+                self.plugins_metadata.insert(name, (dest_path, flag));
+                continue;
             }
-
-            let results = join_all(tasks).await;
-            for result in results {
-                let (name, path, bytes, flag) = result??;
-                std::fs::write(&path, &bytes)?;
-                self.plugins_metadata.insert(name, (path, flag));
+            match plugin {
+                PluginSchema::GitHub {
+                    owner,
+                    repo,
+                    version,
+                    ..
+                } => {
+                    tasks.push(get_task_download_plugin_from_github(
+                        &owner,
+                        &repo,
+                        &version,
+                        &name,
+                        &self.config.document.backend,
+                        dest_path,
+                        flag,
+                    ));
+                },
+                PluginSchema::Local { path, .. } => {
+                    tasks.push(get_task_download_plugin_from_local(&path, dest_path));
+                }
             }
         }
 
+        let results = join_all(tasks).await;
+        for result in results {
+            let (name, path, bytes, flag) = result??;
+            std::fs::write(&path, &bytes)?;
+            self.plugins_metadata.insert(name, (path, flag));
+        }
         Ok(())
     }
 
