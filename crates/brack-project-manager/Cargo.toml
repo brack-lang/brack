@@ -19,7 +19,7 @@ brack-transformer = { git = "https://github.com/brack-lang/brack", package = "br
 brack-codegen = { git = "https://github.com/brack-lang/brack", package = "brack-codegen" }
 futures = "0.3.31"
 sha2 = "0.10.8"
-bytes = "1.9.0"
+bytes = "1.10.1"
 walkdir = "2.5.0"
 
 
