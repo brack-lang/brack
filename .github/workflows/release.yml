@@ -9,14 +9,55 @@ permissions:
   contents: write
 
 jobs:
+  build-linux:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        # GitHub Actions does not provide an aarch64-linux host runner.
+        # platform: [ x86_64-linux, aarch64-linux ]
+        platform: [ x86_64-linux ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+      - uses: cachix/cachix-action@v15
+        with:
+          name: brack-lang
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - run: nix build ".#packages.${{ matrix.platform }}.brack"
+  build-darwin:
+    runs-on: macos-15
+    strategy:
+      matrix:
+        platform: [ x86_64-darwin, aarch64-darwin ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+      - uses: cachix/cachix-action@v15
+        with:
+          name: brack-lang
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - run: nix build ".#packages.${{ matrix.platform }}.brack"
   tag:
     runs-on: ubuntu-24.04
+    needs: [ build-linux, build-darwin ]
     steps:
       - uses: actions/checkout@v4
       - name: Get current version
         id: version
         run: |
           echo "version=$(cat ./VERSION)" >> $GITHUB_OUTPUT
+      - uses: actions/download-artifact@v4
+        with:
+          name: brack-x86_64-linux
+          path: x86_64-linux
+      - uses: actions/download-artifact@v4
+        with:
+          name: brack-x86_64-darwin
+          path: x86_64-darwin
+      - uses: actions/download-artifact@v4
+        with:
+          name: brack-aarch64-darwin
+          path: aarch64-darwin
       - name: Create release
         uses: softprops/action-gh-release@v2
         env:
@@ -26,4 +67,8 @@ jobs:
           draft: false
           prerelease: ${{ contains(github.ref, '-rc') }}
           generate_release_notes: true
+        files: |
+          x86_64-linux/*
+          x86_64-darwin/*
+          aarch64-darwin/*
 
