@@ -144,7 +144,7 @@ jobs:
         with:
           repository: brack-lang/homebrew-tap
           path: homebrew-tap
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
       - run: |
           echo "VERSION=${{ needs.tag.outputs.version }}" >> $GITHUB_ENV
           echo "SHA_X86_64_LINUX=${{ needs.tag.outputs.sha_x86_64_linux }}" >> $GITHUB_ENV
