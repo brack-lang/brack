@@ -81,6 +81,17 @@ fn rewrite_version_file<P: AsRef<Path> + Copy>(path: P, version: &SemVer) -> Res
     Ok(())
 }
 
+async fn generate_cargo_lock() -> Result<()> {
+    let status = Command::new("cargo")
+        .arg("generate-lockfile")
+        .status()
+        .await?;
+    if !status.success() {
+        anyhow::bail!("Failed to generate lock file");
+    }
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Args::parse();
@@ -110,6 +121,7 @@ async fn main() -> Result<()> {
                     git_switch_new(&format!("release/v{}", except_rc_version)).await?;
                     rewrite_all_cargo_toml(&next_version)?;
                     rewrite_version_file("VERSION", &next_version)?;
+                    generate_cargo_lock().await?;
                     git_commit_all(&format!(
                         "update: prepare for next version: {}",
                         next_version
@@ -131,6 +143,7 @@ async fn main() -> Result<()> {
                     git_merge_no_ff("develop").await?;
                     rewrite_all_cargo_toml(&next_version)?;
                     rewrite_version_file("VERSION", &next_version)?;
+                    generate_cargo_lock().await?;
                     git_commit_all(&format!(
                         "update: prepare for next version: {}",
                         next_version
@@ -168,6 +181,7 @@ async fn main() -> Result<()> {
             let next_version = current_version.release()?;
             rewrite_all_cargo_toml(&next_version)?;
             rewrite_version_file("VERSION", &next_version)?;
+            generate_cargo_lock().await?;
             git_commit_all(&format!(
                 "update: prepare for next version: {}",
                 next_version
