@@ -28,11 +28,24 @@ jobs:
           name: brack-lang
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - run: nix flake check --all-systems
-  build:
+  build-linux:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        platform: [ x86_64-linux, aarch64-linux, x86_64-darwin, aarch64-darwin ]
+        platform: [ x86_64-linux, aarch64-linux ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+      - uses: cachix/cachix-action@v15
+        with:
+          name: brack-lang
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - run: nix build ".#packages.${{ matrix.platform }}.brack"
+  build-darwin:
+    runs-on: macos-15
+    strategy:
+      matrix:
+        platform: [ x86_64-darwin, aarch64-darwin ]
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
