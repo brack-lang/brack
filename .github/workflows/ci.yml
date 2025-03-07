@@ -43,11 +43,8 @@ jobs:
           name: brack-lang
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - run: nix build ".#packages.${{ matrix.platform }}.brack"
-  build-darwin:
-    runs-on: macos-15
-    strategy:
-      matrix:
-        platform: [ x86_64-darwin, aarch64-darwin ]
+  build-x86_64-darwin:
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
@@ -55,7 +52,17 @@ jobs:
         with:
           name: brack-lang
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - run: nix build ".#packages.${{ matrix.platform }}.brack"
+      - run: nix build ".#packages.x86_64-darwin.brack"
+  build-aarch64-darwin:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+      - uses: cachix/cachix-action@v15
+        with:
+          name: brack-lang
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - run: nix build ".#packages.aarch64-darwin.brack"
   cargo-fmt:
     runs-on: ubuntu-24.04
     steps:
