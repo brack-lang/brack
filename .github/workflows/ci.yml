@@ -40,7 +40,7 @@ jobs:
         with:
           name: brack-lang
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - run: nix build ".#packages.${{ matrix.platform }}.package"
+      - run: nix build ".#packages.${{ matrix.platform }}.brack"
   cargo-fmt:
     runs-on: ubuntu-24.04
     steps:
