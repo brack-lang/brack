@@ -3,12 +3,13 @@ use brack_plugin::{plugins::Plugins, types::Type};
 use brack_transformer::ast::AST;
 
 use crate::op_code::OpCode;
+use crate::errors::LoweringError;
 use crate::{curly, expr, square, stmt, text};
 
-pub fn lowering(ast: &AST, plugins: Plugins) -> Result<Vec<OpCode>> {
+pub fn lowering(ast: &AST, plugins: Plugins) -> Result<Vec<OpCode>, LoweringError> {
     match ast {
         AST::Document(_) => (),
-        _ => anyhow::bail!("Document must be a document"),
+        _ => panic!("Document must be a document"),
     };
     let mut result = vec![];
     for child in ast.children() {
@@ -18,8 +19,8 @@ pub fn lowering(ast: &AST, plugins: Plugins) -> Result<Vec<OpCode>> {
             AST::Curly(_) => curly::lowering(child, &plugins)?,
             AST::Square(_) => square::lowering(child, &plugins)?,
             AST::Text(_) => text::lowering(child, &plugins)?,
-            AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
-            ast => anyhow::bail!("Document cannot contain the following node\n{}", ast),
+            AST::Angle(_) => panic!("Angle must be expanded by the macro expander."),
+            ast => panic!("Document cannot contain the following node\n{}", ast),
         };
         result.extend(res);
     }

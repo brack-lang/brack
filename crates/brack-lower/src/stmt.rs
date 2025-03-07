@@ -2,13 +2,14 @@ use anyhow::Result;
 use brack_plugin::{plugins::Plugins, types::Type};
 use brack_transformer::ast::AST;
 
+use crate::errors::LoweringError;
 use crate::op_code::{self, OpCode};
 use crate::{curly, expr, square, text};
 
-pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>> {
+pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, LoweringError> {
     match ast {
         AST::Stmt(_) => (),
-        _ => anyhow::bail!("Stmt must be a stmt"),
+        _ => panic!("Stmt must be a stmt"),
     };
     let mut result = vec![];
     for child in ast.children() {
@@ -17,8 +18,8 @@ pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>> {
             AST::Curly(_) => curly::lowering(child, &plugins)?,
             AST::Square(_) => square::lowering(child, &plugins)?,
             AST::Text(_) => text::lowering(child, &plugins)?,
-            AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
-            ast => anyhow::bail!("Document cannot contain the following node\n{}", ast),
+            AST::Angle(_) => panic!("Angle must be expanded by the macro expander."),
+            ast => panic!("Stmt cannot contain the following node\n{}", ast),
         };
         result.extend(res);
     }

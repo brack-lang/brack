@@ -8,3 +8,5 @@ anyhow = "1.0.93"
 brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
 brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
 brack-transformer = { git = "https://github.com/brack-lang/brack", package = "brack-transformer" }
+brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
+thiserror = "2.0.3"
