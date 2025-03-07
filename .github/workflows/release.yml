@@ -67,8 +67,8 @@ jobs:
           draft: false
           prerelease: ${{ contains(github.ref, '-rc') }}
           generate_release_notes: true
-        files: |
-          x86_64-linux/*
-          x86_64-darwin/*
-          aarch64-darwin/*
+          files: |
+            x86_64-linux/*
+            x86_64-darwin/*
+            aarch64-darwin/*
 
