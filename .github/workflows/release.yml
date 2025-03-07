@@ -9,11 +9,13 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        platform: [ x86_64-linux, aarch64-linux, x86_64-darwin, aarch64-darwin ]
+        # GitHub Actions does not provide an aarch64-linux host runner.
+        # platform: [ x86_64-linux, aarch64-linux ]
+        platform: [ x86_64-linux ]
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
@@ -22,13 +24,22 @@ jobs:
           name: brack-lang
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - run: nix build ".#packages.${{ matrix.platform }}.brack"
-      - uses: actions/upload-artifact@v4
+  build-darwin:
+    runs-on: macos-15
+    strategy:
+      matrix:
+        platform: [ x86_64-darwin, aarch64-darwin ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+      - uses: cachix/cachix-action@v15
         with:
-          name: ${{ matrix.platform }}
-          path: result
+          name: brack-lang
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - run: nix build ".#packages.${{ matrix.platform }}.brack"
   tag:
     runs-on: ubuntu-24.04
-    needs: build
+    needs: [ build-linux, build-darwin ]
     steps:
       - uses: actions/checkout@v4
       - name: Get current version
@@ -39,10 +50,6 @@ jobs:
         with:
           name: brack-x86_64-linux
           path: x86_64-linux
-      - uses: actions/download-artifact@v4
-        with:
-          name: brack-aarch64-linux
-          path: aarch64-linux
       - uses: actions/download-artifact@v4
         with:
           name: brack-x86_64-darwin
@@ -62,7 +69,6 @@ jobs:
           generate_release_notes: true
         files: |
           x86_64-linux/*
-          aarch64-linux/*
           x86_64-darwin/*
           aarch64-darwin/*
 
