@@ -139,7 +139,13 @@ async fn main() -> Result<()> {
             language_server.run().await?;
         }
         SubCommands::New { name } => new_project(&name)?,
-        SubCommands::Add { schema } => brack_project_manager::plugin::add_plugin(&schema).await?,
+        SubCommands::Add { schema } => {
+            // FIXME: if the process fails, the schema should not be added to the project.
+            brack_project_manager::plugin::add_plugin(&schema).await?;
+            let mut project = brack_project_manager::project::Project::new(".");
+            project.load_brack_toml()?;
+            project.download_plugins_using_config().await?;
+        }
         SubCommands::Version => {
             let version = match std::env::var("APP_VERSION") {
                 Ok(version) => version,
