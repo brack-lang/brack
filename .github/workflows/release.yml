@@ -152,7 +152,7 @@ jobs:
           echo "SHA_AARCH64_DARWIN=${{ needs.tag.outputs.sha_aarch64_darwin }}" >> $GITHUB_ENV
       - if: contains(github.ref, '-rc')
         run: echo "FILE_NAME=brack-rc.rb" >> $GITHUB_ENV
-      - if: not(contains(github.ref, '-rc'))
+      - if: ${{ !contains(github.ref, '-rc') }}
         run: echo "FILE_NAME=brack.rb" >> $GITHUB_ENV
       - run: |
           cd homebrew-tap
