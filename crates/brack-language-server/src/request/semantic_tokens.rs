@@ -2,7 +2,7 @@ use anyhow::Result;
 use brack_tokenizer::{tokenize::tokenize, tokens::Token};
 use lsp_types::{SemanticToken, SemanticTokenType, SemanticTokens, SemanticTokensParams};
 
-use crate::server::Server;
+use crate::{server::Server, utils::to_url};
 
 fn token_kind_to_type(token: &Token) -> u32 {
     let typ = match token {
@@ -78,12 +78,18 @@ impl Server {
         &self,
         params: SemanticTokensParams,
     ) -> Result<Option<SemanticTokens>> {
-        let uri = params.text_document.uri.as_str();
-        let tokens = match tokenize(uri) {
+        let path = to_url(params.text_document.uri)?
+            .to_file_path()
+            .map_err(|e| anyhow::anyhow!("Failed to convert URI to file path: {:?}", e))?;
+
+        let tokens = match tokenize(&path) {
             Ok(tokens) => tokens,
             Err(e) => {
-                self.log_message(&format!("Failed to tokenize file: {:?}", e))
-                    .await?;
+                self.log_message(&format!(
+                    "[SemanticTokens]: Failed to tokenize file: {:?}",
+                    e
+                ))
+                .await?;
                 return Ok(None);
             }
         };

@@ -1,0 +1,169 @@
+name: release
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-x86_64-linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+      - uses: cachix/cachix-action@v15
+        with:
+          name: brack-lang
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - run: nix build ".#packages.x86_64-linux.brack"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: brack-x86_64-linux
+          path: result/bin/brack
+      - uses: actions/upload-artifact@v4
+        with:
+          name: brack-release-x86_64-linux
+          path: result/bin/brack-release
+  
+  build-x86_64-darwin:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+      - uses: cachix/cachix-action@v15
+        with:
+          name: brack-lang
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - run: nix build ".#packages.x86_64-darwin.brack"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: brack-x86_64-darwin
+          path: result/bin/brack
+      - uses: actions/upload-artifact@v4
+        with:
+          name: brack-release-x86_64-darwin
+          path: result/bin/brack-release
+
+  build-aarch64-darwin:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+      - uses: cachix/cachix-action@v15
+        with:
+          name: brack-lang
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - run: nix build ".#packages.aarch64-darwin.brack"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: brack-aarch64-darwin
+          path: result/bin/brack
+      - uses: actions/upload-artifact@v4
+        with:
+          name: brack-release-aarch64-darwin
+          path: result/bin/brack-release
+
+  tag:
+    runs-on: ubuntu-24.04
+    needs: [ build-x86_64-linux, build-x86_64-darwin, build-aarch64-darwin ]
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      sha_x86_64_linux: ${{ steps.calc-sha.outputs.x86_64_linux }}
+      sha_x86_64_darwin: ${{ steps.calc-sha.outputs.x86_64_darwin }}
+      sha_aarch64_darwin: ${{ steps.calc-sha.outputs.aarch64_darwin }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get current version
+        id: version
+        run: |
+          echo "version=$(cat ./VERSION)" >> $GITHUB_OUTPUT
+      - uses: actions/download-artifact@v4
+        with:
+          name: brack-x86_64-linux
+          path: x86_64-linux
+      - uses: actions/download-artifact@v4
+        with:
+          name: brack-release-x86_64-linux
+          path: x86_64-linux
+      - uses: actions/download-artifact@v4
+        with:
+          name: brack-x86_64-darwin
+          path: x86_64-darwin
+      - uses: actions/download-artifact@v4
+        with:
+          name: brack-release-x86_64-darwin
+          path: x86_64-darwin
+      - uses: actions/download-artifact@v4
+        with:
+          name: brack-aarch64-darwin
+          path: aarch64-darwin
+      - uses: actions/download-artifact@v4
+        with:
+          name: brack-release-aarch64-darwin
+          path: aarch64-darwin
+      - run: |
+          mv x86_64-linux/brack x86_64-linux/brack-x86_64-linux
+          mv x86_64-linux/brack-release x86_64-linux/brack-release-x86_64-linux
+          mv x86_64-darwin/brack x86_64-darwin/brack-x86_64-darwin
+          mv x86_64-darwin/brack-release x86_64-darwin/brack-release-x86_64-darwin
+          mv aarch64-darwin/brack aarch64-darwin/brack-aarch64-darwin
+          mv aarch64-darwin/brack-release aarch64-darwin/brack-release-aarch64-darwin
+      - id: calc-sha
+        run: |
+          X86_64_LINUX_SHA=$(shasum -a 256 x86_64-linux/brack-x86_64-linux | cut -d ' ' -f1)
+          X86_64_DARWIN_SHA=$(shasum -a 256 x86_64-darwin/brack-x86_64-darwin | cut -d ' ' -f1)
+          AARCH64_DARWIN_SHA=$(shasum -a 256 aarch64-darwin/brack-aarch64-darwin | cut -d ' ' -f1)
+          echo "x86_64_linux=$X86_64_LINUX_SHA" >> $GITHUB_OUTPUT
+          echo "x86_64_darwin=$X86_64_DARWIN_SHA" >> $GITHUB_OUTPUT
+          echo "aarch64_darwin=$AARCH64_DARWIN_SHA" >> $GITHUB_OUTPUT
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: v${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: ${{ contains(github.ref, '-rc') }}
+          generate_release_notes: true
+          files: |
+            x86_64-linux/brack-x86_64-linux
+            x86_64-linux/brack-release-x86_64-linux
+            x86_64-darwin/brack-x86_64-darwin
+            x86_64-darwin/brack-release-x86_64-darwin
+            aarch64-darwin/brack-aarch64-darwin
+            aarch64-darwin/brack-release-aarch64-darwin
+  
+  update-homebrew-tap:
+    runs-on: ubuntu-24.04
+    needs: tag
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: brack-lang/homebrew-tap
+          path: homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+      - run: |
+          echo "VERSION=${{ needs.tag.outputs.version }}" >> $GITHUB_ENV
+          echo "SHA_X86_64_LINUX=${{ needs.tag.outputs.sha_x86_64_linux }}" >> $GITHUB_ENV
+          echo "SHA_X86_64_DARWIN=${{ needs.tag.outputs.sha_x86_64_darwin }}" >> $GITHUB_ENV
+          echo "SHA_AARCH64_DARWIN=${{ needs.tag.outputs.sha_aarch64_darwin }}" >> $GITHUB_ENV
+      - if: contains(github.ref, '-rc')
+        run: echo "FILE_NAME=brack-rc.rb" >> $GITHUB_ENV
+      - if: ${{ !contains(github.ref, '-rc') }}
+        run: echo "FILE_NAME=brack.rb" >> $GITHUB_ENV
+      - run: |
+          cd homebrew-tap
+          NEW_VERSION="${VERSION#v}"
+          sed -i "s|^  version \".*\"|  version \"${NEW_VERSION}\"|" Formula/${FILE_NAME}
+          sed -i "s|^  x86_64_darwin_sha256 = \".*\"|  x86_64_darwin_sha256 = \"${SHA_X86_64_DARWIN}\"|" Formula/${FILE_NAME}
+          sed -i "s|^  aarch64_darwin_sha256 = \".*\"|  aarch64_darwin_sha256 = \"${SHA_AARCH64_DARWIN}\"|" Formula/${FILE_NAME}
+          sed -i "s|^  x86_64_linux_sha256 = \".*\"|  x86_64_linux_sha256 = \"${SHA_X86_64_LINUX}\"|" Formula/${FILE_NAME}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/${FILE_NAME}
+          git commit -m "Update ${FILE_NAME} for ${VERSION}"
+          git push origin main
+
