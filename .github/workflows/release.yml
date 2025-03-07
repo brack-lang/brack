@@ -65,7 +65,7 @@ jobs:
           path: result/bin/brack-release
   tag:
     runs-on: ubuntu-24.04
-    needs: [ build-linux, build-x86_64-darwin, build-aarch64-darwin ]
+    needs: [ build-x86_64-linux, build-x86_64-darwin, build-aarch64-darwin ]
     steps:
       - uses: actions/checkout@v4
       - name: Get current version
