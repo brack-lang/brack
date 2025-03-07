@@ -146,7 +146,7 @@ jobs:
           path: homebrew-tap
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: |
-          echo "VERSION=${{ needs.tag.outputs.version#v }}" >> $GITHUB_ENV
+          echo "VERSION=${{ needs.tag.outputs.version }}" >> $GITHUB_ENV
           echo "SHA_X86_64_LINUX=${{ needs.tag.outputs.sha_x86_64_linux }}" >> $GITHUB_ENV
           echo "SHA_X86_64_DARWIN=${{ needs.tag.outputs.sha_x86_64_darwin }}" >> $GITHUB_ENV
           echo "SHA_AARCH64_DARWIN=${{ needs.tag.outputs.sha_aarch64_darwin }}" >> $GITHUB_ENV
@@ -156,7 +156,8 @@ jobs:
         run: echo "FILE_NAME=brack.rb" >> $GITHUB_ENV
       - run: |
           cd homebrew-tap
-          sed -i "s|^  version \".*\"|  version \"${VERSION}\"|" Formula/${FILE_NAME}
+          NEW_VERSION="${VERSION#v}"
+          sed -i "s|^  version \".*\"|  version \"${NEW_VERSION}\"|" Formula/${FILE_NAME}
           sed -i "s|^  x86_64_darwin_sha256 = \".*\"|  x86_64_darwin_sha256 = \"${SHA_X86_64_DARWIN}\"|" Formula/${FILE_NAME}
           sed -i "s|^  aarch64_darwin_sha256 = \".*\"|  aarch64_darwin_sha256 = \"${SHA_AARCH64_DARWIN}\"|" Formula/${FILE_NAME}
           sed -i "s|^  x86_64_linux_sha256 = \".*\"|  x86_64_linux_sha256 = \"${SHA_X86_64_LINUX}\"|" Formula/${FILE_NAME}
