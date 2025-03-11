@@ -9,7 +9,7 @@ edition = "2021"
 anyhow = "1.0.97"
 brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
 brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
-serde = { version = "1.0.218", features = ["derive"] }
+serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.134"
 thiserror = "2.0.12"
 
