@@ -1,4 +1,9 @@
-{ makeRustPlatform, rust-bin }:
+{
+  makeRustPlatform,
+  rust-bin,
+  openssl,
+  pkg-config,
+}:
 let
   toolchain = rust-bin.stable.latest.default;
   rustPlatform = makeRustPlatform {
@@ -12,6 +17,13 @@ rustPlatform.buildRustPackage {
 
   src = ../.;
   cargoLock.lockFile = ../Cargo.lock;
+
+  buildInputs = [
+    openssl
+    openssl.dev
+  ];
+
+  nativeBuildInputs = [ pkg-config ];
 
   checkPhase = ''
     cargo clippy --all-features -- -D warnings
