@@ -1,7 +1,7 @@
 {
   makeRustPlatform,
   rust-bin,
-  pkgs-config,
+  pkg-config,
   openssl,
   doCheck ? true,
 }:
@@ -24,7 +24,7 @@ rustPlatform.buildRustPackage {
     openssl.dev
   ];
 
-  nativeBuildInputs = [ pkgs-config ];
+  nativeBuildInputs = [ pkg-config ];
 
   inherit doCheck;
 }
