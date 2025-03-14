@@ -79,7 +79,7 @@ jobs:
       - name: Get current version
         id: version
         run: |
-          echo "version=$(cat ./VERSION)" >> $GITHUB_OUTPUT
+          echo "version=$(cat ./VERSION)" >> "$GITHUB_OUTPUT"
       - uses: actions/download-artifact@v4
         with:
           name: brack-x86_64-linux
@@ -116,9 +116,11 @@ jobs:
           X86_64_LINUX_SHA=$(shasum -a 256 x86_64-linux/brack-x86_64-linux | cut -d ' ' -f1)
           X86_64_DARWIN_SHA=$(shasum -a 256 x86_64-darwin/brack-x86_64-darwin | cut -d ' ' -f1)
           AARCH64_DARWIN_SHA=$(shasum -a 256 aarch64-darwin/brack-aarch64-darwin | cut -d ' ' -f1)
-          echo "x86_64_linux=$X86_64_LINUX_SHA" >> $GITHUB_OUTPUT
-          echo "x86_64_darwin=$X86_64_DARWIN_SHA" >> $GITHUB_OUTPUT
-          echo "aarch64_darwin=$AARCH64_DARWIN_SHA" >> $GITHUB_OUTPUT
+          {
+            echo "x86_64_linux=$X86_64_LINUX_SHA"
+            echo "x86_64_darwin=$X86_64_DARWIN_SHA"
+            echo "aarch64_darwin=$AARCH64_DARWIN_SHA"
+          } >> "$GITHUB_OUTPUT"
       - name: Create release
         uses: softprops/action-gh-release@v2
         env:
@@ -146,24 +148,25 @@ jobs:
           path: homebrew-tap
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
       - run: |
-          echo "VERSION=${{ needs.tag.outputs.version }}" >> $GITHUB_ENV
-          echo "SHA_X86_64_LINUX=${{ needs.tag.outputs.sha_x86_64_linux }}" >> $GITHUB_ENV
-          echo "SHA_X86_64_DARWIN=${{ needs.tag.outputs.sha_x86_64_darwin }}" >> $GITHUB_ENV
-          echo "SHA_AARCH64_DARWIN=${{ needs.tag.outputs.sha_aarch64_darwin }}" >> $GITHUB_ENV
+          {
+            echo "VERSION=${{ needs.tag.outputs.version }}"
+            echo "SHA_X86_64_LINUX=${{ needs.tag.outputs.sha_x86_64_linux }}"
+            echo "SHA_X86_64_DARWIN=${{ needs.tag.outputs.sha_x86_64_darwin }}"
+            echo "SHA_AARCH64_DARWIN=${{ needs.tag.outputs.sha_aarch64_darwin }}"
+          } >> "$GITHUB_ENV" 
       - if: contains(github.ref, '-rc')
-        run: echo "FILE_NAME=brack-rc.rb" >> $GITHUB_ENV
+        run: echo "FILE_NAME=brack-rc.rb" >> "$GITHUB_ENV"
       - if: ${{ !contains(github.ref, '-rc') }}
-        run: echo "FILE_NAME=brack.rb" >> $GITHUB_ENV
+        run: echo "FILE_NAME=brack.rb" >> "$GITHUB_ENV"
       - run: |
           cd homebrew-tap
           NEW_VERSION="${VERSION#v}"
-          sed -i "s|^  version \".*\"|  version \"${NEW_VERSION}\"|" Formula/${FILE_NAME}
-          sed -i "s|^  x86_64_darwin_sha256 = \".*\"|  x86_64_darwin_sha256 = \"${SHA_X86_64_DARWIN}\"|" Formula/${FILE_NAME}
-          sed -i "s|^  aarch64_darwin_sha256 = \".*\"|  aarch64_darwin_sha256 = \"${SHA_AARCH64_DARWIN}\"|" Formula/${FILE_NAME}
-          sed -i "s|^  x86_64_linux_sha256 = \".*\"|  x86_64_linux_sha256 = \"${SHA_X86_64_LINUX}\"|" Formula/${FILE_NAME}
+          sed -i "s|^  version \".*\"|  version \"${NEW_VERSION}\"|" "Formula/${FILE_NAME}"
+          sed -i "s|^  x86_64_darwin_sha256 = \".*\"|  x86_64_darwin_sha256 = \"${SHA_X86_64_DARWIN}\"|" "Formula/${FILE_NAME}"
+          sed -i "s|^  aarch64_darwin_sha256 = \".*\"|  aarch64_darwin_sha256 = \"${SHA_AARCH64_DARWIN}\"|" "Formula/${FILE_NAME}"
+          sed -i "s|^  x86_64_linux_sha256 = \".*\"|  x86_64_linux_sha256 = \"${SHA_X86_64_LINUX}\"|" "Formula/${FILE_NAME}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Formula/${FILE_NAME}
+          git add "Formula/${FILE_NAME}"
           git commit -m "Update ${FILE_NAME} for ${VERSION}"
           git push origin main
-

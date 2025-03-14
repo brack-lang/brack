@@ -2,7 +2,6 @@ use anyhow::Result;
 use brack::sub_commands::SubCommands;
 use regex::Regex;
 use std::collections::HashMap;
-use tokio;
 
 pub fn run_compile(subcommand: SubCommands) -> Result<()> {
     let mut pathes = HashMap::new();
@@ -12,16 +11,14 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
             plugins_dir_path,
             backend,
             filename,
+            ..
         } => (plugins_dir_path, backend, filename),
         _ => unreachable!(),
     };
 
     let plugins_dir_path = match args.0 {
         Some(path) => path,
-        None => match std::env::var("BRACK_PLUGINS_PATH") {
-            Ok(path) => path,
-            Err(_) => String::new(),
-        },
+        None => std::env::var("BRACK_PLUGINS_PATH").unwrap_or_default(),
     };
 
     let pattern = Regex::new(r"(?<module_name>[[:alpha:]]+)_[[:alnum:]]+.wasm").unwrap();
@@ -39,7 +36,7 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
         }
     }
 
-    let mut plugins = brack_plugin::plugin::new_plugins(pathes)?;
+    let mut plugins = brack_plugin::plugins::Plugins::new(vec![])?;
 
     if !args.2.ends_with(".[]") {
         anyhow::bail!("Filename must end with .[]");
@@ -47,7 +44,8 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
 
     let tokenized = brack_tokenizer::tokenize::tokenize(&args.2)?;
     let parsed = brack_parser::parse::parse(&tokenized)?;
-    let expanded = brack_expander::expand::expander(&parsed, &mut plugins)?;
+    let (ast, _errors) = brack_transformer::transform::transform(&parsed);
+    let expanded = brack_expander::expand::expander(&ast, &mut plugins)?;
     let gen = brack_codegen::generate::generate(&expanded, &mut plugins)?;
     println!("{}", gen);
     Ok(())
@@ -59,6 +57,8 @@ async fn main() -> Result<()> {
         plugins_dir_path: Some("plugins".to_string()),
         backend: "html".to_string(),
         filename: "docs/main.[]".to_string(),
+        json: false,
+        output_level: 0,
     };
     run_compile(args)?;
 
