@@ -1,4 +1,10 @@
-{ makeRustPlatform, rust-bin, doCheck ? true }:
+{
+  makeRustPlatform,
+  rust-bin,
+  pkgs-config,
+  openssl,
+  doCheck ? true,
+}:
 let
   toolchain = rust-bin.stable.latest.default;
   rustPlatform = makeRustPlatform {
@@ -12,6 +18,13 @@ rustPlatform.buildRustPackage {
 
   src = ../.;
   cargoLock.lockFile = ../Cargo.lock;
+
+  buildInputs = [
+    openssl
+    openssl.dev
+  ];
+
+  nativeBuildInputs = [ pkgs-config ];
 
   inherit doCheck;
 }
