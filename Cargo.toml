@@ -39,14 +39,20 @@ required-features = ["debug"]
 name = "brack-release"
 path = "crates/brack-release/src/main.rs"
 
+[[bin]]
+name = "brace"
+path = "crates/brace/src/main.rs"
+
 [workspace]
 members = [
+    "crates/brace",
     "crates/brack-codegen",
     "crates/brack-expander",
     "crates/brack-language-server",
     "crates/brack-parser",
     "crates/brack-plugin",
-    "crates/brack-project-manager", "crates/brack-release",
+    "crates/brack-project-manager",
+    "crates/brack-release",
     "crates/brack-tokenizer",
     "crates/brack-transformer",
 ]
