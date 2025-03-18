@@ -1,4 +1,5 @@
 {
+  lib,
   makeRustPlatform,
   rust-bin,
   pkg-config,
@@ -11,10 +12,11 @@ let
     cargo = toolchain;
     rustc = toolchain;
   };
+  version = lib.strings.trim (builtins.readFile ../VERSION);
 in
 rustPlatform.buildRustPackage {
   pname = "brack";
-  version = "0.2.0";
+  inherit version;
 
   src = ../.;
   cargoLock.lockFile = ../Cargo.lock;
@@ -27,4 +29,6 @@ rustPlatform.buildRustPackage {
   nativeBuildInputs = [ pkg-config ];
 
   inherit doCheck;
+
+  APP_VERSION = version;
 }

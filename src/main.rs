@@ -123,6 +123,8 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
     Ok(())
 }
 
+const APP_VERSION: &str = env!("APP_VERSION");
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Args::parse();
@@ -147,13 +149,7 @@ async fn main() -> Result<()> {
             project.download_plugins_using_config().await?;
         }
         SubCommands::Version => {
-            let version = match std::env::var("APP_VERSION") {
-                Ok(version) => version,
-                // FIXME: The following hard-coded version for Nix packaging now.
-                //       We should remove this when we have a better way to handle it.
-                Err(_) => "0.2.0".to_string(),
-            };
-            println!("Brack {}", version);
+            println!("Brack {}", APP_VERSION);
         }
     }
     Ok(())
