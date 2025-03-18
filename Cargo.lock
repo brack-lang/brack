@@ -197,30 +197,6 @@ name = "brace"
 version = "0.1.0"
 
 [[package]]
-name = "brack"
-version = "0.2.0"
-dependencies = [
- "anyhow",
- "brack-codegen",
- "brack-expander",
- "brack-language-server",
- "brack-parser",
- "brack-plugin",
- "brack-project-manager",
- "brack-tokenizer",
- "brack-transformer",
- "clap",
- "extism",
- "regex",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "toml",
- "toml_edit",
-]
-
-[[package]]
 name = "brack-codegen"
 version = "0.2.0"
 dependencies = [
@@ -336,6 +312,30 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.12",
  "uuid",
+]
+
+[[package]]
+name = "brackc"
+version = "0.2.0"
+dependencies = [
+ "anyhow",
+ "brack-codegen",
+ "brack-expander",
+ "brack-language-server",
+ "brack-parser",
+ "brack-plugin",
+ "brack-project-manager",
+ "brack-tokenizer",
+ "brack-transformer",
+ "clap",
+ "extism",
+ "regex",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "toml",
+ "toml_edit",
 ]
 
 [[package]]

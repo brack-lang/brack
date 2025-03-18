@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::Result;
-use brack::{new_project::new_project, sub_commands::SubCommands};
+use brackc::{new_project::new_project, sub_commands::SubCommands};
 use brack_plugin::{feature_flag::FeatureFlag, plugin::Plugin, plugins::Plugins};
 use clap::Parser;
 use regex::Regex;
