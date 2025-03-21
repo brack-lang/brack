@@ -1,8 +1,8 @@
 document := (stmt newline newline+)* stmt? newline* EOF
-stmt := expr (newline expr)*
+stmt := expr (newline expr)* | curly
 expr := (text | square | angle)+
 angle := angle_bracket_open (module | angle) dot (ident | angle) (expr (comma expr)*)? angle_bracket_close 
-curly := curly_bracket_open (module | angle) dot (ident | angle) (expr (comma expr)*)? curly_bracket_close
+curly := curly_bracket_open (module | angle) dot (ident | angle) (stmt (comma stmt)*)? curly_bracket_close
 square := square_bracket_open (module | angle) dot (ident | angle) (expr (comma expr)*)? square_bracket_close
 angle_bracket_open := "<"
 angle_bracket_close := ">"

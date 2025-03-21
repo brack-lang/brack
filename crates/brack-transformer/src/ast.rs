@@ -149,6 +149,22 @@ impl AST {
         }
     }
 
+    pub fn location(&self) -> Location {
+        match self {
+            AST::Document(node)
+            | AST::Stmt(node)
+            | AST::Expr(node)
+            | AST::Angle(node)
+            | AST::Square(node)
+            | AST::Curly(node) => node.location.clone(),
+            AST::Ident(leaf)
+            | AST::Module(leaf)
+            | AST::Text(leaf)
+            | AST::Invalid(leaf)
+            | AST::Ignored(leaf) => leaf.location.clone(),
+        }
+    }
+
     pub fn display_with_ident(&self, f: &mut fmt::Formatter, ident: usize) -> fmt::Result {
         let ident_str = "  ".repeat(ident);
         match self {
