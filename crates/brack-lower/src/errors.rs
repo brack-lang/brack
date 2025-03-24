@@ -9,8 +9,17 @@ use thiserror::Error;
 pub enum LoweringError {
     PluginNotFound(Location),
     CommandNotFound(Location),
-    MissingArgument(Location),
-    TooManyArguments(Location),
+    MissingArgument{
+        required: usize,
+        provided: usize,
+        missing: Vec<String>,
+        location: Location,
+    },
+    TooManyArguments{
+        required: usize,
+        provided: usize,
+        location: Location,
+    },
 }
 
 impl LoweringError {
@@ -18,8 +27,8 @@ impl LoweringError {
         match self {
             Self::PluginNotFound(location) => location.clone(),
             Self::CommandNotFound(location) => location.clone(),
-            Self::MissingArgument(location) => location.clone(),
-            Self::TooManyArguments(location) => location.clone(),
+            Self::MissingArgument{location, ..} => location.clone(),
+            Self::TooManyArguments{location, ..} => location.clone(),
         }
     }
 
@@ -27,8 +36,21 @@ impl LoweringError {
         match self {
             Self::PluginNotFound(_) => "Plugin not found".to_string(),
             Self::CommandNotFound(_) => "Command not found".to_string(),
-            Self::MissingArgument(_) => "Missing argument".to_string(),
-            Self::TooManyArguments(_) => "Too many arguments".to_string(),
+            Self::MissingArgument{required, provided, missing, ..} => {
+                format!(
+                    "Missing {} argument(s) out of {} required: {}",
+                    required - provided,
+                    required,
+                    missing.join(", ")
+                )
+            }
+            Self::TooManyArguments{required, provided, ..} => {
+                format!(
+                    "Too many arguments: {} provided, {} required",
+                    provided,
+                    required
+                )
+            }
         }
     }
 }

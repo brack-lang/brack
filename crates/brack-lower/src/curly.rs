@@ -7,10 +7,7 @@ use crate::op_code::OpCode;
 use crate::{expr, square, text};
 
 pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, LoweringError> {
-    match ast {
-        AST::Curly(_) => (),
-        _ => panic!("Curly must be a curly"),
-    }
+    let AST::Curly(_) = ast else { panic!("Curly must be a curly") };
 
     let mut op_codes = vec![];
     let mut result = vec![];
@@ -36,7 +33,7 @@ pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, Lowe
     };
 
     let ident = ast
-        .children()
+        .children() 
         .get(1)
         .expect("Curly must contain ident");
 
@@ -55,35 +52,50 @@ pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, Lowe
         None => return Err(LoweringError::CommandNotFound(ident.location().clone())),
     };
 
-    let arg_types = metadata.argument_types.iter().map(|(_, t)| t.clone()).collect::<Vec<_>>();
+    let required_args = metadata.argument_types.iter().map(|(s, t)| (s.clone(), t.clone())).collect::<Vec<_>>();
 
     let childs = ast.children().iter().skip(2).collect::<Vec<_>>();
 
-    for arg_type in arg_types {
+    for i in 0..required_args.len() {
+        let (arg_name, arg_type) = &required_args[i];
+        let child = childs.get(i).and_then(|child| Some(child.clone()));
         match arg_type {
             Type::TInline => {
-                let (child, childs) = match childs.split_first() {
-                    Some((child, childs)) => (child.clone(), childs.to_vec()),
-                    None => return Err(LoweringError::MissingArgument(ast.location().clone())),
+                let child = match child {
+                    Some(child) => child,
+                    None => return Err(LoweringError::MissingArgument {
+                        required: required_args.len(),
+                        provided: i,
+                        missing: required_args.iter().skip(i).map(|(s, _)| s.clone()).collect(),
+                        location: ast.location().clone(),
+                    }),
                 };
                 let res = expr::lowering(child, &plugins)?;
                 op_codes.extend(res);
             }
-            _ => todo!()
+            Type::TOption(t) => {
+                let Type::TInline = **t else { panic!("Plugin requires illegal type") };
+                let child = match child {
+                    Some(child) => child,
+                    None => {
+                        op_codes.push(OpCode::ToOption(None));
+                        continue;
+                    }
+                };
+                let res = expr::lowering(child, &plugins)?;
+                op_codes.extend(res);
+                op_codes.push(OpCode::ToOption(Some(())));
+            }
+            Type::TArray(t) => {
+                let Type::TInline = **t else { panic!("Plugin requires illegal type") };
+                for child in childs.iter().skip(i) {
+                    op_codes.extend(expr::lowering(child, &plugins)?);
+                }
+                op_codes.push(OpCode::ToArray(childs.len() - i));
+            }
+            _ => panic!("Plugin requires illegal type"),
         }
     }
-
-    // for child in ast.children().iter().skip(2) {
-    //     let res = match child {
-    //         AST::Expr(_) => expr::lowering(child, &plugins)?,
-    //         AST::Curly(_) => lowering(child, &plugins)?,
-    //         AST::Square(_) => square::lowering(child, &plugins)?,
-    //         AST::Text(_) => text::lowering(child, &plugins)?,
-    //         AST::Angle(_) => panic!("Angle must be expanded by the macro expander."),
-    //         ast => panic!("Curly cannot contain the following node\n{}", ast),
-    //     };
-    //     op_codes.extend(res);
-    // }
 
     op_codes.push(OpCode::Join(ast.children().len() - 2));
 
