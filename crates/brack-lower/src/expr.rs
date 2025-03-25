@@ -4,7 +4,7 @@ use brack_transformer::ast::AST;
 
 use crate::errors::LoweringError;
 use crate::op_code::{self, OpCode};
-use crate::{curly, square, text};
+use crate::{square, text};
 
 pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, LoweringError> {
     let AST::Expr(_) = ast else {
@@ -18,10 +18,12 @@ pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, Lowe
         let res = match child {
             AST::Square(_) => square::lowering(child, &plugins)?,
             AST::Text(_) => text::lowering(child, &plugins)?,
-            _ => return Err(LoweringError::Panic {
-                message: format!("Expr must contain square or text but found {:?}", child),
-                location: child.location().clone(),
-            }),
+            _ => {
+                return Err(LoweringError::Panic {
+                    message: format!("Expr must contain square or text but found {:?}", child),
+                    location: child.location().clone(),
+                })
+            }
         };
         result.extend(res);
     }

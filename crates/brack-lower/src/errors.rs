@@ -1,6 +1,6 @@
 use std::fmt::{self, Display, Formatter};
 
-use brack_tokenizer::tokens::{Location};
+use brack_tokenizer::tokens::Location;
 
 use thiserror::Error;
 
@@ -22,7 +22,7 @@ pub enum LoweringError {
 
     // This is used for debugging in places where a panic should occur.
     // It will be removed in the future.
-    Panic{
+    Panic {
         message: String,
         location: Location,
     },

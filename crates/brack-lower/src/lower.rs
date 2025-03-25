@@ -4,9 +4,9 @@ use brack_transformer::ast::AST;
 
 use crate::errors::LoweringError;
 use crate::op_code::OpCode;
-use crate::{curly, expr, square, stmt, text};
+use crate::stmt;
 
-pub fn lowering(ast: &AST, plugins: Plugins) -> Result<Vec<OpCode>, LoweringError> {
+pub fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, LoweringError> {
     let AST::Document(_) = ast else {
         return Err(LoweringError::Panic {
             message: format!("Document must be a document but found {:?}", ast),
@@ -17,10 +17,12 @@ pub fn lowering(ast: &AST, plugins: Plugins) -> Result<Vec<OpCode>, LoweringErro
     for child in ast.children() {
         let res = match child {
             AST::Stmt(_) => stmt::lowering(child, &plugins)?,
-            _ => return Err(LoweringError::Panic {
-                message: format!("Document must contain stmt but found {:?}", child),
-                location: child.location().clone(),
-            }),
+            _ => {
+                return Err(LoweringError::Panic {
+                    message: format!("Document must contain stmt but found {:?}", child),
+                    location: child.location().clone(),
+                })
+            }
         };
         result.extend(res);
     }

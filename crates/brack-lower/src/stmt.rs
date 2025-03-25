@@ -3,8 +3,8 @@ use brack_plugin::{plugins::Plugins, types::Type};
 use brack_transformer::ast::AST;
 
 use crate::errors::LoweringError;
-use crate::op_code::{self, OpCode};
-use crate::{curly, expr, square, text};
+use crate::op_code::OpCode;
+use crate::{curly, expr};
 
 pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, LoweringError> {
     let AST::Stmt(_) = ast else {
@@ -18,10 +18,12 @@ pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, Lowe
         let res = match child {
             AST::Expr(_) => expr::lowering(child, &plugins)?,
             AST::Curly(_) => curly::lowering(child, &plugins)?,
-            _ => return Err(LoweringError::Panic {
-                message: format!("Stmt must contain expr or curly but found {:?}", child),
-                location: child.location().clone(),
-            }),
+            _ => {
+                return Err(LoweringError::Panic {
+                    message: format!("Stmt must contain expr or curly but found {:?}", child),
+                    location: child.location().clone(),
+                })
+            }
         };
         result.extend(res);
     }

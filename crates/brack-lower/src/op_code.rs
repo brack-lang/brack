@@ -1,4 +1,7 @@
 use brack_plugin::types::Type;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum OpCode {
     ToArray(usize),
     ToOption(Option<()>),

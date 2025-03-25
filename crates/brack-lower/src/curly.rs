@@ -15,16 +15,17 @@ pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, Lowe
     };
 
     let mut op_codes = vec![];
-    let mut result = vec![];
 
     let module = ast.children().first().expect("Curly must contain module");
 
     let module_name = match module {
         AST::Module(module) => module.value.clone(),
-        _ => return Err(LoweringError::Panic {
-            message: format!("Module must be a module but found {:?}", module),
-            location: module.location().clone(),
-        }),
+        _ => {
+            return Err(LoweringError::Panic {
+                message: format!("Module must be a module but found {:?}", module),
+                location: module.location().clone(),
+            })
+        }
     };
 
     let Some(module_name) = module_name else {
@@ -42,10 +43,12 @@ pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, Lowe
 
     let ident_name = match ident {
         AST::Ident(ident) => ident.value.clone(),
-        _ => return Err(LoweringError::Panic {
-            message: format!("Ident must be an ident but found {:?}", ident),
-            location: ident.location().clone(),
-        }),
+        _ => {
+            return Err(LoweringError::Panic {
+                message: format!("Ident must be an ident but found {:?}", ident),
+                location: ident.location().clone(),
+            })
+        }
     };
 
     let Some(ident_name) = ident_name else {
@@ -140,11 +143,11 @@ pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, Lowe
         });
     }
 
-    result.push(OpCode::Call {
+    op_codes.push(OpCode::Call {
         plugin_name: module_name,
         function_name: ident_name,
         return_type: Type::TBlock,
     });
 
-    Ok(result)
+    Ok(op_codes)
 }
