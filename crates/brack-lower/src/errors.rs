@@ -1,7 +1,6 @@
 use std::fmt::{self, Display, Formatter};
 
-use brack_tokenizer::tokens::{Location, mock_location};
-use brack_plugin::{plugins::Plugins, metadata::Metadata, types::Type::*};
+use brack_tokenizer::tokens::{Location};
 
 use thiserror::Error;
 
@@ -9,15 +8,22 @@ use thiserror::Error;
 pub enum LoweringError {
     PluginNotFound(Location),
     CommandNotFound(Location),
-    MissingArgument{
+    MissingArgument {
         required: usize,
         provided: usize,
         missing: Vec<String>,
         location: Location,
     },
-    TooManyArguments{
+    TooManyArguments {
         required: usize,
         provided: usize,
+        location: Location,
+    },
+
+    // This is used for debugging in places where a panic should occur.
+    // It will be removed in the future.
+    Panic{
+        message: String,
         location: Location,
     },
 }
@@ -27,8 +33,9 @@ impl LoweringError {
         match self {
             Self::PluginNotFound(location) => location.clone(),
             Self::CommandNotFound(location) => location.clone(),
-            Self::MissingArgument{location, ..} => location.clone(),
-            Self::TooManyArguments{location, ..} => location.clone(),
+            Self::MissingArgument { location, .. } => location.clone(),
+            Self::TooManyArguments { location, .. } => location.clone(),
+            Self::Panic { location, .. } => location.clone(),
         }
     }
 
@@ -36,7 +43,12 @@ impl LoweringError {
         match self {
             Self::PluginNotFound(_) => "Plugin not found".to_string(),
             Self::CommandNotFound(_) => "Command not found".to_string(),
-            Self::MissingArgument{required, provided, missing, ..} => {
+            Self::MissingArgument {
+                required,
+                provided,
+                missing,
+                ..
+            } => {
                 format!(
                     "Missing {} argument(s) out of {} required: {}",
                     required - provided,
@@ -44,13 +56,15 @@ impl LoweringError {
                     missing.join(", ")
                 )
             }
-            Self::TooManyArguments{required, provided, ..} => {
+            Self::TooManyArguments {
+                required, provided, ..
+            } => {
                 format!(
                     "Too many arguments: {} provided, {} required",
-                    provided,
-                    required
+                    provided, required
                 )
             }
+            Self::Panic { message, .. } => message.clone(),
         }
     }
 }
@@ -70,4 +84,3 @@ impl Display for LoweringError {
         )
     }
 }
-

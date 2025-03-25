@@ -7,19 +7,21 @@ use crate::op_code::{self, OpCode};
 use crate::{curly, square, text};
 
 pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, LoweringError> {
-    match ast {
-        AST::Expr(_) => (),
-        _ => panic!("Expr must be an expr"),
+    let AST::Expr(_) = ast else {
+        return Err(LoweringError::Panic {
+            message: format!("Expr must be an expr but found {:?}", ast),
+            location: ast.location().clone(),
+        });
     };
     let mut result = vec![];
     for child in ast.children() {
         let res = match child {
-            AST::Expr(_) => lowering(child, &plugins)?,
-            AST::Curly(_) => curly::lowering(child, &plugins)?,
             AST::Square(_) => square::lowering(child, &plugins)?,
             AST::Text(_) => text::lowering(child, &plugins)?,
-            AST::Angle(_) => panic!("Angle must be expanded by the macro expander."),
-            ast => panic!("Expr cannot contain the following node\n{}", ast),
+            _ => return Err(LoweringError::Panic {
+                message: format!("Expr must contain square or text but found {:?}", child),
+                location: child.location().clone(),
+            }),
         };
         result.extend(res);
     }
@@ -27,7 +29,7 @@ pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, Lowe
     result.push(op_code::OpCode::Join(ast.children().len()));
 
     if let Some(expr_hook_plugin_name) = plugins.expr_hook_plugin_name.clone() {
-        result.push(OpCode::Call{
+        result.push(OpCode::Call {
             plugin_name: expr_hook_plugin_name,
             function_name: "expr".to_string(),
             return_type: Type::TInline,
