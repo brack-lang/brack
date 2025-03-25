@@ -107,6 +107,19 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
             }
         }
         5 => {
+            let tokens = brack_tokenizer::tokenize::tokenize(&filename)?;
+            let cst = brack_parser::parse::parse(&tokens)?;
+            let (ast, _errors) = brack_transformer::transform::transform(&cst);
+            let expanded_ast = brack_expander::expand::expander(&ast, &mut plugins)?;
+            let ir = brack_lower::lower::lowering(&expanded_ast, &plugins)?;
+            if json {
+                let json = serde_json::to_string(&ir)?;
+                println!("{}", json);
+            } else {
+                println!("{:?}", ir);
+            }
+        }
+        6 => {
             if json {
                 anyhow::bail!("Cannot output JSON at output level 5.")
             }
