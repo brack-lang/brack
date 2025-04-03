@@ -17,7 +17,7 @@ pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, Lowe
     for child in ast.children() {
         let res = match child {
             AST::Square(_) => square::lowering(child, &plugins)?,
-            AST::Text(_) => text::lowering(child, &plugins)?,
+            AST::Text(_) => text::lowering(child)?,
             _ => {
                 return Err(LoweringError::Panic {
                     message: format!("Expr must contain square or text but found {:?}", child),

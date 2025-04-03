@@ -13,7 +13,7 @@ brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-p
 brack-project-manager = { git = "https://github.com/brack-lang/brack", package = "brack-project-manager" }
 brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
 brack-transformer = { git = "https://github.com/brack-lang/brack", package = "brack-transformer" }
-brack-lower = { git = "https://github.com/brack-lang/brack", package = "brack-lower" }
+brack-typeck = { git = "https://github.com/brack-lang/brack", package = "brack-typeck" }
 tokio = { version = "1", features = ["full"] }
 toml = "0.8.14"
 extism = "1.9.1"
@@ -50,7 +50,7 @@ members = [
     "crates/brack-project-manager", "crates/brack-release",
     "crates/brack-tokenizer",
     "crates/brack-transformer",
-    "crates/brack-lower"
+    "crates/brack-typeck"
 ]
 
 resolver = "2"
@@ -64,4 +64,4 @@ brack-plugin = { path = "crates/brack-plugin" }
 brack-project-manager = { path = "crates/brack-project-manager" }
 brack-tokenizer = { path = "crates/brack-tokenizer" }
 brack-transformer = { path = "crates/brack-transformer" }
-brack-lower = { path = "crates/brack-lower" }
+brack-typeck = { path = "crates/brack-typeck" }

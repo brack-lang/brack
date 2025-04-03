@@ -7,16 +7,16 @@ use crate::expr;
 use crate::op_code::OpCode;
 
 pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, LoweringError> {
-    let AST::Curly(_) = ast else {
+    let AST::Square(_) = ast else {
         return Err(LoweringError::Panic {
-            message: format!("Curly must be a curly but found {:?}", ast),
+            message: format!("Square must be a square but found {:?}", ast),
             location: ast.location().clone(),
         });
     };
 
     let mut op_codes = vec![];
 
-    let module = ast.children().first().expect("Curly must contain module");
+    let module = ast.children().first().expect("Square must contain module");
 
     let module_name = match module {
         AST::Module(module) => module.value.clone(),
@@ -39,7 +39,7 @@ pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, Lowe
         return Err(LoweringError::PluginNotFound(module.location().clone()));
     };
 
-    let ident = ast.children().get(1).expect("Curly must contain ident");
+    let ident = ast.children().get(1).expect("Square must contain ident");
 
     let ident_name = match ident {
         AST::Ident(ident) => ident.value.clone(),
@@ -76,7 +76,7 @@ pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, Lowe
 
     for i in 0..required_args.len() {
         let arg_type = required_args[i].1.clone();
-        let child = childs.get(i).and_then(|child| Some(child.clone()));
+        let child = childs.get(i).and_then(|child| Some(*child));
         match arg_type {
             Type::TInline => {
                 let Some(child) = child else {
@@ -146,7 +146,7 @@ pub(crate) fn lowering(ast: &AST, plugins: &Plugins) -> Result<Vec<OpCode>, Lowe
     op_codes.push(OpCode::Call {
         plugin_name: module_name,
         function_name: ident_name,
-        return_type: Type::TBlock,
+        return_type: Type::TInline,
     });
 
     Ok(op_codes)

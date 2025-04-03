@@ -111,7 +111,7 @@ pub fn run_compile(subcommand: SubCommands) -> Result<()> {
             let cst = brack_parser::parse::parse(&tokens)?;
             let (ast, _errors) = brack_transformer::transform::transform(&cst);
             let expanded_ast = brack_expander::expand::expander(&ast, &mut plugins)?;
-            let ir = brack_lower::lower::lowering(&expanded_ast, &plugins)?;
+            let ir = brack_typeck::lower::lowering(&expanded_ast, &plugins)?;
             if json {
                 let json = serde_json::to_string(&ir)?;
                 println!("{}", json);

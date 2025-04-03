@@ -200,12 +200,12 @@ dependencies = [
  "brack-codegen",
  "brack-expander",
  "brack-language-server",
- "brack-lower",
  "brack-parser",
  "brack-plugin",
  "brack-project-manager",
  "brack-tokenizer",
  "brack-transformer",
+ "brack-typeck",
  "clap",
  "extism",
  "regex",
@@ -253,19 +253,6 @@ dependencies = [
  "tokio",
  "url",
  "urlencoding",
-]
-
-[[package]]
-name = "brack-lower"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "brack-parser",
- "brack-plugin",
- "brack-tokenizer",
- "brack-transformer",
- "serde",
- "thiserror 2.0.12",
 ]
 
 [[package]]
@@ -346,6 +333,19 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.12",
  "uuid",
+]
+
+[[package]]
+name = "brack-typeck"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "brack-parser",
+ "brack-plugin",
+ "brack-tokenizer",
+ "brack-transformer",
+ "serde",
+ "thiserror 2.0.12",
 ]
 
 [[package]]
