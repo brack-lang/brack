@@ -3,11 +3,12 @@ use crate::{
     curly_bracket_open, dot, identifier, module, newline, square_bracket_close,
     square_bracket_open, text,
     tokenizer::Tokenizer,
-    tokens::{Location, LocationData, Token},
     utils::separate,
     whitespace,
 };
 use anyhow::Result;
+use brack_common::location::{Location, LocationData};
+use brack_common::tokens::Token;
 
 pub fn dispatch(t: &Tokenizer) -> Result<Vec<Token>> {
     let s = t

@@ -1,7 +1,8 @@
 use anyhow::Result;
 use std::{fs::File, io::Read, path::Path};
 
-use crate::{dispatch::dispatch, tokenizer::Tokenizer, tokens::Token};
+use crate::{dispatch::dispatch, tokenizer::Tokenizer};
+use brack_common::tokens::Token;
 
 pub fn tokenize<P: AsRef<Path>>(path: P) -> Result<Vec<Token>> {
     let mut file = File::open(&path)?;
@@ -31,8 +32,9 @@ pub fn tokenize_str(text: &str) -> Result<Vec<Token>> {
 #[cfg(test)]
 mod tests {
     use super::tokenize;
-    use crate::tokens::{Location, LocationData, Token};
     use anyhow::Result;
+    use brack_common::location::{Location, LocationData};
+    use brack_common::tokens::Token;
     use pretty_assertions::assert_eq;
 
     #[test]

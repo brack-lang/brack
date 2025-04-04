@@ -1,10 +1,11 @@
 use crate::{
     dispatch::dispatch,
     tokenizer::Tokenizer,
-    tokens::{Location, LocationData, Token},
     utils::separate,
 };
 use anyhow::Result;
+use brack_common::location::{Location, LocationData};
+use brack_common::tokens::Token;
 
 pub fn tokenize(t: &Tokenizer) -> Result<Vec<Token>> {
     let s = t

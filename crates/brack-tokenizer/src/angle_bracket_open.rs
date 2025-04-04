@@ -1,10 +1,11 @@
 use crate::{
     dispatch::dispatch,
     tokenizer::Tokenizer,
-    tokens::{Location, LocationData, Token},
     utils::separate,
 };
 use anyhow::Result;
+use brack_common::location::{Location, LocationData};
+use brack_common::tokens::Token;
 
 pub fn tokenize(t: &Tokenizer) -> Result<Vec<Token>> {
     let s = t
@@ -54,7 +55,8 @@ pub fn tokenize(t: &Tokenizer) -> Result<Vec<Token>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{tokenize::tokenize_str, tokens::Token::*};
+    use crate::tokenize::tokenize_str;
+    use brack_common::tokens::Token::{AngleBracketOpen, EOF};
 
     #[test]
     fn test_angle_bracket_open() -> Result<()> {
