@@ -1,45 +1,45 @@
-use anyhow::{bail, Result};
-use brack_tokenizer::tokens::Token;
+use brack_common::tokens::Token;
+use brack_common::cst::new_module;
 
-use crate::{cst::new_module, parser::Parser};
+use crate::parser::Parser;
 
 // text
-pub fn parse(tokens: &[Token]) -> Result<Parser> {
+pub fn parse(tokens: &[Token]) -> Option<Parser> {
     if let Some(token) = tokens.first() {
         match token {
             Token::Module(text, location) => {
-                return Ok((new_module(text.clone(), location.clone()), &tokens[1..]));
+                return Some((new_module(text.clone(), location.clone()), &tokens[1..]));
             }
-            token => bail!("Expected module token, found {:?}", token),
+            _ => return None,
         }
     }
-    bail!("Expected module token, found none");
+    None
 }
 
 #[cfg(test)]
 mod tests {
-    use anyhow::Result;
-    use brack_tokenizer::tokens::{mock_location, Token};
-
-    use crate::cst::{matches_kind, new_module};
+    use brack_common::tokens::Token;
+    use brack_common::location::mock_location;
+    use brack_common::cst::{matches_kind, new_module};
 
     #[test]
-    fn test_module_parse_only_module() -> Result<()> {
+    fn test_module_parse_only_module() {
         let tokens = vec![Token::Module("module".to_string(), mock_location())];
-        let (cst, tokens) = super::parse(&tokens)?;
-        assert_eq!(tokens.len(), 0);
-        assert!(matches_kind(
-            &cst,
-            &new_module("module".to_string(), mock_location())
-        ));
-        Ok(())
+        if let Some((cst, tokens)) = super::parse(&tokens) {
+            assert_eq!(tokens.len(), 0);
+            assert!(matches_kind(
+                &cst,
+                &new_module("module".to_string(), mock_location())
+            ));
+        } else {
+            panic!("Expected to parse a module token");
+        }
     }
 
     #[test]
-    fn test_module_parse_failure() -> Result<()> {
+    fn test_module_parse_failure() {
         let tokens = vec![Token::Dot(mock_location())];
         let result = super::parse(&tokens);
-        assert!(result.is_err());
-        Ok(())
+        assert!(result.is_none());
     }
 }

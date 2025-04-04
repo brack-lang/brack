@@ -1,41 +1,42 @@
-use anyhow::{bail, Result};
-use brack_tokenizer::tokens::Token;
+use brack_common::tokens::Token;
+use brack_common::cst::new_newline;
 
-use crate::{cst::new_newline, parser::Parser};
+use crate::parser::Parser;
 
 // newline = '\n'
-pub fn parse(tokens: &[Token]) -> Result<Parser> {
+pub fn parse(tokens: &[Token]) -> Option<Parser> {
     if let Some(token) = tokens.first() {
         match token {
             Token::NewLine(location) => {
-                return Ok((new_newline(location.clone()), &tokens[1..]));
+                return Some((new_newline(location.clone()), &tokens[1..]));
             }
-            token => bail!("Expected newline, found {:?}", token),
+            _ => return None,
         }
     }
-    bail!("Expected newline, found none");
+    None
 }
 
 #[cfg(test)]
 mod tests {
-    use anyhow::Result;
-    use brack_tokenizer::tokens::{mock_location, Token};
-
-    use crate::cst::{matches_kind, new_newline};
+    use brack_common::tokens::Token;
+    use brack_common::location::mock_location;
+    use brack_common::cst::{matches_kind, new_newline};
 
     #[test]
-    fn test_newline_parse_only_newline() -> Result<()> {
+    fn test_newline_parse_only_newline() {
         let tokens = vec![Token::NewLine(mock_location())];
-        let (cst, tokens) = super::parse(&tokens)?;
-        assert_eq!(tokens.len(), 0);
-        assert!(matches_kind(&cst, &new_newline(mock_location())));
-        Ok(())
+        if let Some((cst, tokens)) = super::parse(&tokens) {
+            assert_eq!(tokens.len(), 0);
+            assert!(matches_kind(&cst, &new_newline(mock_location())));
+        } else {
+            panic!("Expected to parse a newline token");
+        }
     }
 
     #[test]
     fn test_newline_parse_failure() {
         let tokens = vec![Token::Dot(mock_location())];
         let result = super::parse(&tokens);
-        assert!(result.is_err());
+        assert!(result.is_none());
     }
 }
