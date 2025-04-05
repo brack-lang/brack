@@ -1,6 +1,8 @@
-use brack_common::tokens::Token;
-use brack_common::cst::{new_angle_bracket_close, new_curly_bracket_close, new_square_bracket_close};
 use crate::parser::Parser;
+use brack_common::cst::{
+    new_angle_bracket_close, new_curly_bracket_close, new_square_bracket_close,
+};
+use brack_common::tokens::Token;
 
 // angle_bracket_close | square_bracket_close | curly_bracket_close
 pub fn parse(tokens: &[Token]) -> Option<Parser> {
@@ -23,11 +25,11 @@ pub fn parse(tokens: &[Token]) -> Option<Parser> {
 
 #[cfg(test)]
 mod tests {
-    use brack_common::tokens::Token;
-    use brack_common::location::mock_location;
     use brack_common::cst::{
         matches_kind, new_angle_bracket_close, new_curly_bracket_close, new_square_bracket_close,
     };
+    use brack_common::location::mock_location;
+    use brack_common::tokens::Token;
 
     #[test]
     fn test_bracket_close_parse_only_angle_bracket_close() {

@@ -1,5 +1,5 @@
-use brack_common::tokens::Token;
 use brack_common::cst::new_module;
+use brack_common::tokens::Token;
 
 use crate::parser::Parser;
 
@@ -18,9 +18,9 @@ pub fn parse(tokens: &[Token]) -> Option<Parser> {
 
 #[cfg(test)]
 mod tests {
-    use brack_common::tokens::Token;
-    use brack_common::location::mock_location;
     use brack_common::cst::{matches_kind, new_module};
+    use brack_common::location::mock_location;
+    use brack_common::tokens::Token;
 
     #[test]
     fn test_module_parse_only_module() {

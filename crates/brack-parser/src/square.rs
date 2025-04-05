@@ -1,11 +1,8 @@
-use brack_common::tokens::Token;
-use brack_common::location::Location;
 use brack_common::cst::{new_square, new_square_bracket_close, new_square_bracket_open};
+use brack_common::location::Location;
+use brack_common::tokens::Token;
 
-use crate::{
-    expr, newline,
-    parser::Parser,
-};
+use crate::{expr, newline, parser::Parser};
 
 // square_bracket_open (expr | newline)* square_bracket_close?
 pub fn parse(tokens: &[Token]) -> Option<Parser> {

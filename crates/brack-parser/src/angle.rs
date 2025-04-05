@@ -1,11 +1,8 @@
-use brack_common::tokens::Token;
-use brack_common::location::Location;
 use brack_common::cst::{new_angle, new_angle_bracket_close, new_angle_bracket_open};
+use brack_common::location::Location;
+use brack_common::tokens::Token;
 
-use crate::{
-    expr, newline,
-    parser::Parser,
-};
+use crate::{expr, newline, parser::Parser};
 
 // angle_bracket_open (expr | newline)* angle_bracket_close?
 pub fn parse(tokens: &[Token]) -> Option<Parser> {
@@ -134,7 +131,6 @@ mod tests {
         } else {
             panic!("Expected to parse an angle bracket");
         }
-
     }
 
     #[test]

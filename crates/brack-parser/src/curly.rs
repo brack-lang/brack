@@ -1,11 +1,8 @@
+use brack_common::cst::{new_curly, new_curly_bracket_close, new_curly_bracket_open};
 use brack_common::location::Location;
 use brack_common::tokens::Token;
-use brack_common::cst::{new_curly, new_curly_bracket_close, new_curly_bracket_open};
 
-use crate::{    
-    expr, newline,
-    parser::Parser,
-};
+use crate::{expr, newline, parser::Parser};
 
 // curly_bracket_open (expr | newline)* curly_bracket_close?
 pub fn parse(tokens: &[Token]) -> Option<Parser> {

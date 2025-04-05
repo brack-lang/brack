@@ -1,9 +1,7 @@
-use brack_common::tokens::Token;
 use brack_common::cst::{new_document, CST};
+use brack_common::tokens::Token;
 
-use crate::{
-    eof, newline, stmt,
-};
+use crate::{eof, newline, stmt};
 
 // (stmt newline newline+)* stmt? newline* EOF
 pub fn parse(tokens: &[Token]) -> CST {
@@ -52,7 +50,7 @@ pub fn parse(tokens: &[Token]) -> CST {
     if let Some((cst1, _)) = eof::parse(tokens) {
         cst.add(cst1);
     } else {
-       panic!("EOF not found");
+        panic!("EOF not found");
     }
 
     cst

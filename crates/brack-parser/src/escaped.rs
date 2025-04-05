@@ -1,5 +1,5 @@
-use brack_common::tokens::Token;
 use brack_common::cst::{new_backslash, new_text};
+use brack_common::tokens::Token;
 
 use crate::parser::Parser;
 
@@ -57,10 +57,7 @@ pub fn parse(tokens: &[Token]) -> Option<Parser> {
                     for child in children {
                         inner.add(child);
                     }
-                    return Some((
-                        inner,
-                        tokens,
-                    ));
+                    return Some((inner, tokens));
                 }
                 return Some((new_backslash(location.clone()), &tokens[1..]));
             }
@@ -72,9 +69,9 @@ pub fn parse(tokens: &[Token]) -> Option<Parser> {
 
 #[cfg(test)]
 mod tests {
-    use brack_common::tokens::Token;
-    use brack_common::location::mock_location;
     use brack_common::cst::{matches_kind, new_backslash, new_text};
+    use brack_common::location::mock_location;
+    use brack_common::tokens::Token;
 
     #[test]
     fn test_escaped_parse_valid_dot() {

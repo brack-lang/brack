@@ -1,6 +1,6 @@
 use crate::{expr_or_close, newline, parser::Parser};
-use brack_common::tokens::Token;
 use brack_common::cst::new_stmt;
+use brack_common::tokens::Token;
 
 // expr_or_close (newline expr_or_close)*
 pub fn parse(tokens: &[Token]) -> Option<Parser> {

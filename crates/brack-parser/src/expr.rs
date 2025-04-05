@@ -1,10 +1,8 @@
-use brack_common::tokens::Token;
-use brack_common::location::Location;
 use brack_common::cst::new_expr;
+use brack_common::location::Location;
+use brack_common::tokens::Token;
 
-use crate::{
-    bracket, comma, dot, escaped, ident, modules, parser::Parser, text, whitespace,
-};
+use crate::{bracket, comma, dot, escaped, ident, modules, parser::Parser, text, whitespace};
 
 // (escaped | module | ident | bracket | dot | comma | whitespace | text)+
 pub fn parse(tokens: &[Token]) -> Option<Parser> {
