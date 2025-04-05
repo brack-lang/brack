@@ -89,7 +89,46 @@ pub enum ProjectError {
     ChannelNotFound {
         name: String,
     },
-    TransformAngleBracketNotOpened {
+    AngleNotOpened {
+        location: Location,
+    },
+    AngleNotClosed {
+        location: Location,
+    },
+    CurlyNotOpened {
+        location: Location,
+    },
+    CurlyNotClosed {
+        location: Location,
+    },
+    SquareNotOpened {
+        location: Location,
+    },
+    SquareNotClosed {
+        location: Location,
+    },
+    MismatchedBracket {
+        location: Location,
+    },
+    ModuleNotFound {
+        location: Location,
+    },
+    IdentifierNotFound {
+        location: Location,
+    },
+    DotNotFound {
+        location: Location,
+    },
+    CommaNotFound {
+        location: Location,
+    },
+    UnexpectedDot {
+        location: Location,
+    },
+    UnexpectedComma {
+        location: Location,
+    },
+    InvalidBackslash {
         location: Location,
     },
 }
@@ -121,7 +160,20 @@ impl ProjectError {
             ProjectError::FailedToRemoveDir { .. } => 22,
             ProjectError::FailedToReadFileSize { .. } => 23,
             ProjectError::ChannelNotFound { .. } => 24,
-            ProjectError::TransformAngleBracketNotOpened { .. } => 25,
+            ProjectError::AngleNotOpened { .. } => 25,
+            ProjectError::AngleNotClosed { .. } => 26,
+            ProjectError::CurlyNotOpened { .. } => 27,
+            ProjectError::CurlyNotClosed { .. } => 28,
+            ProjectError::SquareNotOpened { .. } => 29,
+            ProjectError::SquareNotClosed { .. } => 30,
+            ProjectError::MismatchedBracket { .. } => 31,
+            ProjectError::ModuleNotFound { .. } => 32,
+            ProjectError::IdentifierNotFound { .. } => 33,
+            ProjectError::DotNotFound { .. } => 34,
+            ProjectError::CommaNotFound { .. } => 35,
+            ProjectError::UnexpectedDot { .. } => 36,
+            ProjectError::UnexpectedComma { .. } => 37,
+            ProjectError::InvalidBackslash { .. } => 38,
         }
     }
 
@@ -151,7 +203,20 @@ impl ProjectError {
             ProjectError::FailedToRemoveDir { .. } => String::from("E0022"),
             ProjectError::FailedToReadFileSize { .. } => String::from("E0023"),
             ProjectError::ChannelNotFound { .. } => String::from("E0024"),
-            ProjectError::TransformAngleBracketNotOpened { .. } => String::from("E0025"),
+            ProjectError::AngleNotOpened { .. } => String::from("E0025"),
+            ProjectError::AngleNotClosed { .. } => String::from("E0026"),
+            ProjectError::CurlyNotOpened { .. } => String::from("E0027"),
+            ProjectError::CurlyNotClosed { .. } => String::from("E0028"),
+            ProjectError::SquareNotOpened { .. } => String::from("E0029"),
+            ProjectError::SquareNotClosed { .. } => String::from("E0030"),
+            ProjectError::MismatchedBracket { .. } => String::from("E0031"),
+            ProjectError::ModuleNotFound { .. } => String::from("E0032"),
+            ProjectError::IdentifierNotFound { .. } => String::from("E0033"),
+            ProjectError::DotNotFound { .. } => String::from("E0034"),
+            ProjectError::CommaNotFound { .. } => String::from("E0035"),
+            ProjectError::UnexpectedDot { .. } => String::from("E0036"),
+            ProjectError::UnexpectedComma { .. } => String::from("E0037"),
+            ProjectError::InvalidBackslash { .. } => String::from("E0038"),
         }
     }
 }

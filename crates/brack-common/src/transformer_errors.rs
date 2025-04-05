@@ -1,6 +1,6 @@
+use crate::{location::Location, project_errors::ProjectError};
 use std::fmt::{self, Display, Formatter};
 use thiserror::Error;
-use crate::location::Location;
 
 #[derive(Error, Debug)]
 pub enum TransformError {
@@ -75,5 +75,32 @@ impl Display for TransformError {
             location.end.character,
             message
         )
+    }
+}
+
+impl Into<ProjectError> for TransformError {
+    fn into(self) -> ProjectError {
+        match self {
+            TransformError::AngleNotOpened(location) => ProjectError::AngleNotOpened { location },
+            TransformError::AngleNotClosed(location) => ProjectError::AngleNotClosed { location },
+            TransformError::CurlyNotOpened(location) => ProjectError::CurlyNotOpened { location },
+            TransformError::CurlyNotClosed(location) => ProjectError::CurlyNotClosed { location },
+            TransformError::SquareNotOpened(location) => ProjectError::SquareNotOpened { location },
+            TransformError::SquareNotClosed(location) => ProjectError::SquareNotClosed { location },
+            TransformError::MismatchedBracket(location) => {
+                ProjectError::MismatchedBracket { location }
+            }
+            TransformError::ModuleNotFound(location) => ProjectError::ModuleNotFound { location },
+            TransformError::IdentifierNotFound(location) => {
+                ProjectError::IdentifierNotFound { location }
+            }
+            TransformError::DotNotFound(location) => ProjectError::DotNotFound { location },
+            TransformError::CommaNotFound(location) => ProjectError::CommaNotFound { location },
+            TransformError::UnexpectedDot(location) => ProjectError::UnexpectedDot { location },
+            TransformError::UnexpectedComma(location) => ProjectError::UnexpectedComma { location },
+            TransformError::InvalidBackslash(location) => {
+                ProjectError::InvalidBackslash { location }
+            }
+        }
     }
 }
