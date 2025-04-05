@@ -1,6 +1,6 @@
 use anyhow::Result;
-use brack_plugin::{plugins::Plugins, value::Value};
 use brack_common::ast::AST;
+use brack_plugin::{plugins::Plugins, value::Value};
 
 pub(crate) fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     let result = ast

@@ -1,6 +1,6 @@
 use anyhow::Result;
-use brack_plugin::{plugins::Plugins, value::Value};
 use brack_common::ast::AST;
+use brack_plugin::{plugins::Plugins, value::Value};
 
 use crate::{curly, square, text};
 
