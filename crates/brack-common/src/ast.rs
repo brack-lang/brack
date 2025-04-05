@@ -1,8 +1,9 @@
 use std::fmt;
 
-use brack_tokenizer::tokens::{merge_location, Location};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+use crate::location::{Location, merge_location};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct InnerNode {
@@ -48,9 +49,7 @@ impl AST {
             | AST::Angle(node)
             | AST::Square(node)
             | AST::Curly(node) => &node.children,
-            AST::Ident(_) | AST::Module(_) | AST::Text(_) => {
-                panic!("Leaf node has no children: {}", self)
-            }
+            AST::Ident(_) | AST::Module(_) | AST::Text(_) => panic!("Leaf node has no children: {}", self),
             AST::Invalid(_) => panic!("This node is broken"),
             AST::Ignored(_) => panic!("This node has to be ignored"),
         }

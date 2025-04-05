@@ -1,4 +1,4 @@
-use brack_parser::cst::{new_invalid, CST};
+use brack_common::cst::{new_invalid, CST};
 
 use crate::error::TransformError;
 

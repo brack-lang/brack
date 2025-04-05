@@ -1,5 +1,4 @@
-use brack_parser::cst::{InnerNode, CST};
-use uuid::Uuid;
+use brack_common::cst::{new_stmt, CST};
 
 use crate::{error::TransformError, simplify, utils::remove_elements_not_included_ast};
 
@@ -19,12 +18,10 @@ pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
 
     csts = remove_elements_not_included_ast(&csts);
 
-    (
-        CST::Stmt(InnerNode {
-            id: Uuid::new_v4().to_string(),
-            children: csts,
-            location: node.location.clone(),
-        }),
-        errors,
-    )
+    let mut stmt = new_stmt();
+    for child in csts.clone() {
+        stmt.add(child);
+    }
+    stmt.set_location(node.location.clone());
+    (stmt, errors)
 }

@@ -1,6 +1,6 @@
 use std::fmt::{self, Display, Formatter};
 
-use brack_tokenizer::tokens::Location;
+use brack_common::location::Location;
 use thiserror::Error;
 
 #[derive(Error, Debug)]

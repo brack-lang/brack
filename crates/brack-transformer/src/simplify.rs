@@ -1,4 +1,4 @@
-use brack_parser::cst::CST;
+use brack_common::cst::CST;
 
 use crate::{angle, backslash, curly, document, error::TransformError, expr, square, stmt};
 
