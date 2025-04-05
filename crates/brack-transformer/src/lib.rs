@@ -2,7 +2,6 @@ mod angle;
 mod backslash;
 mod curly;
 mod document;
-mod error;
 mod expr;
 mod simplify;
 mod square;

@@ -3,8 +3,9 @@ use brack_common::ast::{
     new_stmt, new_text, AST,
 };
 use brack_common::cst::CST;
+use brack_common::transformer_errors::TransformError;
 
-use crate::{error::TransformError, simplify};
+use crate::simplify;
 
 pub fn transform(cst: &CST) -> (AST, Vec<TransformError>) {
     let (cst, errors) = simplify::simplify(cst);

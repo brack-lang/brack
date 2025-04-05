@@ -1,7 +1,6 @@
 use std::fmt::{self, Display, Formatter};
-
-use brack_common::location::Location;
 use thiserror::Error;
+use crate::location::Location;
 
 #[derive(Error, Debug)]
 pub enum TransformError {

@@ -1,6 +1,5 @@
 use brack_common::cst::{new_expr, CST};
-
-use crate::error::TransformError;
+use brack_common::transformer_errors::TransformError;
 
 pub fn check_if_module_or_angle_bracket(csts: &[CST]) -> Vec<TransformError> {
     if csts.len() < 2 {

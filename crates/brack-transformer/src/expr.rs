@@ -1,6 +1,7 @@
 use brack_common::cst::{new_expr, CST};
+use brack_common::transformer_errors::TransformError;
 
-use crate::{error::TransformError, simplify};
+use crate::simplify;
 
 pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
     let node = match cst {
