@@ -1,6 +1,6 @@
 use anyhow::Result;
-use brack_plugin::plugins::Plugins;
 use brack_common::ast::AST;
+use brack_plugin::plugins::Plugins;
 
 fn expand_angle(overall_ast: &AST, ast: &AST, plugins: &mut Plugins) -> Result<AST> {
     let mut module_name = String::from("");

@@ -13,6 +13,19 @@ pub struct Location {
     pub end: LocationData,
 }
 
+impl LocationData {
+    pub fn to_usize(&self, source: &str) -> usize {
+        let lines: Vec<&str> = source.lines().collect();
+        let mut offset = 0;
+
+        for i in 0..self.line {
+            offset += lines[i].len() + 1;
+        }
+
+        offset + self.character
+    }
+}
+
 pub fn mock_location() -> Location {
     Location {
         start: LocationData {

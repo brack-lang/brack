@@ -131,52 +131,10 @@ pub enum ProjectError {
     InvalidBackslash {
         location: Location,
     },
+    TransformError,
 }
 
 impl ProjectError {
-    pub fn exit_code(&self) -> i32 {
-        match self {
-            ProjectError::FailedToGetFileNameFromPath { .. } => 1,
-            ProjectError::FailedToConvertPathToStr { .. } => 2,
-            ProjectError::ProjectAlreadyExists { .. } => 3,
-            ProjectError::DirectoryAlreadyExists { .. } => 4,
-            ProjectError::FailedToWriteFile { .. } => 5,
-            ProjectError::FailedToCreateDirectory { .. } => 6,
-            ProjectError::FailedToSerializeManifest { .. } => 7,
-            ProjectError::FailedToDeserializeManifest { .. } => 8,
-            ProjectError::UninitializedProject => 9,
-            ProjectError::ChannelAlreadyExists { .. } => 10,
-            ProjectError::FailedToFetchResource { .. } => 11,
-            ProjectError::ReceivedHttpNonSuccessStatus { .. } => 12,
-            ProjectError::FailedToConvertBytesToStr { .. } => 13,
-            ProjectError::FailedToParseChannel { .. } => 14,
-            ProjectError::ChannelNameCannotBeEmpty => 15,
-            ProjectError::InvalidChannelName { .. } => 16,
-            ProjectError::ChannelUrlCannotBeEmpty => 17,
-            ProjectError::InvalidChannelUrl { .. } => 18,
-            ProjectError::FailedToReadFile { .. } => 19,
-            ProjectError::ManifestNotFound { .. } => 20,
-            ProjectError::FailedToRemoveFile { .. } => 21,
-            ProjectError::FailedToRemoveDir { .. } => 22,
-            ProjectError::FailedToReadFileSize { .. } => 23,
-            ProjectError::ChannelNotFound { .. } => 24,
-            ProjectError::AngleNotOpened { .. } => 25,
-            ProjectError::AngleNotClosed { .. } => 26,
-            ProjectError::CurlyNotOpened { .. } => 27,
-            ProjectError::CurlyNotClosed { .. } => 28,
-            ProjectError::SquareNotOpened { .. } => 29,
-            ProjectError::SquareNotClosed { .. } => 30,
-            ProjectError::MismatchedBracket { .. } => 31,
-            ProjectError::ModuleNotFound { .. } => 32,
-            ProjectError::IdentifierNotFound { .. } => 33,
-            ProjectError::DotNotFound { .. } => 34,
-            ProjectError::CommaNotFound { .. } => 35,
-            ProjectError::UnexpectedDot { .. } => 36,
-            ProjectError::UnexpectedComma { .. } => 37,
-            ProjectError::InvalidBackslash { .. } => 38,
-        }
-    }
-
     pub fn codespan_code(&self) -> String {
         match self {
             ProjectError::FailedToGetFileNameFromPath { .. } => String::from("E0001"),
@@ -217,6 +175,7 @@ impl ProjectError {
             ProjectError::UnexpectedDot { .. } => String::from("E0036"),
             ProjectError::UnexpectedComma { .. } => String::from("E0037"),
             ProjectError::InvalidBackslash { .. } => String::from("E0038"),
+            ProjectError::TransformError => String::from("E0039"),
         }
     }
 }

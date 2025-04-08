@@ -2,25 +2,20 @@
 name = "brack"
 version = "0.2.0"
 edition = "2021"
+authors = [
+    "Mutsuha Asada <me@momee.mt>",
+    "Kanta Ueno <kantaueno0808@yahoo.co.jp>",
+]
+description = "A bracket-based lightweight markup language that extends commands with WebAssembly"
 
 [dependencies]
-anyhow = "1.0.97"
-brack-codegen = { git = "https://github.com/brack-lang/brack", package = "brack-codegen" }
-brack-expander = { git = "https://github.com/brack-lang/brack", package = "brack-expander" }
-brack-language-server = { git = "https://github.com/brack-lang/brack", package = "brack-language-server" }
-brack-parser = { git = "https://github.com/brack-lang/brack", package = "brack-parser" }
-brack-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-plugin" }
-brack-project-manager = { git = "https://github.com/brack-lang/brack", package = "brack-project-manager" }
-brack-tokenizer = { git = "https://github.com/brack-lang/brack", package = "brack-tokenizer" }
-brack-transformer = { git = "https://github.com/brack-lang/brack", package = "brack-transformer" }
+brack-common = { git = "https://github.com/brack-lang/brack", package = "brack-common" }
+brack-project = { git = "https://github.com/brack-lang/brack", package = "brack-project" }
 tokio = { version = "1", features = ["full"] }
-toml = "0.8.14"
-extism = "1.9.1"
-reqwest = "0.12.15"
-regex = "1.11.1"
-serde_json = "1.0.134"
-serde = { version = "1.0.219", features = ["derive"] }
-toml_edit = "0.22.22"
+anstyle = "1.0.10"
+colored = "3.0.0"
+codespan-reporting = "0.12.0"
+file-size = "1.0.3"
 
 [dependencies.clap]
 version = "4.5.32"
@@ -35,18 +30,16 @@ name = "debug_compile"
 path = "src/debug/debug_compile.rs"
 required-features = ["debug"]
 
-[[bin]]
-name = "brack-release"
-path = "crates/brack-release/src/main.rs"
-
 [workspace]
 members = [
     "crates/brack-codegen",
+    "crates/brack-common",
     "crates/brack-expander",
     "crates/brack-language-server",
     "crates/brack-parser",
     "crates/brack-plugin",
-    "crates/brack-project-manager", "crates/brack-release",
+    "crates/brack-project",
+    "crates/brack-release",
     "crates/brack-tokenizer",
     "crates/brack-transformer",
 ]
@@ -55,10 +48,11 @@ resolver = "2"
 
 [patch."https://github.com/brack-lang/brack"]
 brack-codegen = { path = "crates/brack-codegen" }
+brack-common = { path = "crates/brack-common" }
 brack-expander = { path = "crates/brack-expander" }
 brack-language-server = { path = "crates/brack-language-server" }
 brack-parser = { path = "crates/brack-parser" }
 brack-plugin = { path = "crates/brack-plugin" }
-brack-project-manager = { path = "crates/brack-project-manager" }
+brack-project = { path = "crates/brack-project" }
 brack-tokenizer = { path = "crates/brack-tokenizer" }
 brack-transformer = { path = "crates/brack-transformer" }
