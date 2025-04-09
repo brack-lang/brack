@@ -1,6 +1,6 @@
 use std::fmt::{self};
 
-use crate::location::{Location, merge_location, mock_location};
+use crate::location::{merge_location, mock_location, Location};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
