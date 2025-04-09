@@ -25,11 +25,6 @@ features = ["derive"]
 default = []
 debug = []
 
-[[bin]]
-name = "debug_compile"
-path = "src/debug/debug_compile.rs"
-required-features = ["debug"]
-
 [workspace]
 members = [
     "crates/brack-codegen",
