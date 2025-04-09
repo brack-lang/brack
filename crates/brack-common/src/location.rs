@@ -18,8 +18,8 @@ impl LocationData {
         let lines: Vec<&str> = source.lines().collect();
         let mut offset = 0;
 
-        for i in 0..self.line {
-            offset += lines[i].len() + 1;
+        for line in lines.iter().take(self.line) {
+            offset += line.len() + 1;
         }
 
         offset + self.character

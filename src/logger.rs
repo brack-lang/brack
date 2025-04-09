@@ -343,7 +343,7 @@ fn get_label_message_from_error(error: &ProjectError) -> String {
                 String::from("path cannot terminate with `..`")
             } else if needle == "/" {
                 String::from("path cannot be `/`")
-            } else if needle == "" {
+            } else if needle.is_empty() {
                 String::from("path cannot be empty")
             } else {
                 String::from("failed to get file name for unknown reason")

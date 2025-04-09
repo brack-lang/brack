@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use std::str;
 
 use crate::location::Location;
+use crate::transformer_errors::TransformError;
 
 #[derive(Debug)]
 pub enum ProjectError {
@@ -256,4 +257,31 @@ pub enum ProjectDebug {
     RemoveFile { path: PathBuf },
     RemoveDir { path: PathBuf },
     BuildingFile { path: PathBuf, file_name: String },
+}
+
+impl From<TransformError> for ProjectError {
+    fn from(val: TransformError) -> Self {
+        match val {
+            TransformError::AngleNotOpened(location) => ProjectError::AngleNotOpened { location },
+            TransformError::AngleNotClosed(location) => ProjectError::AngleNotClosed { location },
+            TransformError::CurlyNotOpened(location) => ProjectError::CurlyNotOpened { location },
+            TransformError::CurlyNotClosed(location) => ProjectError::CurlyNotClosed { location },
+            TransformError::SquareNotOpened(location) => ProjectError::SquareNotOpened { location },
+            TransformError::SquareNotClosed(location) => ProjectError::SquareNotClosed { location },
+            TransformError::MismatchedBracket(location) => {
+                ProjectError::MismatchedBracket { location }
+            }
+            TransformError::ModuleNotFound(location) => ProjectError::ModuleNotFound { location },
+            TransformError::IdentifierNotFound(location) => {
+                ProjectError::IdentifierNotFound { location }
+            }
+            TransformError::DotNotFound(location) => ProjectError::DotNotFound { location },
+            TransformError::CommaNotFound(location) => ProjectError::CommaNotFound { location },
+            TransformError::UnexpectedDot(location) => ProjectError::UnexpectedDot { location },
+            TransformError::UnexpectedComma(location) => ProjectError::UnexpectedComma { location },
+            TransformError::InvalidBackslash(location) => {
+                ProjectError::InvalidBackslash { location }
+            }
+        }
+    }
 }

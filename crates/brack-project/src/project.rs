@@ -240,6 +240,12 @@ fn try_read_to_string<P: AsRef<Path>, L: Logger>(
     }
 }
 
+impl Default for Project {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Project {
     pub fn new() -> Self {
         Self {

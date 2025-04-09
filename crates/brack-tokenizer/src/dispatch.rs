@@ -17,7 +17,6 @@ pub fn dispatch(t: &Tokenizer) -> Vec<Token> {
         .unwrap_or_else(|| panic!("`Tokenizer.pool` is not set"));
     let column = t
         .column
-        .clone()
         .unwrap_or_else(|| panic!("`Tokenizer.column` is not set"));
 
     let (head, tail) = separate(&s);
