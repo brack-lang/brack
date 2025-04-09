@@ -267,7 +267,11 @@ fn get_file_from_error(logger: &Logger, error: &ProjectError) -> SimpleFile<Stri
             });
             SimpleFile::new(path.display().to_string(), file)
         }
-        ProjectError::TransformError => cli_command
+        ProjectError::TransformError => cli_command,
+        ProjectError::FailedToCreatePlugin => cli_command,
+        ProjectError::ExpandError => cli_command,
+        ProjectError::CodegenError => cli_command,
+        ProjectError::DocumentSettingsNotFound => cli_command,
     }
 }
 
@@ -324,6 +328,10 @@ fn get_diagnostic_message_from_error(error: &ProjectError) -> String {
         ProjectError::UnexpectedComma { .. } => String::from("unexpected comma"),
         ProjectError::InvalidBackslash { .. } => String::from("invalid backslash"),
         ProjectError::TransformError => String::from("transform error"),
+        ProjectError::FailedToCreatePlugin => String::from("failed to create plugin"),
+        ProjectError::ExpandError => String::from("expand error"),
+        ProjectError::CodegenError => String::from("codegen error"),
+        ProjectError::DocumentSettingsNotFound => String::from("document settings not found"),
     }
 }
 
@@ -422,6 +430,10 @@ fn get_label_message_from_error(error: &ProjectError) -> String {
         ProjectError::UnexpectedComma { .. } => String::from("unexpected comma"),
         ProjectError::InvalidBackslash { .. } => String::from("invalid backslash"),
         ProjectError::TransformError => String::from("transform error"),
+        ProjectError::FailedToCreatePlugin => String::from("failed to create plugin"),
+        ProjectError::ExpandError => String::from("expand error"),
+        ProjectError::CodegenError => String::from("codegen error"),
+        ProjectError::DocumentSettingsNotFound => String::from("document settings not found"),
     }
 }
 
@@ -698,6 +710,10 @@ fn get_diagnostic_labels_from_error(logger: &Logger, error: &ProjectError) -> Ve
             .with_message("invalid backslash")]
         }
         ProjectError::TransformError => vec![],
+        ProjectError::FailedToCreatePlugin => vec![],
+        ProjectError::ExpandError => vec![],
+        ProjectError::CodegenError => vec![],
+        ProjectError::DocumentSettingsNotFound => vec![],
     }
 }
 
@@ -951,6 +967,10 @@ fn get_diagnostic_notes_from_error(error: &ProjectError) -> Vec<String> {
         ProjectError::UnexpectedComma { .. } => vec![],
         ProjectError::InvalidBackslash { .. } => vec![],
         ProjectError::TransformError => vec![],
+        ProjectError::FailedToCreatePlugin => vec![],
+        ProjectError::ExpandError => vec![],
+        ProjectError::CodegenError => vec![],
+        ProjectError::DocumentSettingsNotFound => vec![],
     }
 }
 
@@ -1075,6 +1095,10 @@ fn get_debug_heading(debug: &ProjectDebug) -> String {
         ProjectDebug::RemoveDir { path } => {
             let path = path.display().to_string();
             format!("removing directory `{}`", path)
+        }
+        ProjectDebug::BuildingFile { path, file_name } => {
+            let path = path.display().to_string();
+            format!("building file `{}` in `{}`", file_name, path)
         }
     }
 }

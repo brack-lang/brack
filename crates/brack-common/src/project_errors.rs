@@ -132,6 +132,10 @@ pub enum ProjectError {
         location: Location,
     },
     TransformError,
+    FailedToCreatePlugin,
+    ExpandError,
+    CodegenError,
+    DocumentSettingsNotFound,
 }
 
 impl ProjectError {
@@ -176,6 +180,10 @@ impl ProjectError {
             ProjectError::UnexpectedComma { .. } => String::from("E0037"),
             ProjectError::InvalidBackslash { .. } => String::from("E0038"),
             ProjectError::TransformError => String::from("E0039"),
+            ProjectError::FailedToCreatePlugin => String::from("E0040"),
+            ProjectError::ExpandError => String::from("E0041"),
+            ProjectError::CodegenError => String::from("E0042"),
+            ProjectError::DocumentSettingsNotFound => String::from("E0043"),
         }
     }
 }
@@ -247,4 +255,5 @@ pub enum ProjectDebug {
     CreatingDirectory { path: PathBuf },
     RemoveFile { path: PathBuf },
     RemoveDir { path: PathBuf },
+    BuildingFile { path: PathBuf, file_name: String },
 }

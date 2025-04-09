@@ -10,7 +10,7 @@ use brack_plugin::feature_flag::FeatureFlag;
 // use indicatif::{ProgressBar, ProgressStyle};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fs::{create_dir, read_to_string, remove_dir_all, remove_file, write};
+use std::fs::{create_dir_all, read_to_string, remove_dir_all, remove_file, write};
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
@@ -183,7 +183,11 @@ const DEFAULT_PROJECT_TARGET_PATH: &str = "target";
 
 fn try_create_dir<P: AsRef<Path>, L: Logger>(path: &P, logger: &L) -> Result<(), ProjectError> {
     let path = path.as_ref().to_path_buf();
-    match create_dir(&path) {
+    if path.exists() {
+        // logger.debug(&ProjectDebug::DirectoryAlreadyExists { path });
+        return Ok(());
+    }
+    match create_dir_all(&path) {
         Ok(_) => {
             logger.debug(&ProjectDebug::CreatingDirectory { path });
             Ok(())
@@ -333,8 +337,7 @@ impl Project {
         }]);
         self.manifest.dependencies = Some(HashMap::default());
         self.manifest.document = Some(DocumentSettings {
-            backend: String::from("html"),
-            extension: None,
+            target: String::from("html"),
             output_level: None,
             output_format: None,
             src: String::from(DEFAULT_PROJECT_SRC_PATH),
@@ -370,6 +373,14 @@ impl Project {
     pub async fn build<L: Logger>(&self, logger: &mut L) -> Result<(), ProjectError> {
         // let channels = download_channels(&self.manifest).await?;
         // let _plugins = download_plugins(&self.manifest, &channels).await?;
+        let mut plugins = match brack_plugin::plugins::Plugins::new(vec![]) {
+            Ok(plugins) => plugins,
+            Err(_) => {
+                let err = ProjectError::FailedToCreatePlugin;
+                logger.error(&err);
+                return Err(err);
+            }
+        };
         let name = self.manifest.name.clone();
         logger.info(&ProjectInfo::BuildingProject { name: name.clone() });
         if self.project_root.is_none() {
@@ -379,16 +390,26 @@ impl Project {
         }
         let project_root = self.project_root.as_ref().unwrap();
         let docs_path = project_root.join(DEFAULT_PROJECT_SRC_PATH);
-        // let target_path = project_root.join(DEFAULT_PROJECT_TARGET_PATH);
+        let target = match &self.manifest.document {
+            Some(document) => &document.target,
+            _ => {
+                let err = ProjectError::DocumentSettingsNotFound;
+                logger.error(&err);
+                return Err(err);
+            }
+        };
+        let target_path = project_root.join(DEFAULT_PROJECT_TARGET_PATH).join(target);
+        try_create_dir(&project_root.join(DEFAULT_PROJECT_TARGET_PATH), logger)?;
+        try_create_dir(&target_path, logger)?;
         let mut has_transform_error = false;
-        for entry in WalkDir::new(docs_path).into_iter().filter_map(|e| e.ok()) {
+        for entry in WalkDir::new(&docs_path).into_iter().filter_map(|e| e.ok()) {
             let path = entry.path();
             if !path.is_file() {
                 continue;
             }
             logger.set_path(path.to_path_buf());
             let file_name = path.file_name().unwrap().to_str().unwrap();
-            // logger.debug(&Debug::BuildingFile { path: path.to_path_buf(), file_name: file_name.to_string() });
+            logger.debug(&ProjectDebug::BuildingFile { path: path.to_path_buf(), file_name: file_name.to_string() });
             if !file_name.ends_with(".[]") {
                 continue;
             }
@@ -405,13 +426,37 @@ impl Project {
             };
             let tokens = brack_tokenizer::tokenize::tokenize(&file);
             let cst = brack_parser::parse::parse(&tokens);
-            let (_ast, errors) = brack_transformer::transform::transform(&cst);
+            let (ast, errors) = brack_transformer::transform::transform(&cst);
             if !errors.is_empty() {
                 for error in errors {
                     logger.error(&error.into());
                 }
                 has_transform_error = true;
             }
+            let east = match brack_expander::expand::expander(&ast, &mut plugins) {
+                Ok(east) => east,
+                Err(_) => {
+                    let err = ProjectError::ExpandError;
+                    logger.error(&err);
+                    return Err(err);
+                }
+            };
+            let result = match brack_codegen::generate::generate(&east, &mut plugins) {
+                Ok(result) => result,
+                Err(_) => {
+                    let err = ProjectError::CodegenError;
+                    logger.error(&err);
+                    return Err(err);
+                }
+            };
+            let out_dir = target_path.join(
+                path.strip_prefix(&docs_path).unwrap().parent().unwrap(),
+            );
+            let out_path = target_path.join(
+                path.strip_prefix(&docs_path).unwrap().with_extension(target),
+            );
+            try_create_dir(&out_dir, logger)?;
+            try_write(&out_path, &result, logger)?;
         }
         if has_transform_error {
             return Err(ProjectError::TransformError);

@@ -63,8 +63,8 @@ pub enum OutputFormat {
 
 #[derive(Serialize, Deserialize)]
 pub struct DocumentSettings {
-    pub backend: String,
-    pub extension: Option<String>,
+    // FIXME: it will change into enum because we implement specific code generator for each backend
+    pub target: String,
     pub output_level: Option<OutputLevel>,
     pub output_format: Option<OutputFormat>,
     pub src: String,
