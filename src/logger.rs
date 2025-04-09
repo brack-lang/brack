@@ -121,7 +121,7 @@ fn emit_info_output(info: &ProjectInfo) {
 }
 
 fn emit_debug_output(debug: &ProjectDebug) {
-    let tag  = "Debug";
+    let tag = "Debug";
     let heading = get_debug_heading(debug);
     let padding = " ".repeat(TAG_WIDTH - tag.len());
     let message = format!("{}{} {}", padding, tag.black().bold(), heading);
@@ -1088,7 +1088,7 @@ fn get_debug_heading(debug: &ProjectDebug) -> String {
             let path = path.display().to_string();
             format!("creating directory `{}`", path)
         }
-        ProjectDebug::RemoveFile { path }  => {
+        ProjectDebug::RemoveFile { path } => {
             let path = path.display().to_string();
             format!("removing file `{}`", path)
         }

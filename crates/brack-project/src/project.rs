@@ -409,7 +409,10 @@ impl Project {
             }
             logger.set_path(path.to_path_buf());
             let file_name = path.file_name().unwrap().to_str().unwrap();
-            logger.debug(&ProjectDebug::BuildingFile { path: path.to_path_buf(), file_name: file_name.to_string() });
+            logger.debug(&ProjectDebug::BuildingFile {
+                path: path.to_path_buf(),
+                file_name: file_name.to_string(),
+            });
             if !file_name.ends_with(".[]") {
                 continue;
             }
@@ -449,11 +452,12 @@ impl Project {
                     return Err(err);
                 }
             };
-            let out_dir = target_path.join(
-                path.strip_prefix(&docs_path).unwrap().parent().unwrap(),
-            );
+            let out_dir =
+                target_path.join(path.strip_prefix(&docs_path).unwrap().parent().unwrap());
             let out_path = target_path.join(
-                path.strip_prefix(&docs_path).unwrap().with_extension(target),
+                path.strip_prefix(&docs_path)
+                    .unwrap()
+                    .with_extension(target),
             );
             try_create_dir(&out_dir, logger)?;
             try_write(&out_path, &result, logger)?;
