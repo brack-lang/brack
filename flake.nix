@@ -39,7 +39,9 @@
           devShells.default = pkgs.mkShell {
             buildInputs = with pkgs; [
               nil
-              rust-bin.stable.latest.default
+              (rust-bin.stable.latest.default.override {
+                extensions = [ "rust-src" ];
+              })
               rust-analyzer
             ];
           };

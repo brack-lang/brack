@@ -1,13 +1,11 @@
-use brack_parser::cst::CST;
-
-use crate::{
-    ast::{
-        new_angle, new_curly, new_document, new_expr, new_ident, new_invalid, new_module,
-        new_square, new_stmt, new_text, AST,
-    },
-    error::TransformError,
-    simplify,
+use brack_common::ast::{
+    new_angle, new_curly, new_document, new_expr, new_ident, new_invalid, new_module, new_square,
+    new_stmt, new_text, AST,
 };
+use brack_common::cst::CST;
+use brack_common::transformer_errors::TransformError;
+
+use crate::simplify;
 
 pub fn transform(cst: &CST) -> (AST, Vec<TransformError>) {
     let (cst, errors) = simplify::simplify(cst);

@@ -1,13 +1,10 @@
-use anyhow::Result;
-use brack_tokenizer::tokens::Token;
+use brack_common::cst::{new_document, CST};
+use brack_common::tokens::Token;
 
-use crate::{
-    cst::{new_document, CST},
-    eof, newline, stmt,
-};
+use crate::{eof, newline, stmt};
 
 // (stmt newline newline+)* stmt? newline* EOF
-pub fn parse(tokens: &[Token]) -> Result<CST> {
+pub fn parse(tokens: &[Token]) -> CST {
     let mut tokens = tokens;
     let mut cst = new_document();
 
@@ -15,21 +12,21 @@ pub fn parse(tokens: &[Token]) -> Result<CST> {
         let mut csts = vec![];
         let mut tokens1 = tokens;
 
-        if let Ok((cst1, new_tokens)) = stmt::parse(tokens1) {
+        if let Some((cst1, new_tokens)) = stmt::parse(tokens1) {
             tokens1 = new_tokens;
             csts.push(cst1);
         } else {
             break;
         }
 
-        if let Ok((cst2, new_tokens)) = newline::parse(tokens1) {
+        if let Some((cst2, new_tokens)) = newline::parse(tokens1) {
             tokens1 = new_tokens;
             csts.push(cst2);
         } else {
             break;
         }
 
-        while let Ok((cst3, new_tokens)) = newline::parse(tokens1) {
+        while let Some((cst3, new_tokens)) = newline::parse(tokens1) {
             tokens1 = new_tokens;
             csts.push(cst3);
         }
@@ -40,18 +37,21 @@ pub fn parse(tokens: &[Token]) -> Result<CST> {
         }
     }
 
-    if let Ok((cst1, new_tokens)) = stmt::parse(tokens) {
+    if let Some((cst1, new_tokens)) = stmt::parse(tokens) {
         cst.add(cst1);
         tokens = new_tokens;
     }
 
-    while let Ok((cst1, new_tokens)) = newline::parse(tokens) {
+    while let Some((cst1, new_tokens)) = newline::parse(tokens) {
         cst.add(cst1);
         tokens = new_tokens;
     }
 
-    let (cst1, _) = eof::parse(tokens)?;
-    cst.add(cst1);
+    if let Some((cst1, _)) = eof::parse(tokens) {
+        cst.add(cst1);
+    } else {
+        panic!("EOF not found");
+    }
 
-    Ok(cst)
+    cst
 }

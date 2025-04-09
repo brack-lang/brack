@@ -1,8 +1,8 @@
-use brack_parser::cst::{InnerNode, CST};
-use brack_tokenizer::tokens::merge_location;
+use brack_common::cst::{InnerNode, CST};
+use brack_common::location::merge_location;
+use brack_common::transformer_errors::TransformError;
 
 use crate::{
-    error::TransformError,
     simplify,
     utils::{
         check_if_dot, check_if_ident_or_angle_bracket, check_if_module_or_angle_bracket,

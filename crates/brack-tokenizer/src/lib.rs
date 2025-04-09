@@ -14,6 +14,5 @@ mod square_bracket_open;
 mod text;
 pub mod tokenize;
 mod tokenizer;
-pub mod tokens;
 mod utils;
 mod whitespace;

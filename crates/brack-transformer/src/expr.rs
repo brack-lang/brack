@@ -1,7 +1,7 @@
-use brack_parser::cst::{InnerNode, CST};
-use uuid::Uuid;
+use brack_common::cst::{new_expr, CST};
+use brack_common::transformer_errors::TransformError;
 
-use crate::{error::TransformError, simplify};
+use crate::simplify;
 
 pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
     let node = match cst {
@@ -17,12 +17,10 @@ pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
         errors.append(&mut node_errors);
     }
 
-    (
-        CST::Expr(InnerNode {
-            id: Uuid::new_v4().to_string(),
-            children: csts,
-            location: node.location.clone(),
-        }),
-        errors,
-    )
+    let mut expr = new_expr();
+    for child in csts {
+        expr.add(child);
+    }
+    expr.set_location(node.location.clone());
+    (expr, errors)
 }

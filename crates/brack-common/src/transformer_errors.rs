@@ -1,6 +1,5 @@
+use crate::location::Location;
 use std::fmt::{self, Display, Formatter};
-
-use brack_tokenizer::tokens::Location;
 use thiserror::Error;
 
 #[derive(Error, Debug)]

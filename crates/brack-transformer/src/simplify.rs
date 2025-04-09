@@ -1,6 +1,7 @@
-use brack_parser::cst::CST;
+use brack_common::cst::CST;
+use brack_common::transformer_errors::TransformError;
 
-use crate::{angle, backslash, curly, document, error::TransformError, expr, square, stmt};
+use crate::{angle, backslash, curly, document, expr, square, stmt};
 
 pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
     match cst {

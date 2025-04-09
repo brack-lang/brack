@@ -10,3 +10,4 @@ anyhow = "1.0.97"
 unicode-segmentation = "1.12"
 serde = { version = "1.0.219", features = ["derive"] }
 pretty_assertions = "1.4.1"
+brack-common = { git = "https://github.com/brack-lang/brack", package = "brack-common" }

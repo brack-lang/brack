@@ -1,16 +1,16 @@
-use crate::{cst::new_stmt, expr_or_close, newline, parser::Parser};
-use anyhow::Result;
-use brack_tokenizer::tokens::Token;
+use crate::{expr_or_close, newline, parser::Parser};
+use brack_common::cst::new_stmt;
+use brack_common::tokens::Token;
 
 // expr_or_close (newline expr_or_close)*
-pub fn parse(tokens: &[Token]) -> Result<Parser> {
+pub fn parse(tokens: &[Token]) -> Option<Parser> {
     let mut stmt = new_stmt();
     let (cst, mut tokens) = expr_or_close::parse(tokens)?;
     stmt.add(cst);
 
     loop {
-        if let Ok((cst1, new_tokens)) = newline::parse(tokens) {
-            if let Ok((cst2, new_tokens)) = expr_or_close::parse(new_tokens) {
+        if let Some((cst1, new_tokens)) = newline::parse(tokens) {
+            if let Some((cst2, new_tokens)) = expr_or_close::parse(new_tokens) {
                 stmt.add(cst1);
                 stmt.add(cst2);
                 tokens = new_tokens;
@@ -20,5 +20,5 @@ pub fn parse(tokens: &[Token]) -> Result<Parser> {
         break;
     }
 
-    Ok((stmt, tokens))
+    Some((stmt, tokens))
 }

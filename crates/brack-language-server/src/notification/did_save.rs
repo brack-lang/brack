@@ -3,6 +3,7 @@ use brack_parser::parse::parse;
 use brack_tokenizer::tokenize::tokenize;
 use brack_transformer::transform::transform;
 use lsp_types::{Diagnostic, DidSaveTextDocumentParams};
+use std::fs::read_to_string;
 
 use crate::{server::Server, utils::to_url};
 
@@ -18,11 +19,9 @@ impl Server {
             .to_str()
             .ok_or_else(|| anyhow::anyhow!("Invalid file path"))?;
 
-        let tokens = match tokenize(&path) {
-            Ok(tokens) => tokens,
-            Err(e) => return self.log_message(&format!("Tokenize failed: {}", e)).await,
-        };
-        let cst = parse(&tokens)?;
+        let file = read_to_string(path_str)?;
+        let tokens = tokenize(&file);
+        let cst = parse(&tokens);
         let (_, errors) = transform(&cst);
 
         if errors.is_empty() {

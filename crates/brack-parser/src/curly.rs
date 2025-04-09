@@ -1,30 +1,32 @@
-use anyhow::{bail, Result};
-use brack_tokenizer::tokens::{Location, Token};
+use brack_common::cst::{new_curly, new_curly_bracket_close, new_curly_bracket_open};
+use brack_common::location::Location;
+use brack_common::tokens::Token;
 
-use crate::{
-    cst::{new_curly, new_curly_bracket_close, new_curly_bracket_open},
-    expr, newline,
-    parser::Parser,
-};
+use crate::{expr, newline, parser::Parser};
 
 // curly_bracket_open (expr | newline)* curly_bracket_close?
-pub fn parse(tokens: &[Token]) -> Result<Parser> {
+pub fn parse(tokens: &[Token]) -> Option<Parser> {
     let mut result = new_curly();
+    let mut tokens = tokens;
 
     let bracket_open_location = if let Some(token) = tokens.first() {
         token.get_location()
     } else {
-        bail!("Expected curly bracket open token, found none");
+        return None;
     };
 
-    let (cst, mut tokens) = parse_curly_bracket_open(tokens)?;
-    result.add(cst);
+    if let Some((cst, new_tokens)) = parse_curly_bracket_open(tokens) {
+        result.add(cst);
+        tokens = new_tokens;
+    } else {
+        return None;
+    }
 
     loop {
-        if let Ok((cst, new_tokens)) = expr::parse(tokens) {
+        if let Some((cst, new_tokens)) = expr::parse(tokens) {
             result.add(cst);
             tokens = new_tokens;
-        } else if let Ok((cst, new_tokens)) = newline::parse(tokens) {
+        } else if let Some((cst, new_tokens)) = newline::parse(tokens) {
             result.add(cst);
             tokens = new_tokens;
         } else {
@@ -35,10 +37,10 @@ pub fn parse(tokens: &[Token]) -> Result<Parser> {
     let bracket_close_location = if let Some(token) = tokens.first() {
         token.get_location()
     } else {
-        bail!("Expected even at worst EOF, found none");
+        return None;
     };
 
-    let tokens = if let Ok((cst, tokens)) = parse_curly_bracket_close(tokens) {
+    let tokens = if let Some((cst, tokens)) = parse_curly_bracket_close(tokens) {
         result.add(cst);
         tokens
     } else {
@@ -50,31 +52,31 @@ pub fn parse(tokens: &[Token]) -> Result<Parser> {
         end: bracket_close_location.end,
     });
 
-    Ok((result, tokens))
+    Some((result, tokens))
 }
 
 // curly_bracket_open
-fn parse_curly_bracket_open(tokens: &[Token]) -> Result<Parser> {
+fn parse_curly_bracket_open(tokens: &[Token]) -> Option<Parser> {
     if let Some(token) = tokens.first() {
         match token {
             Token::CurlyBracketOpen(location) => {
-                return Ok((new_curly_bracket_open(location.clone()), &tokens[1..]));
+                return Some((new_curly_bracket_open(location.clone()), &tokens[1..]));
             }
-            token => bail!("Expected curly bracket open token, found {:?}", token),
+            _ => return None,
         }
     }
-    bail!("Expected curly bracket open token, found none");
+    None
 }
 
 // curly_bracket_close
-fn parse_curly_bracket_close(tokens: &[Token]) -> Result<Parser> {
+fn parse_curly_bracket_close(tokens: &[Token]) -> Option<Parser> {
     if let Some(token) = tokens.first() {
         match token {
             Token::CurlyBracketClose(location) => {
-                return Ok((new_curly_bracket_close(location.clone()), &tokens[1..]));
+                return Some((new_curly_bracket_close(location.clone()), &tokens[1..]));
             }
-            token => bail!("Expected curly bracket close token, found {:?}", token),
+            _ => return None,
         }
     }
-    bail!("Expected curly bracket close token, found none");
+    None
 }
