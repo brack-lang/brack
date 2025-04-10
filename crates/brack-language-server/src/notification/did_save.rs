@@ -29,8 +29,8 @@ impl Server {
             return self.send_publish_diagnostics(path_str, &diagnostics).await;
         }
 
-        let mut diagnostics = vec![];
-        for error in errors {
+        let diagnostics = vec![];
+        for _error in errors {
             // let location = error.get_location();
             // let message = error.get_message();
             // let diagnostic = Diagnostic {
