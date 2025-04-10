@@ -1,9 +1,9 @@
 use brack_common::cst::CST;
-use brack_common::transformer_errors::TransformError;
+use brack_common::errors::TransformingError;
 
 use crate::{angle, backslash, curly, document, expr, square, stmt};
 
-pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
+pub fn simplify(cst: &CST) -> (CST, Vec<TransformingError>) {
     match cst {
         CST::Document(_) => document::simplify(cst),
         CST::Stmt(_) => stmt::simplify(cst),

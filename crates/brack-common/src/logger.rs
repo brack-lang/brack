@@ -1,11 +1,11 @@
-use crate::project_errors::{ProjectDebug, ProjectError, ProjectInfo, ProjectWarning};
+use crate::errors::{Debug, Error, Info, Warning};
 use std::path::PathBuf;
 
 pub trait Logger {
-    fn error(&self, error: &ProjectError);
-    fn warn(&self, warning: &ProjectWarning);
-    fn info(&self, info: &ProjectInfo);
-    fn debug(&self, debug: &ProjectDebug);
+    fn error(&self, error: &Error);
+    fn warn(&self, warning: &Warning);
+    fn info(&self, info: &Info);
+    fn debug(&self, debug: &Debug);
     fn set_path(&mut self, path: PathBuf);
     fn get_path(&self) -> PathBuf;
 }

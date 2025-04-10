@@ -1,9 +1,9 @@
 use brack_common::cst::{new_stmt, CST};
-use brack_common::transformer_errors::TransformError;
+use brack_common::errors::TransformingError;
 
 use crate::{simplify, utils::remove_elements_not_included_ast};
 
-pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
+pub fn simplify(cst: &CST) -> (CST, Vec<TransformingError>) {
     let node = match cst {
         CST::Stmt(node) => node,
         _ => panic!("Cannot pass non-stmt node to stmt::simplify"),

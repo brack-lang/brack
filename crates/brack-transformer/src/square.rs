@@ -1,6 +1,6 @@
 use brack_common::cst::{InnerNode, CST};
+use brack_common::errors::TransformingError;
 use brack_common::location::merge_location;
-use brack_common::transformer_errors::TransformError;
 
 use crate::{
     simplify,
@@ -11,15 +11,15 @@ use crate::{
     },
 };
 
-fn check_if_the_first_and_last_node_are_brackets(csts: &[CST]) -> Vec<TransformError> {
+fn check_if_the_first_and_last_node_are_brackets(csts: &[CST]) -> Vec<TransformingError> {
     let mut errors = vec![];
     match (csts[0].clone(), csts[csts.len() - 1].clone()) {
         (CST::SquareBracketOpen(_), CST::SquareBracketClose(_)) => (),
         (CST::SquareBracketOpen(left), CST::AngleBracketClose(right))
         | (CST::SquareBracketOpen(left), CST::CurlyBracketClose(right)) => errors.push(
-            TransformError::MismatchedBracket(merge_location(&left.location, &right.location)),
+            TransformingError::MismatchedBracket(merge_location(&left.location, &right.location)),
         ),
-        (CST::SquareBracketOpen(left), right) => errors.push(TransformError::SquareNotClosed(
+        (CST::SquareBracketOpen(left), right) => errors.push(TransformingError::SquareNotClosed(
             merge_location(&left.location, &right.location()),
         )),
         _ => panic!(
@@ -29,7 +29,7 @@ fn check_if_the_first_and_last_node_are_brackets(csts: &[CST]) -> Vec<TransformE
     errors
 }
 
-pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
+pub fn simplify(cst: &CST) -> (CST, Vec<TransformingError>) {
     let node = match cst {
         CST::Square(node) => node,
         _ => panic!("Cannot pass non-square-bracket node to curly::simplify"),

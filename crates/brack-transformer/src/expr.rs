@@ -1,9 +1,9 @@
 use brack_common::cst::{new_expr, CST};
-use brack_common::transformer_errors::TransformError;
+use brack_common::errors::TransformingError;
 
 use crate::simplify;
 
-pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
+pub fn simplify(cst: &CST) -> (CST, Vec<TransformingError>) {
     let node = match cst {
         CST::Expr(node) => node,
         _ => panic!("Cannot pass non-expr node to expr::simplify"),

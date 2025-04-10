@@ -1,7 +1,7 @@
 use brack_common::cst::{new_expr, CST};
-use brack_common::transformer_errors::TransformError;
+use brack_common::errors::TransformingError;
 
-pub fn check_if_module_or_angle_bracket(csts: &[CST]) -> Vec<TransformError> {
+pub fn check_if_module_or_angle_bracket(csts: &[CST]) -> Vec<TransformingError> {
     if csts.len() < 2 {
         return vec![];
     }
@@ -9,22 +9,22 @@ pub fn check_if_module_or_angle_bracket(csts: &[CST]) -> Vec<TransformError> {
     match cst {
         CST::Module(_) => vec![],
         CST::Angle(_) => vec![],
-        _ => vec![TransformError::ModuleNotFound(cst.location())],
+        _ => vec![TransformingError::ModuleNotFound(cst.location())],
     }
 }
 
-pub fn check_if_dot(csts: &[CST]) -> Vec<TransformError> {
+pub fn check_if_dot(csts: &[CST]) -> Vec<TransformingError> {
     if csts.len() < 3 {
         return vec![];
     }
     let cst = csts[2].clone();
     match cst {
         CST::Dot(_) => vec![],
-        _ => vec![TransformError::DotNotFound(cst.location())],
+        _ => vec![TransformingError::DotNotFound(cst.location())],
     }
 }
 
-pub fn check_if_ident_or_angle_bracket(csts: &[CST]) -> Vec<TransformError> {
+pub fn check_if_ident_or_angle_bracket(csts: &[CST]) -> Vec<TransformingError> {
     if csts.len() < 4 {
         return vec![];
     }
@@ -32,7 +32,7 @@ pub fn check_if_ident_or_angle_bracket(csts: &[CST]) -> Vec<TransformError> {
     match cst {
         CST::Ident(_) => vec![],
         CST::Angle(_) => vec![],
-        _ => vec![TransformError::IdentifierNotFound(cst.location())],
+        _ => vec![TransformingError::IdentifierNotFound(cst.location())],
     }
 }
 
@@ -57,7 +57,7 @@ pub fn remove_elements_not_included_ast(csts: &[CST]) -> Vec<CST> {
     new_csts
 }
 
-pub fn check_valid_arguments(csts: &[CST]) -> (Vec<CST>, Vec<TransformError>) {
+pub fn check_valid_arguments(csts: &[CST]) -> (Vec<CST>, Vec<TransformingError>) {
     if csts.len() < 4 {
         return (csts.to_vec(), vec![]);
     }
@@ -69,7 +69,7 @@ pub fn check_valid_arguments(csts: &[CST]) -> (Vec<CST>, Vec<TransformError>) {
         match csts[i].clone() {
             CST::Comma(_) => {
                 if expr.children().is_empty() {
-                    errors.push(TransformError::UnexpectedComma(csts[i].location()));
+                    errors.push(TransformingError::UnexpectedComma(csts[i].location()));
                     continue;
                 }
                 new_csts.push(expr);
@@ -80,14 +80,14 @@ pub fn check_valid_arguments(csts: &[CST]) -> (Vec<CST>, Vec<TransformError>) {
                 if !expr.children().is_empty() {
                     new_csts.push(expr.clone());
                 } else if previous_comma {
-                    errors.push(TransformError::UnexpectedComma(csts[i - 1].location()));
+                    errors.push(TransformingError::UnexpectedComma(csts[i - 1].location()));
                 }
                 expr = new_expr();
                 new_csts.push(csts[i].clone());
                 break;
             }
             CST::Dot(_) => {
-                errors.push(TransformError::UnexpectedDot(csts[i].location()));
+                errors.push(TransformingError::UnexpectedDot(csts[i].location()));
                 continue;
             }
             _ => {
@@ -102,11 +102,11 @@ pub fn check_valid_arguments(csts: &[CST]) -> (Vec<CST>, Vec<TransformError>) {
     (new_csts, errors)
 }
 
-pub fn check_unexpected_dot(csts: &[CST]) -> Vec<TransformError> {
+pub fn check_unexpected_dot(csts: &[CST]) -> Vec<TransformingError> {
     let mut errors = vec![];
     for cst in csts.iter().skip(3) {
         if let CST::Dot(_) = cst {
-            errors.push(TransformError::UnexpectedDot(cst.location()));
+            errors.push(TransformingError::UnexpectedDot(cst.location()));
         }
     }
     errors
