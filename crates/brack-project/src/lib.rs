@@ -1,2 +1,4 @@
+pub mod channels;
 pub mod manifest;
-pub mod project;
+pub mod projects;
+mod utils;

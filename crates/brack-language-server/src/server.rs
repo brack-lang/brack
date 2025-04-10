@@ -1,7 +1,7 @@
 use std::str::from_utf8;
 
 use anyhow::Result;
-use brack_project::project::Project;
+use brack_project::projects::Project;
 use lsp_types::{ClientCapabilities, Diagnostic};
 use serde::Serialize;
 use serde_json::{from_str, json, Value};

@@ -1,6 +1,6 @@
 use crate::{logger::Logger, server::Server};
 use anyhow::Result;
-use brack_project::project::Project;
+use brack_project::projects::Project;
 use lsp_types::DidOpenTextDocumentParams;
 use std::path::Path;
 
@@ -20,8 +20,8 @@ impl Server {
             .ok_or_else(|| anyhow::anyhow!("Invalid file path"))?;
 
         let logger = Logger {};
-        let project = Project::new_with_manifest(&logger, root)
-            .map_err(|e| anyhow::anyhow!("Failed to create project: {:?}", e))?;
+        let project = Project::new_with_manifest(&logger, &root)
+            .map_err(|_| anyhow::anyhow!("Failed to create project"))?;
         self.project = Some(project);
 
         Ok(())

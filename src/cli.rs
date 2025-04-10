@@ -1,7 +1,7 @@
 use crate::logger::CliLogLevel;
 use crate::logger::Logger;
 use anstyle::{AnsiColor, Color, Style};
-use brack_project::project::Project;
+use brack_project::projects::Project;
 use clap::{builder, ArgGroup, Parser, Subcommand};
 use std::path::Path;
 use std::process::exit;
@@ -126,7 +126,7 @@ impl Cli {
             cli_log_level: self.log_level.clone(),
             path: None,
         };
-        let project = Project::new_with_manifest(&logger, Path::new("."))
+        let project = Project::new_with_manifest(&logger, &Path::new("."))
             .map_err(|_| {
                 exit(1);
             })
@@ -146,7 +146,7 @@ impl Cli {
             cli_log_level: self.log_level.clone(),
             path: None,
         };
-        let project = Project::new_with_manifest(&logger, Path::new("."))
+        let project = Project::new_with_manifest(&logger, &Path::new("."))
             .map_err(|_| {
                 exit(1);
             })
@@ -191,7 +191,7 @@ impl Cli {
             cli_log_level: self.log_level.clone(),
             path: None,
         };
-        let mut project = Project::new_with_manifest(&logger, Path::new("."))
+        let mut project = Project::new_with_manifest(&logger, &Path::new("."))
             .map_err(|_| {
                 exit(1);
             })
@@ -211,7 +211,7 @@ impl Cli {
             cli_log_level: self.log_level.clone(),
             path: None,
         };
-        let mut project = Project::new_with_manifest(&logger, Path::new("."))
+        let mut project = Project::new_with_manifest(&logger, &Path::new("."))
             .map_err(|_| {
                 exit(1);
             })
@@ -230,7 +230,7 @@ impl Cli {
             cli_log_level: self.log_level.clone(),
             path: None,
         };
-        let project = Project::new_with_manifest(&logger, Path::new("."))
+        let project = Project::new_with_manifest(&logger, &Path::new("."))
             .map_err(|_| {
                 exit(1);
             })
@@ -250,7 +250,7 @@ impl Cli {
             cli_log_level: self.log_level.clone(),
             path: None,
         };
-        let project = Project::new_with_manifest(&logger, Path::new("."))
+        let project = Project::new_with_manifest(&logger, &Path::new("."))
             .map_err(|_| {
                 exit(1);
             })

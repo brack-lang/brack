@@ -1,0 +1,7 @@
+[package]
+name = "brack-lower"
+version = "0.2.0"
+edition = "2021"
+
+[dependencies]
+brack-common = { git = "https://github.com/brack-lang/brack", package = "brack-common" }

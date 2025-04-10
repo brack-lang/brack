@@ -31,23 +31,23 @@ impl Server {
 
         let mut diagnostics = vec![];
         for error in errors {
-            let location = error.get_location();
-            let message = error.get_message();
-            let diagnostic = Diagnostic {
-                range: lsp_types::Range {
-                    start: lsp_types::Position {
-                        line: location.start.line as u32,
-                        character: location.start.character as u32,
-                    },
-                    end: lsp_types::Position {
-                        line: location.end.line as u32,
-                        character: location.end.character as u32,
-                    },
-                },
-                message,
-                ..Default::default()
-            };
-            diagnostics.push(diagnostic);
+            // let location = error.get_location();
+            // let message = error.get_message();
+            // let diagnostic = Diagnostic {
+            //     range: lsp_types::Range {
+            //         start: lsp_types::Position {
+            //             line: location.start.line as u32,
+            //             character: location.start.character as u32,
+            //         },
+            //         end: lsp_types::Position {
+            //             line: location.end.line as u32,
+            //             character: location.end.character as u32,
+            //         },
+            //     },
+            //     message,
+            //     ..Default::default()
+            // };
+            // diagnostics.push(diagnostic);
         }
         self.send_publish_diagnostics(path_str, &diagnostics).await
     }
