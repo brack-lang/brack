@@ -1,28 +1,48 @@
 document = { stmt, '\n', '\n', { '\n' }}, [ stmt ], { '\n' }, ?EOF?;
 stmt = (expr, { '\n', expr }) | curly;
-expr = (text | square | angle), {text | square | angle};
+expr = (text_expr | square | angle), {text_expr | square | angle};
 
 angle = '<', [(module | angle), '.'], (ident | angle), [argument, {',', argument}], '>';
 square = '[', [(module | angle), '.'], (ident | angle), [argument, {',', argument}], ']';
 curly = '{', [(module | angle), '.'], (ident | angle), [argument, {',', argument}], '}';
 
-argument = expr | string_literal | number_literal | boolean_literal | url_literal | path_literal | list_literal | tuple_literal | record_literal;
-item = text | string | number | boolean | url | path | list_literal | tuple_literal | record_literal;
+argument = (text_argument | square | angle), {text_argument | square | angle}
+    | string_literal
+    | number_literal
+    | boolean_literal
+    | url_literal
+    | path_literal
+    | list
+    | tuple
+    | record;
 
-string_literal = '"', ? ダブルクォーテーションを含まない任意の文字列 ?, '"';
+item = string
+    | number
+    | boolean
+    | url
+    | path
+    | list
+    | tuple
+    | record
+    | square
+    | angle;
+
+string_literal = '(', string, ')';
 number_literal = '(', number, ')';
 boolean_literal = '(', boolean, ')';
 url_literal = '(', url, ')';
 path_literal = '(', path, ')';
-list_literal = '#', '(', {item}, ')';
-tuple_literal = '!', '(', {item}, ')';
-record_literal = '(', {string, ':', (string | number | boolean | url | path)}, ')';
+list = '#', '(', {item}, ')';
+tuple = '!', '(', {item}, ')';
+record = '(', {word, ':', item}, ')';
 
-module = string;
-ident = string;
+module = word;
+ident = word;
 
-text = ? all character ?;
-string = ? [^\[\{\<\(\.,\s#!\\] ?;
+text_expr = ? [^\[\{<\]\}<\n]+ ?; (* コマンドを呼び出せるbracktおよび改行以外の任意の文字列 *)
+text_argument = ? [^,\[\{<\(\]\}\)<\n]+ ?; (* カンマと各種bracket以外からなる任意の文字列 *)
+word = ? [^\.,:\[\{<\(\]\}>\)\s]+ ?; (* ドット、カンマ、コロン、各種ブラケット、空白以外からなる任意の文字列 *)
+string = '"', ? ([^"] | \\")+ ?, '"'; (* エスケープされていないダブルクォーテーションを含まない任意の文字列 *)
 number = ? [0-9]+ ?;
 boolean = 'true' | 'false';
 url = ? url ?;
