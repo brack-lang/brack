@@ -1,6 +1,10 @@
 use std::{ffi::OsString, io, path::PathBuf};
 
-use crate::{location::Location, logger::Logger};
+use crate::{
+    location::Location,
+    logger::Logger,
+    plugins::{CommandType, Signature},
+};
 
 pub enum Error {
     TransformingError(TransformingError),
@@ -8,6 +12,7 @@ pub enum Error {
     CodegenError(CodegenError),
     ProjectError(ProjectError),
     ReleaseError(ReleaseError),
+    PluginError(PluginError),
     InternalError { panic_message: String },
 }
 
@@ -19,6 +24,7 @@ impl Error {
             Self::CodegenError(err) => err.code(),
             Self::ProjectError(err) => err.code(),
             Self::ReleaseError(err) => err.code(),
+            Self::PluginError(err) => err.code(),
             Self::InternalError { .. } => String::from("Fatal"),
         }
     }
@@ -209,6 +215,44 @@ impl ReleaseError {
     pub fn code(&self) -> String {
         match self {
             _ => String::from("ER001"),
+        }
+    }
+}
+
+pub enum PluginError {
+    PluginCallError {
+        name: String,
+        signature: Signature,
+        args: String,
+    },
+    PluginReadError {
+        name: String,
+        source: String,
+    },
+    PluginCreateError {
+        name: String,
+        source: String,
+    },
+    SignatureNotFound {
+        name: String,
+        command_name: String,
+        command_type: CommandType,
+    },
+    SignatureNotMatched {
+        name: String,
+        command_name: String,
+        args: Vec<String>,
+    },
+}
+
+impl PluginError {
+    pub fn code(&self) -> String {
+        match self {
+            PluginError::PluginCallError { .. } => String::from("EG001"),
+            PluginError::PluginReadError { .. } => String::from("EG002"),
+            PluginError::PluginCreateError { .. } => String::from("EG003"),
+            PluginError::SignatureNotFound { .. } => String::from("EG004"),
+            PluginError::SignatureNotMatched { .. } => String::from("EG005"),
         }
     }
 }

@@ -260,6 +260,8 @@ name = "brack-lower"
 version = "0.2.0"
 dependencies = [
  "brack-common",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -335,6 +337,16 @@ name = "brack-transformer"
 version = "0.2.0"
 dependencies = [
  "brack-common",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "brack-wasm-plugin"
+version = "0.1.0"
+dependencies = [
+ "brack-common",
+ "extism",
  "serde",
  "serde_json",
 ]

@@ -33,11 +33,11 @@ members = [
     "crates/brack-language-server",
     "crates/brack-lower",
     "crates/brack-parser",
-    "crates/brack-plugin",
     "crates/brack-project",
     "crates/brack-release",
     "crates/brack-tokenizer",
     "crates/brack-transformer",
+    "crates/brack-wasm-plugin",
 ]
 
 resolver = "2"
