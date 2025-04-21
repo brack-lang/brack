@@ -2,25 +2,47 @@ document = { stmt, '\n', '\n', { '\n' }}, [ stmt ], { '\n' }, ?EOF?;
 stmt = (expr, { '\n', expr }) | curly;
 expr = (text_expr | square | angle), {text_expr | square | angle};
 
-angle = '<', [(module | angle), '.'], (ident | angle), [argument, {',', argument}], '>';
-square = '[', [(module | angle), '.'], (ident | angle), [argument, {',', argument}], ']';
-curly = '{', [(module | angle), '.'], (ident | angle), [argument, {',', argument}], '}';
+angle = '<',
+        ([module, '.'], ident | angle),
+        [
+            argument, {',', argument}
+            | argument, {',', argument}, ',', argument_with_name, {',', argument_with_name}
+            | argument_with_name, {',', argument_with_name}
+        ],
+    '>';
 
+square = '[',
+        ([module, '.'], ident | angle),
+        [
+            argument, {',', argument}
+            | argument, {',', argument}, ',', argument_with_name, {',', argument_with_name}
+            | argument_with_name, {',', argument_with_name}
+        ],
+    ']';
+
+curly = '{',
+        ([module, '.'], ident | angle),
+        [
+            argument, {',', argument}
+            | argument, {',', argument}, ',', argument_with_name, {',', argument_with_name}
+            | argument_with_name, {',', argument_with_name}
+        ],
+    '}';
+
+argument_with_name = word, '=', argument;
 argument = (text_argument | square | angle), {text_argument | square | angle}
     | string_literal
-    | number_literal
+    | int_literal
+    | float_literal
     | boolean_literal
-    | url_literal
-    | path_literal
     | list
     | tuple
     | record;
 
 item = string
-    | number
+    | int
+    | float
     | boolean
-    | url
-    | path
     | list
     | tuple
     | record
@@ -28,22 +50,20 @@ item = string
     | angle;
 
 string_literal = '(', string, ')';
-number_literal = '(', number, ')';
+int_literal = '(', int, ')';
+float_literal = '(', float, ')';
 boolean_literal = '(', boolean, ')';
-url_literal = '(', url, ')';
-path_literal = '(', path, ')';
-list = '#', '(', {item}, ')';
-tuple = '!', '(', {item}, ')';
-record = '(', {word, ':', item}, ')';
+list = '@', '(', [item, {',', item}],')';
+tuple = '!', '(', [item, {',', item}], ')';
+record = '#', '(', [word, ':', item, {',', word, ':', item}], ')';
 
 module = word;
 ident = word;
 
 text_expr = ? [^\[\{<\]\}<\n]+ ?; (* コマンドを呼び出せるbracktおよび改行以外の任意の文字列 *)
-text_argument = ? [^,\[\{<\(\]\}\)<\n]+ ?; (* カンマと各種bracket以外からなる任意の文字列 *)
-word = ? [^\.,:\[\{<\(\]\}>\)\s]+ ?; (* ドット、カンマ、コロン、各種ブラケット、空白以外からなる任意の文字列 *)
+text_argument = ? [^,=\[\{<\(\]\}\)<\n]+ ?; (* カンマと各種bracket以外からなる任意の文字列 *)
+word = ? [^\.,:=\[\{<\(\]\}>\)\s]+ ?; (* ドット、カンマ、コロン、各種ブラケット、空白以外からなる任意の文字列 *)
 string = '"', ? ([^"] | \\")+ ?, '"'; (* エスケープされていないダブルクォーテーションを含まない任意の文字列 *)
-number = ? [0-9]+ ?;
+int = ? -[1-9][0-9]* | [0-9]+ ?;
+float = ? (-|)[0-9]+\.[0-9]+ ?;
 boolean = 'true' | 'false';
-url = ? url ?;
-path = ? absolute or relative path ?;

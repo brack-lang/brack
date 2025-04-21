@@ -1,16 +1,26 @@
 document = { stmt, '\n', '\n', { '\n' }}, [ stmt ], { '\n' }, ?EOF?;
-stmt = (expr | bracket_close), { '\n', expr };
-escaped = '\\', ['.' | ',' | bracket_open | bracket_close | '\\'];
-expr = (escaped | module | ident | bracket | '.' | ',' | ' ' | text), {escaped | module | ident | bracket | '.' | ',' | ' ' | text};
-bracket = angle | curly | square;
-angle = '<', {expr | '\n'}, [bracket_close];
-curly = '{', {expr | '\n'}, [bracket_close];
-square = '[', {expr | '\n'}, [bracket_close];
+stmt = expr, { '\n', expr } | curly;
+expr = (text_expr | square | angle | '}'), {text_expr | square | angle | '}'};
+angle = '<', [command], {argument | ',' | '\n'}, ['>'];
+square = '[', [command], {argument | ',' | '\n'}, [']'];
+curly = '{', [command], {argument | ',' | ']' | '\n'}, ['}'];
 
-bracket_open = '<' | '{' | '[';
-bracket_close = '}' | ']' | '>';
+argument = literal | object | bracket | '=' | ')';
+bracket = square | angle | curly;
+object = list | tuple | record;
 
-module = text;
-ident = text;
+literal = '(', {bracket | string | int | float | boolean | ' ' | '(' | ? other ? }, [')'];
+list = '@', '(', {literal | object | bracket | string | int | float | boolean | ' ' | ',' |  ? other ? }, [')'];
+tuple = '!', '(', {literal | object | bracket | string | int | float | boolean | ' ' | ',' |  ? other ? }, [')'];
+record = '#', '(', {literal | object | bracket | string | int | float | boolean | ' ' | ',' |  ? other ? }, [')'];
 
-text = ? [^.]+ ?;
+command = [module, '.'], ident | angle;
+module = word;
+ident = word;
+
+text_expr = ? [^\[\{<\]\}<\n]+ ?; (* コマンドを呼び出せるbracktおよび改行以外の任意の文字列 *)
+word = ? [^\.,:\[\{<\(\]\}>\)\s]+ ?; (* ドット、カンマ、コロン、各種ブラケット、空白以外からなる任意の文字列 *)
+string = '"', ? ([^"] | \\")+ ?, '"'; (* エスケープされていないダブルクォーテーションを含まない任意の文字列 *)
+int = ? -[1-9][0-9]* | [0-9]+ ?;
+float = ? (-|)[0-9]+\.[0-9]+ ?;
+boolean = 'true' | 'false';
