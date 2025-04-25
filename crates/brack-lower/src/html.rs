@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use brack_common::{
     ast::{InnerNode, LeafNode, AST},
-    ir::{Html, HtmlTag},
+    html::{Html, HtmlTag},
     logger::Logger,
     plugins::Plugins,
 };

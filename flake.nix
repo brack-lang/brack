@@ -43,6 +43,8 @@
                 extensions = [ "rust-src" ];
               })
               rust-analyzer
+              openssl.dev
+              pkg-config
             ];
           };
 
