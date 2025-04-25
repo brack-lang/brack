@@ -11,6 +11,7 @@ description = "A bracket-based lightweight markup language that extends commands
 [dependencies]
 brack-common = { git = "https://github.com/brack-lang/brack", package = "brack-common" }
 brack-project = { git = "https://github.com/brack-lang/brack", package = "brack-project" }
+brack-internal-plugin = { git = "https://github.com/brack-lang/brack", package = "brack-internal-plugin" }
 tokio = { version = "1", features = ["full"] }
 anstyle = "1.0.10"
 colored = "3.0.0"
@@ -30,6 +31,7 @@ members = [
     "crates/brack-codegen",
     "crates/brack-common",
     "crates/brack-expander",
+    "crates/brack-internal-plugin",
     "crates/brack-language-server",
     "crates/brack-lower",
     "crates/brack-parser",
@@ -46,9 +48,12 @@ resolver = "2"
 brack-codegen = { path = "crates/brack-codegen" }
 brack-common = { path = "crates/brack-common" }
 brack-expander = { path = "crates/brack-expander" }
+brack-internal-plugin = { path = "crates/brack-internal-plugin" }
 brack-language-server = { path = "crates/brack-language-server" }
+brack-lower = { path = "crates/brack-lower" }
 brack-parser = { path = "crates/brack-parser" }
-brack-plugin = { path = "crates/brack-plugin" }
 brack-project = { path = "crates/brack-project" }
+brack-release = { path = "crates/brack-release" }
 brack-tokenizer = { path = "crates/brack-tokenizer" }
 brack-transformer = { path = "crates/brack-transformer" }
+brack-wasm-plugin = { path = "crates/brack-wasm-plugin" }

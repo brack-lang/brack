@@ -1,20 +1,23 @@
-use std::collections::HashMap;
+use core::fmt;
 
-pub struct Html {
-    pub tag: HtmlTag,
-    pub attributes: HashMap<HtmlAttribute, Vec<String>>,
-    pub children: Vec<Html>,
+use serde::{Deserialize, Serialize};
+
+use crate::html::Html;
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum IR {
+    Html(Html),
 }
 
-pub enum HtmlTag {
-    Fragment,
-    Div,
-    Span,
-    P,
+impl fmt::Display for IR {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            IR::Html(html) => write!(f, "{}", html),
+        }
+    }
 }
 
-pub enum HtmlAttribute {
-    Class,
-    Id,
-    Style,
+#[derive(Clone)]
+pub enum IRKind {
+    Html,
 }

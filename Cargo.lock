@@ -198,6 +198,7 @@ version = "0.2.0"
 dependencies = [
  "anstyle",
  "brack-common",
+ "brack-internal-plugin",
  "brack-project",
  "clap",
  "codespan-reporting",
@@ -234,6 +235,15 @@ dependencies = [
  "anyhow",
  "brack-common",
  "brack-plugin",
+]
+
+[[package]]
+name = "brack-internal-plugin"
+version = "0.1.0"
+dependencies = [
+ "brack-common",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -276,6 +286,7 @@ dependencies = [
 [[package]]
 name = "brack-plugin"
 version = "0.2.0"
+source = "git+https://github.com/brack-lang/brack#b2692ea9aaf63292cc42e2de167084ae4acf8fbb"
 dependencies = [
  "anyhow",
  "brack-common",

@@ -6,9 +6,7 @@ use crate::utils::{
     remove_dir, remove_file, write, write_manifest,
 };
 use anyhow::Result;
-use brack_common::errors::{
-    Error, ProjectError, ProjectInfo, ProjectResultExt, ProjectWarning,
-};
+use brack_common::errors::{Error, ProjectError, ProjectInfo, ProjectResultExt, ProjectWarning};
 use brack_common::logger::Logger;
 use brack_plugin::feature_flag::FeatureFlag;
 use std::collections::HashMap;

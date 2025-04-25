@@ -1,6 +1,9 @@
 pub mod ast;
+pub mod css_types;
 pub mod cst;
 pub mod errors;
+pub mod html;
+pub mod ir;
 pub mod location;
 pub mod logger;
 pub mod plugins;

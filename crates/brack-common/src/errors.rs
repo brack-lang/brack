@@ -233,15 +233,17 @@ pub enum PluginError {
         name: String,
         source: String,
     },
-    SignatureNotFound {
+    PluginNotFoundError {
         name: String,
         command_name: String,
         command_type: CommandType,
     },
-    SignatureNotMatched {
+    InvalidArgumentError {
         name: String,
         command_name: String,
-        args: Vec<String>,
+        command_type: CommandType,
+        expected: String,
+        found: Signature,
     },
 }
 
@@ -251,8 +253,8 @@ impl PluginError {
             PluginError::PluginCallError { .. } => String::from("EG001"),
             PluginError::PluginReadError { .. } => String::from("EG002"),
             PluginError::PluginCreateError { .. } => String::from("EG003"),
-            PluginError::SignatureNotFound { .. } => String::from("EG004"),
-            PluginError::SignatureNotMatched { .. } => String::from("EG005"),
+            PluginError::PluginNotFoundError { .. } => String::from("EG004"),
+            PluginError::InvalidArgumentError { .. } => String::from("EG005"),
         }
     }
 }

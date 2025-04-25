@@ -1,6 +1,9 @@
 use crate::logger::CliLogLevel;
 use crate::logger::Logger;
 use anstyle::{AnsiColor, Color, Style};
+use brack_common::ir::Html;
+use brack_common::plugins::Plugin as PluginTrait;
+use brack_internal_plugin::html::InternalHtmlPlugin;
 use brack_project::projects::Project;
 use clap::{builder, ArgGroup, Parser, Subcommand};
 use std::path::Path;
@@ -126,6 +129,10 @@ impl Cli {
             cli_log_level: self.log_level.clone(),
             path: None,
         };
+
+        let mut plugins: Vec<Box<dyn PluginTrait>> = vec![];
+        plugins.push(Box::new(InternalHtmlPlugin::new()));
+
         let project = Project::new_with_manifest(&logger, &Path::new("."))
             .map_err(|_| {
                 exit(1);
