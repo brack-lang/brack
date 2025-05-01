@@ -1,18 +1,9 @@
 document = { stmt, '\n', '\n', { '\n' }}, [ stmt ], { '\n' }, ?EOF?;
 stmt = (expr, { '\n', expr }) | curly;
-expr = (text_expr | square | angle), {text_expr | square | angle};
-
-angle = '<',
-        ([ident, '.'], ident | angle),
-        [
-            argument, {',', argument}
-            | argument, {',', argument}, ',', argument_with_name, {',', argument_with_name}
-            | argument_with_name, {',', argument_with_name}
-        ],
-    '>';
+expr = (text_expr | square), {text_expr | square};
 
 square = '[',
-        ([ident, '.'], ident | angle),
+        [module, '.'], ident,
         [
             argument, {',', argument}
             | argument, {',', argument}, ',', argument_with_name, {',', argument_with_name}
@@ -21,7 +12,7 @@ square = '[',
     ']';
 
 curly = '{',
-        ([ident, '.'], ident | angle),
+        [module, '.'], ident,
         [
             argument, {',', argument}
             | argument, {',', argument}, ',', argument_with_name, {',', argument_with_name}
@@ -29,8 +20,8 @@ curly = '{',
         ],
     '}';
 
-argument_with_name = ident, '=', argument;
-argument = (text_argument | square | angle), {text_argument | square | angle}
+argument_with_name = word, '=', argument;
+argument = (text_argument | square), {text_argument | square}
     | string_literal
     | int_literal
     | float_literal
@@ -46,8 +37,7 @@ item = string
     | list
     | tuple
     | record
-    | square
-    | angle;
+    | square;
 
 string_literal = '(', string, ')';
 int_literal = '(', int, ')';
@@ -55,11 +45,14 @@ float_literal = '(', float, ')';
 boolean_literal = '(', boolean, ')';
 list = '@', '(', [item, {',', item}],')';
 tuple = '!', '(', [item, {',', item}], ')';
-record = '#', '(', [ident, ':', item, {',', ident, ':', item}], ')';
+record = '#', '(', [word, ':', item, {',', word, ':', item}], ')';
+
+module = word;
+ident = word;
 
 text_expr = ? [^\[\{<\]\}<\n]+ ?; (* コマンドを呼び出せるbracktおよび改行以外の任意の文字列 *)
 text_argument = ? [^,=\[\{<\(\]\}\)<\n]+ ?; (* カンマと各種bracket以外からなる任意の文字列 *)
-ident = ? [^\.,:=\[\{<\(\]\}>\)\s]+ ?; (* ドット、カンマ、コロン、各種ブラケット、空白以外からなる任意の文字列 *)
+word = ? [^\.,:=\[\{<\(\]\}>\)\s]+ ?; (* ドット、カンマ、コロン、各種ブラケット、空白以外からなる任意の文字列 *)
 string = '"', ? ([^"] | \\")+ ?, '"' | "'", ? ([^'] | \\')+ ?, "'" ; (* エスケープされていないクォーテーションを含まない任意の文字列 *)
 int = ? -[1-9][0-9]* | [0-9]+ ?;
 float = ? (-|)[0-9]+\.[0-9]+ ?;

@@ -12,14 +12,12 @@ object = list | tuple | record;
 literal = '(', {bracket | string | int | float | boolean | ' ' | '(' | ? other ? }, [')'];
 list = '@', '(', {literal | object | bracket | string | int | float | boolean | ' ' | ',' |  ? other ? }, [')'];
 tuple = '!', '(', {literal | object | bracket | string | int | float | boolean | ' ' | ',' |  ? other ? }, [')'];
-record = '#', '(', {literal | object | bracket | string | int | float | boolean | ' ' | ',' |  ? other ? }, [')'];
+record = '#', '(', {ident | literal | object | bracket | string | int | float | boolean | ' ' | ',' | ':' |  ? other ? }, [')'];
 
-command = [module, '.'], ident | angle;
-module = word;
-ident = word;
+command = [ident, '.'], ident | angle;
 
 text_expr = ? [^\[\{<\]\}<\n]+ ?; (* コマンドを呼び出せるbracktおよび改行以外の任意の文字列 *)
-word = ? [^\.,:\[\{<\(\]\}>\)\s]+ ?; (* ドット、カンマ、コロン、各種ブラケット、空白以外からなる任意の文字列 *)
+ident = ? [^\.,:\[\{<\(\]\}>\)\s]+ ?; (* ドット、カンマ、コロン、各種ブラケット、空白以外からなる任意の文字列 *)
 string = '"', ? ([^"] | \\")+ ?, '"' | "'", ? ([^'] | \\')+ ?, "'" ; (* エスケープされていないクォーテーションを含まない任意の文字列 *)
 int = ? -[1-9][0-9]* | [0-9]+ ?;
 float = ? (-|)[0-9]+\.[0-9]+ ?;
