@@ -68,7 +68,10 @@ impl TransformingError {
     }
 }
 
-pub enum LoweringError {}
+pub enum LoweringError {
+    ModuleNotFound, // Fatal
+    CommandNotFound, // Fatal
+}
 
 impl LoweringError {
     pub fn code(&self) -> String {
