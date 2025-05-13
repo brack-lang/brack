@@ -18,7 +18,7 @@ codespan-reporting = "0.12.0"
 file-size = "1.0.3"
 
 [dependencies.clap]
-version = "4.5.37"
+version = "4.5.38"
 features = ["derive"]
 
 [features]
