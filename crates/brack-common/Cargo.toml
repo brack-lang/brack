@@ -11,5 +11,5 @@ reqwest = "0.12.15"
 thiserror = "2.0.12"
 
 [dependencies.uuid]
-version = "1.11.0"
+version = "1.17.0"
 features = ["v4", "fast-rng", "macro-diagnostics", "serde"]
