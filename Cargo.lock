@@ -426,11 +426,11 @@ dependencies = [
 
 [[package]]
 name = "cbindgen"
-version = "0.28.0"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eadd868a2ce9ca38de7eeafdcec9c7065ef89b42b32f0839278d55f35c54d1ff"
+checksum = "975982cdb7ad6a142be15bdf84aea7ec6a9e5d4d797c004d43185b24cfe4e684"
 dependencies = [
- "heck 0.4.1",
+ "heck",
  "indexmap",
  "log",
  "proc-macro2",
@@ -487,7 +487,7 @@ version = "4.5.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09176aae279615badda0765c0c0b3f6ed53f4709118af73cf4655d85d1530cd7"
 dependencies = [
- "heck 0.5.0",
+ "heck",
  "proc-macro2",
  "quote",
  "syn",
@@ -857,9 +857,9 @@ dependencies = [
 
 [[package]]
 name = "extism"
-version = "1.10.0"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b06c5ae419bb79082d6ad22fc907717b4a0655c4ff532c09346b4df28abdacba"
+checksum = "6997497df96a70f0030d1f42aeb8a126d01544b645c3749f3aa9d27ad724e258"
 dependencies = [
  "anyhow",
  "cbindgen",
@@ -883,9 +883,9 @@ dependencies = [
 
 [[package]]
 name = "extism-convert"
-version = "1.10.0"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6630b9ecf2628b1ef32e3f9bb888ffc17e0eed5927ba11e72e8bc06e59fa9cf6"
+checksum = "a1f25ec06406bdc237b4831a4565d82ee9d231d52786f9e5ad049a2bfb971c1d"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -899,9 +899,9 @@ dependencies = [
 
 [[package]]
 name = "extism-convert-macros"
-version = "1.10.0"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e030d6ea834ef4004764b4809832e7197469442e92feb7ca4307e827db7c98b8"
+checksum = "a2634ebe706616ed5c751fee197f6299fd61220774ab5061e93f4a5f4912c43c"
 dependencies = [
  "manyhow",
  "proc-macro-crate",
@@ -912,9 +912,9 @@ dependencies = [
 
 [[package]]
 name = "extism-manifest"
-version = "1.10.0"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "65df2772243a6e44caf547142196381a4947cf390cb1252c0205d9337aa0f237"
+checksum = "e58d1588d3bc7b001a0822ebce8e89b3fadcd9ea7b6cb21b42eada7f6e8015ed"
 dependencies = [
  "base64 0.22.1",
  "serde",
@@ -1226,12 +1226,6 @@ dependencies = [
  "foldhash",
  "serde",
 ]
-
-[[package]]
-name = "heck"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95505c38b4572b2d910cecb0281560f54b440a19336cbbcb27bf6ce6adc6f5a8"
 
 [[package]]
 name = "heck"
@@ -3655,7 +3649,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8358319c2dd1e4db79e3c1c5d3a5af84956615343f9f89f4e4996a36816e06e6"
 dependencies = [
  "anyhow",
- "heck 0.5.0",
+ "heck",
  "indexmap",
  "wit-parser",
 ]
@@ -3743,7 +3737,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2cf267dd05673912c8138f4b54acabe6bd53407d9d1536f0fadb6520dd16e101"
 dependencies = [
  "anyhow",
- "heck 0.5.0",
+ "heck",
  "proc-macro2",
  "quote",
  "shellexpand",
