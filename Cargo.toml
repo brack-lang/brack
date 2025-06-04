@@ -12,7 +12,7 @@ description = "A bracket-based lightweight markup language that extends commands
 brack-common = { git = "https://github.com/brack-lang/brack", package = "brack-common" }
 brack-project = { git = "https://github.com/brack-lang/brack", package = "brack-project" }
 tokio = { version = "1", features = ["full"] }
-anstyle = "1.0.10"
+anstyle = "1.0.11"
 colored = "3.0.0"
 codespan-reporting = "0.12.0"
 file-size = "1.0.3"
