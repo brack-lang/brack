@@ -1,0 +1,17 @@
+use brack_common::cst::{new_invalid, CST};
+use brack_common::transformer_errors::TransformError;
+
+pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
+    let node = match cst {
+        CST::BackSlash(node) => node,
+        _ => panic!("Cannot pass non-back-slash node to backslash::simplify"),
+    };
+    let mut errors = vec![];
+
+    if node.children.is_empty() {
+        errors.push(TransformError::InvalidBackslash(node.location.clone()));
+        return (new_invalid(node.location.clone()), errors);
+    }
+
+    (cst.children()[0].clone(), errors)
+}

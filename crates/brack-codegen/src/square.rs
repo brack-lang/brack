@@ -1,0 +1,92 @@
+use anyhow::Result;
+use brack_common::ast::AST;
+use brack_plugin::{
+    plugins::Plugins,
+    types::{arg_counter, Type},
+    value::Value,
+};
+
+use crate::{curly, expr, text};
+
+pub(crate) fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
+    match ast {
+        AST::Square(_) => (),
+        _ => anyhow::bail!("Square must be a square"),
+    };
+    let mut arguments = vec![];
+    let module = ast
+        .children()
+        .first()
+        .ok_or_else(|| anyhow::anyhow!("Square must contain module and identifier"))?;
+    let ident = ast
+        .children()
+        .get(1)
+        .ok_or_else(|| anyhow::anyhow!("Square must contain module and identifier"))?;
+    for child in ast.children().iter().skip(2) {
+        let res = match child {
+            AST::Expr(_) => expr::generate(child, plugins)?,
+            AST::Curly(_) => curly::generate(child, plugins)?,
+            AST::Square(_) => generate(child, plugins)?,
+            AST::Text(_) => text::generate(child, plugins)?,
+            AST::Angle(_) => anyhow::bail!("Angle must be expanded by the macro expander."),
+            ast => anyhow::bail!("Square cannot contain the following node\n{}", ast),
+        };
+        arguments.push(res);
+    }
+
+    let module_name = match module {
+        AST::Module(module) => module.value.clone(),
+        _ => anyhow::bail!("Module must be a module"),
+    };
+    let module_name = match module_name {
+        Some(module_name) => module_name,
+        _ => anyhow::bail!("Module name must be a string"),
+    };
+
+    let ident_name = match ident {
+        AST::Ident(ident) => ident.value.clone(),
+        _ => anyhow::bail!("Identifier must be an identifier"),
+    };
+    let ident_name = match ident_name {
+        Some(ident_name) => ident_name,
+        _ => anyhow::bail!("Identifier name must be a string"),
+    };
+
+    let arg_types = plugins.argument_types(&module_name, &ident_name, Type::TInline)?;
+
+    let (min, max) = arg_counter(
+        &arg_types
+            .iter()
+            .map(|(_, t)| t)
+            .cloned()
+            .collect::<Vec<_>>(),
+    );
+
+    if arguments.len() < min {
+        // TODO: show the signature of the command
+        anyhow::bail!("{} requires at least {} arguments", ident_name, min);
+    }
+    if arguments.len() > max {
+        // TODO: show the signature of the command
+        anyhow::bail!("{} requires at most {} arguments", ident_name, max);
+    }
+
+    let mut args = vec![];
+    for (i, (_, t)) in arg_types.iter().enumerate() {
+        let arg = match t {
+            Type::TOption(_) => {
+                if i < arguments.len() {
+                    Value::TextOption(Some(arguments[i].clone()))
+                } else {
+                    Value::TextOption(None)
+                }
+            }
+            Type::TArray(_) => Value::TextArray(arguments[i..].to_vec()),
+            _ => Value::Text(arguments[i].clone()),
+        };
+        args.push(arg);
+    }
+
+    let result = plugins.call_inline_command(&module_name, &ident_name, args)?;
+    Ok(result)
+}
