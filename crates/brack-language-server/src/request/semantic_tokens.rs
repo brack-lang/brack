@@ -1,6 +1,8 @@
 use anyhow::Result;
-use brack_tokenizer::{tokenize::tokenize, tokens::Token};
+use brack_common::tokens::Token;
+use brack_tokenizer::tokenize::tokenize;
 use lsp_types::{SemanticToken, SemanticTokenType, SemanticTokens, SemanticTokensParams};
+use std::fs::read_to_string;
 
 use crate::{server::Server, utils::to_url};
 
@@ -81,18 +83,9 @@ impl Server {
         let path = to_url(params.text_document.uri)?
             .to_file_path()
             .map_err(|e| anyhow::anyhow!("Failed to convert URI to file path: {:?}", e))?;
+        let file = read_to_string(path)?;
 
-        let tokens = match tokenize(&path) {
-            Ok(tokens) => tokens,
-            Err(e) => {
-                self.log_message(&format!(
-                    "[SemanticTokens]: Failed to tokenize file: {:?}",
-                    e
-                ))
-                .await?;
-                return Ok(None);
-            }
-        };
+        let tokens = tokenize(&file);
 
         let separated = separate(&tokens);
         Ok(Some(SemanticTokens {

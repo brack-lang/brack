@@ -1,7 +1,7 @@
-use brack_parser::cst::{InnerNode, CST};
-use uuid::Uuid;
+use brack_common::cst::{new_document, CST};
+use brack_common::transformer_errors::TransformError;
 
-use crate::{error::TransformError, simplify, utils::remove_elements_not_included_ast};
+use crate::{simplify, utils::remove_elements_not_included_ast};
 
 pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
     let node = match cst {
@@ -19,12 +19,10 @@ pub fn simplify(cst: &CST) -> (CST, Vec<TransformError>) {
 
     csts = remove_elements_not_included_ast(&csts);
 
-    (
-        CST::Document(InnerNode {
-            id: Uuid::new_v4().to_string(),
-            children: csts,
-            location: node.location.clone(),
-        }),
-        errors,
-    )
+    let mut document = new_document();
+    document.set_location(node.location.clone());
+    for child in csts {
+        document.add(child);
+    }
+    (document, errors)
 }

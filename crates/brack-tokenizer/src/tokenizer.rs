@@ -1,4 +1,4 @@
-use crate::tokens::Token;
+use brack_common::tokens::Token;
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Tokenizer {
@@ -22,47 +22,47 @@ impl Tokenizer {
             uri: other.uri.clone(),
             line: match other.line {
                 Some(s) => Some(s),
-                None => self.line,
+                _ => self.line,
             },
             column: match other.column {
                 Some(s) => Some(s),
-                None => self.column,
+                _ => self.column,
             },
             token_start_line: match other.token_start_line {
                 Some(s) => Some(s),
-                None => self.token_start_line,
+                _ => self.token_start_line,
             },
             token_start_column: match other.token_start_column {
                 Some(s) => Some(s),
-                None => self.token_start_column,
+                _ => self.token_start_column,
             },
             untreated: match &other.untreated {
                 Some(s) => Some(s.clone()),
-                None => self.untreated.clone(),
+                _ => self.untreated.clone(),
             },
             pool: match &other.pool {
                 Some(s) => Some(s.clone()),
-                None => self.pool.clone(),
+                _ => self.pool.clone(),
             },
             tokens: match &other.tokens {
                 Some(s) => Some(s.clone()),
-                None => self.tokens.clone(),
+                _ => self.tokens.clone(),
             },
             angle_nest_count: match other.angle_nest_count {
                 Some(s) => Some(s),
-                None => self.angle_nest_count,
+                _ => self.angle_nest_count,
             },
             square_nest_count: match other.square_nest_count {
                 Some(s) => Some(s),
-                None => self.square_nest_count,
+                _ => self.square_nest_count,
             },
             curly_nest_count: match other.curly_nest_count {
                 Some(s) => Some(s),
-                None => self.curly_nest_count,
+                _ => self.curly_nest_count,
             },
             looking_for_identifier: match other.looking_for_identifier {
                 Some(s) => Some(s),
-                None => self.looking_for_identifier,
+                _ => self.looking_for_identifier,
             },
         }
     }
@@ -70,7 +70,7 @@ impl Tokenizer {
 
 #[cfg(test)]
 mod tests {
-    use crate::tokens::{Location, LocationData};
+    use brack_common::location::{Location, LocationData};
 
     #[test]
     fn test_merge() {

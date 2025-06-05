@@ -1,10 +1,10 @@
 use anyhow::Result;
+use brack_common::ast::AST;
 use brack_plugin::{
     plugins::Plugins,
     types::{arg_counter, Type},
     value::Value,
 };
-use brack_transformer::ast::AST;
 
 use crate::{expr, square, text};
 
@@ -40,7 +40,7 @@ pub(crate) fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     };
     let module_name = match module_name {
         Some(module_name) => module_name,
-        None => anyhow::bail!("Module name must be a string"),
+        _ => anyhow::bail!("Module name must be a string"),
     };
 
     let ident_name = match ident {
@@ -49,7 +49,7 @@ pub(crate) fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     };
     let ident_name = match ident_name {
         Some(ident_name) => ident_name,
-        None => anyhow::bail!("Identifier name must be a string"),
+        _ => anyhow::bail!("Identifier name must be a string"),
     };
 
     let arg_types = plugins.argument_types(&module_name, &ident_name, Type::TBlock)?;

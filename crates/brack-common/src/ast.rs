@@ -1,8 +1,9 @@
 use std::fmt;
 
-use brack_tokenizer::tokens::{merge_location, Location};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+use crate::location::{merge_location, Location};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct InnerNode {

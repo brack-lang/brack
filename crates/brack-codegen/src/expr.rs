@@ -1,6 +1,6 @@
 use anyhow::Result;
+use brack_common::ast::AST;
 use brack_plugin::{plugins::Plugins, value::Value};
-use brack_transformer::ast::AST;
 
 use crate::{curly, square, text};
 
@@ -25,6 +25,6 @@ pub(crate) fn generate(ast: &AST, plugins: &mut Plugins) -> Result<String> {
     let hook_result = plugins.call_expr_hook(vec![Value::Text(result.clone())])?;
     match hook_result {
         Some(result) => Ok(result),
-        None => Ok(result),
+        _ => Ok(result),
     }
 }

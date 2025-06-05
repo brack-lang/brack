@@ -1,16 +1,15 @@
-use anyhow::{bail, Result};
-use brack_tokenizer::tokens::Token;
+use brack_common::tokens::Token;
 
 use crate::{angle, curly, parser::Parser, square};
 
 // angle | curly | square
-pub fn parse(tokens: &[Token]) -> Result<Parser> {
-    if let Ok((cst, new_tokens)) = angle::parse(tokens) {
-        return Ok((cst, new_tokens));
-    } else if let Ok((cst, new_tokens)) = curly::parse(tokens) {
-        return Ok((cst, new_tokens));
-    } else if let Ok((cst, new_tokens)) = square::parse(tokens) {
-        return Ok((cst, new_tokens));
+pub fn parse(tokens: &[Token]) -> Option<Parser> {
+    if let Some((cst, new_tokens)) = angle::parse(tokens) {
+        return Some((cst, new_tokens));
+    } else if let Some((cst, new_tokens)) = curly::parse(tokens) {
+        return Some((cst, new_tokens));
+    } else if let Some((cst, new_tokens)) = square::parse(tokens) {
+        return Some((cst, new_tokens));
     }
-    bail!("Expected angle, curly, or square bracket, found none");
+    None
 }

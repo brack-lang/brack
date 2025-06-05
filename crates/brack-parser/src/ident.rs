@@ -1,44 +1,45 @@
-use anyhow::{bail, Result};
-use brack_tokenizer::tokens::Token;
+use brack_common::cst::new_ident;
+use brack_common::tokens::Token;
 
-use crate::{cst::new_ident, parser::Parser};
+use crate::parser::Parser;
 
 // ident
-pub fn parse(tokens: &[Token]) -> Result<Parser> {
+pub fn parse(tokens: &[Token]) -> Option<Parser> {
     if let Some(token) = tokens.first() {
         match token {
             Token::Ident(text, location) => {
-                return Ok((new_ident(text.clone(), location.clone()), &tokens[1..]));
+                return Some((new_ident(text.clone(), location.clone()), &tokens[1..]));
             }
-            token => bail!("Expected ident token, found {:?}", token),
+            _ => return None,
         }
     }
-    bail!("Expected ident token, found none");
+    None
 }
 
 #[cfg(test)]
 mod tests {
-    use anyhow::Result;
-    use brack_tokenizer::tokens::{mock_location, Token};
-
-    use crate::cst::{matches_kind, new_ident};
+    use brack_common::cst::{matches_kind, new_ident};
+    use brack_common::location::mock_location;
+    use brack_common::tokens::Token;
 
     #[test]
-    fn test_ident_parse_only_ident() -> Result<()> {
+    fn test_ident_parse_only_ident() {
         let tokens = vec![Token::Ident("foo".to_string(), mock_location())];
-        let (cst, tokens) = super::parse(&tokens)?;
-        assert_eq!(tokens.len(), 0);
-        assert!(matches_kind(
-            &cst,
-            &new_ident("foo".to_string(), mock_location())
-        ));
-        Ok(())
+        if let Some((cst, tokens)) = super::parse(&tokens) {
+            assert_eq!(tokens.len(), 0);
+            assert!(matches_kind(
+                &cst,
+                &new_ident("foo".to_string(), mock_location())
+            ));
+        } else {
+            panic!("Expected to parse an identifier");
+        }
     }
 
     #[test]
     fn test_ident_parse_failure() {
         let tokens = vec![Token::Dot(mock_location())];
         let result = super::parse(&tokens);
-        assert!(result.is_err());
+        assert!(result.is_none());
     }
 }

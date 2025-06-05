@@ -1,6 +1,6 @@
 use std::fmt::{self};
 
-use brack_tokenizer::tokens::{merge_location, mock_location, Location};
+use crate::location::{merge_location, mock_location, Location};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 

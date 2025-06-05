@@ -1,16 +1,7 @@
-use anyhow::Result;
-use std::{fs::File, io::Read, path::Path};
+use crate::{dispatch::dispatch, tokenizer::Tokenizer};
+use brack_common::tokens::Token;
 
-use crate::{dispatch::dispatch, tokenizer::Tokenizer, tokens::Token};
-
-pub fn tokenize<P: AsRef<Path>>(path: P) -> Result<Vec<Token>> {
-    let mut file = File::open(&path)?;
-    let mut text = String::new();
-    file.read_to_string(&mut text)?;
-    tokenize_str(&text)
-}
-
-pub fn tokenize_str(text: &str) -> Result<Vec<Token>> {
+pub fn tokenize(text: &str) -> Vec<Token> {
     let t = Tokenizer {
         tokens: Some(vec![]),
         line: Some(0),
@@ -31,9 +22,11 @@ pub fn tokenize_str(text: &str) -> Result<Vec<Token>> {
 #[cfg(test)]
 mod tests {
     use super::tokenize;
-    use crate::tokens::{Location, LocationData, Token};
     use anyhow::Result;
+    use brack_common::location::{Location, LocationData};
+    use brack_common::tokens::Token;
     use pretty_assertions::assert_eq;
+    use std::fs::read_to_string;
 
     #[test]
     fn test_split_no_commands() -> Result<()> {
@@ -42,7 +35,8 @@ mod tests {
             .join("test/split_no_commands.[]")
             .to_string_lossy()
             .to_string();
-        let tokens = tokenize(uri.clone())?;
+        let file = read_to_string(uri.clone())?;
+        let tokens = tokenize(&file);
         assert_eq!(
             tokens,
             vec![
@@ -81,7 +75,8 @@ mod tests {
             .join("test/split_commands_with_an_argument_includes_square_brackets.[]")
             .to_string_lossy()
             .to_string();
-        let tokens = tokenize(uri.clone())?;
+        let file = read_to_string(uri.clone())?;
+        let tokens = tokenize(&file);
         assert_eq!(
             tokens,
             vec![
@@ -199,7 +194,8 @@ mod tests {
             .join("test/split_commands_with_an_argument_includes_curly_brackets.[]")
             .to_string_lossy()
             .to_string();
-        let tokens = tokenize(uri.clone())?;
+        let file = read_to_string(uri.clone())?;
+        let tokens = tokenize(&file);
         assert_eq!(
             tokens,
             vec![
@@ -317,7 +313,8 @@ mod tests {
             .join("test/split_commands_with_an_argument_includes_angle_brackets.[]")
             .to_string_lossy()
             .to_string();
-        let tokens = tokenize(uri.clone())?;
+        let file = read_to_string(uri.clone())?;
+        let tokens = tokenize(&file);
         assert_eq!(
             tokens,
             vec![
@@ -412,7 +409,8 @@ mod tests {
             .join("test/split_commands_with_two_arguments_includes_square_brackets.[]")
             .to_string_lossy()
             .to_string();
-        let tokens = tokenize(uri.clone())?;
+        let file = read_to_string(uri.clone())?;
+        let tokens = tokenize(&file);
         assert_eq!(
             tokens,
             vec![
@@ -596,7 +594,8 @@ mod tests {
             .join("test/split_nesting_commands.[]")
             .to_string_lossy()
             .to_string();
-        let tokens = tokenize(uri.clone())?;
+        let file = read_to_string(uri.clone())?;
+        let tokens = tokenize(&file);
         assert_eq!(
             tokens,
             vec![
@@ -846,7 +845,8 @@ mod tests {
             .join("test/split_newlines.[]")
             .to_string_lossy()
             .to_string();
-        let tokens = tokenize(uri.clone())?;
+        let file = read_to_string(uri.clone())?;
+        let tokens = tokenize(&file);
 
         assert_eq!(
             tokens,
@@ -1209,7 +1209,8 @@ mod tests {
             .join("test/split_japanese_and_emoji.[]")
             .to_string_lossy()
             .to_string();
-        let tokens = tokenize(uri.clone())?;
+        let file = read_to_string(uri.clone())?;
+        let tokens = tokenize(&file);
         assert_eq!(
             tokens,
             vec![

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::Result;
-use brack_transformer::ast::AST;
+use brack_common::ast::AST;
 use extism::{FromBytes, ToBytes};
 use extism_convert::Json;
 
