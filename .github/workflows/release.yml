@@ -84,33 +84,33 @@ jobs:
         with:
           name: brack-x86_64-linux
           path: x86_64-linux
-      - uses: actions/download-artifact@v4
-        with:
-          name: brack-release-x86_64-linux
-          path: x86_64-linux
+      # - uses: actions/download-artifact@v4
+      #   with:
+      #     name: brack-release-x86_64-linux
+      #     path: x86_64-linux
       - uses: actions/download-artifact@v4
         with:
           name: brack-x86_64-darwin
           path: x86_64-darwin
-      - uses: actions/download-artifact@v4
-        with:
-          name: brack-release-x86_64-darwin
-          path: x86_64-darwin
+      # - uses: actions/download-artifact@v4
+      #   with:
+      #     name: brack-release-x86_64-darwin
+      #     path: x86_64-darwin
       - uses: actions/download-artifact@v4
         with:
           name: brack-aarch64-darwin
           path: aarch64-darwin
-      - uses: actions/download-artifact@v4
-        with:
-          name: brack-release-aarch64-darwin
-          path: aarch64-darwin
+      # - uses: actions/download-artifact@v4
+      #   with:
+      #     name: brack-release-aarch64-darwin
+      #     path: aarch64-darwin
       - run: |
           mv x86_64-linux/brack x86_64-linux/brack-x86_64-linux
-          mv x86_64-linux/brack-release x86_64-linux/brack-release-x86_64-linux
+          # mv x86_64-linux/brack-release x86_64-linux/brack-release-x86_64-linux
           mv x86_64-darwin/brack x86_64-darwin/brack-x86_64-darwin
-          mv x86_64-darwin/brack-release x86_64-darwin/brack-release-x86_64-darwin
+          # mv x86_64-darwin/brack-release x86_64-darwin/brack-release-x86_64-darwin
           mv aarch64-darwin/brack aarch64-darwin/brack-aarch64-darwin
-          mv aarch64-darwin/brack-release aarch64-darwin/brack-release-aarch64-darwin
+          # mv aarch64-darwin/brack-release aarch64-darwin/brack-release-aarch64-darwin
       - id: calc-sha
         run: |
           X86_64_LINUX_SHA=$(shasum -a 256 x86_64-linux/brack-x86_64-linux | cut -d ' ' -f1)
@@ -132,11 +132,8 @@ jobs:
           generate_release_notes: true
           files: |
             x86_64-linux/brack-x86_64-linux
-            x86_64-linux/brack-release-x86_64-linux
             x86_64-darwin/brack-x86_64-darwin
-            x86_64-darwin/brack-release-x86_64-darwin
             aarch64-darwin/brack-aarch64-darwin
-            aarch64-darwin/brack-release-aarch64-darwin
   
   update-homebrew-tap:
     runs-on: ubuntu-24.04
