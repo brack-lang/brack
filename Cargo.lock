@@ -182,7 +182,7 @@ dependencies = [
 
 [[package]]
 name = "brack"
-version = "0.2.0-rc.19"
+version = "0.2.0-rc.20"
 dependencies = [
  "anstyle",
  "brack-common",
@@ -196,7 +196,7 @@ dependencies = [
 
 [[package]]
 name = "brack-codegen"
-version = "0.2.0-rc.19"
+version = "0.2.0-rc.20"
 dependencies = [
  "anyhow",
  "brack-common",
@@ -217,7 +217,7 @@ dependencies = [
 
 [[package]]
 name = "brack-expander"
-version = "0.2.0-rc.19"
+version = "0.2.0-rc.20"
 dependencies = [
  "anyhow",
  "brack-common",
@@ -226,7 +226,7 @@ dependencies = [
 
 [[package]]
 name = "brack-language-server"
-version = "0.2.0-rc.19"
+version = "0.2.0-rc.20"
 dependencies = [
  "anyhow",
  "brack-common",
@@ -245,7 +245,7 @@ dependencies = [
 
 [[package]]
 name = "brack-parser"
-version = "0.2.0-rc.19"
+version = "0.2.0-rc.20"
 dependencies = [
  "brack-common",
  "serde",
@@ -254,7 +254,7 @@ dependencies = [
 
 [[package]]
 name = "brack-plugin"
-version = "0.2.0-rc.19"
+version = "0.2.0-rc.20"
 dependencies = [
  "anyhow",
  "brack-common",
@@ -266,7 +266,7 @@ dependencies = [
 
 [[package]]
 name = "brack-project"
-version = "0.2.0-rc.19"
+version = "0.2.0-rc.20"
 dependencies = [
  "anyhow",
  "brack-codegen",
@@ -302,7 +302,7 @@ dependencies = [
 
 [[package]]
 name = "brack-tokenizer"
-version = "0.2.0-rc.19"
+version = "0.2.0-rc.20"
 dependencies = [
  "anyhow",
  "brack-common",
@@ -313,7 +313,7 @@ dependencies = [
 
 [[package]]
 name = "brack-transformer"
-version = "0.2.0-rc.19"
+version = "0.2.0-rc.20"
 dependencies = [
  "brack-common",
  "serde",
