@@ -945,6 +945,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "file-size"
+version = "1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9544f10105d33957765016b8a9baea7e689bf1f0f2f32c2fa2f568770c38d2b3"
+
+[[package]]
+name = "filetime"
+version = "0.2.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "35c0522e981e68cbfa8c3f978441a5f34b30b96e146b33cd3359176b50fe8586"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "libredox",
+ "windows-sys 0.59.0",
+]
+
+[[package]]
 name = "flate2"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
