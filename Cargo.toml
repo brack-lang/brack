@@ -1,6 +1,6 @@
 [package]
 name = "brack"
-version = "0.2.0-rc.20"
+version = "0.2.0"
 edition = "2021"
 authors = [
     "Mutsuha Asada <me@momee.mt>",
