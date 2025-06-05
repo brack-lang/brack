@@ -65,7 +65,7 @@ fn rewrite_all_cargo_toml(next_version: &SemVer) -> Result<()> {
         "crates/brack-language-server/Cargo.toml",
         "crates/brack-parser/Cargo.toml",
         "crates/brack-plugin/Cargo.toml",
-        "crates/brack-project-manager/Cargo.toml",
+        "crates/brack-project/Cargo.toml",
         "crates/brack-tokenizer/Cargo.toml",
         "crates/brack-transformer/Cargo.toml",
     ];
