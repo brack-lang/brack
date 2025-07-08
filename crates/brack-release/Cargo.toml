@@ -7,5 +7,5 @@ edition = "2021"
 anyhow = "1.0.98"
 clap = { version = "4.5.40", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
-toml_edit = "0.22.25"
+toml_edit = "0.23.0"
 
