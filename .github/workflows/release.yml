@@ -80,27 +80,27 @@ jobs:
         id: version
         run: |
           echo "version=$(cat ./VERSION)" >> "$GITHUB_OUTPUT"
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: brack-x86_64-linux
           path: x86_64-linux
-      # - uses: actions/download-artifact@v4
+      # - uses: actions/download-artifact@v5
       #   with:
       #     name: brack-release-x86_64-linux
       #     path: x86_64-linux
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: brack-x86_64-darwin
           path: x86_64-darwin
-      # - uses: actions/download-artifact@v4
+      # - uses: actions/download-artifact@v5
       #   with:
       #     name: brack-release-x86_64-darwin
       #     path: x86_64-darwin
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: brack-aarch64-darwin
           path: aarch64-darwin
-      # - uses: actions/download-artifact@v4
+      # - uses: actions/download-artifact@v5
       #   with:
       #     name: brack-release-aarch64-darwin
       #     path: aarch64-darwin
