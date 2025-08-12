@@ -12,7 +12,7 @@ jobs:
   build-x86_64-linux:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: cachix/install-nix-action@v31
       - uses: cachix/cachix-action@v16
         with:
@@ -31,7 +31,7 @@ jobs:
   build-x86_64-darwin:
     runs-on: macos-13
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: cachix/install-nix-action@v31
       - uses: cachix/cachix-action@v16
         with:
@@ -50,7 +50,7 @@ jobs:
   build-aarch64-darwin:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: cachix/install-nix-action@v31
       - uses: cachix/cachix-action@v16
         with:
@@ -75,7 +75,7 @@ jobs:
       sha_x86_64_darwin: ${{ steps.calc-sha.outputs.x86_64_darwin }}
       sha_aarch64_darwin: ${{ steps.calc-sha.outputs.aarch64_darwin }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Get current version
         id: version
         run: |
@@ -139,7 +139,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: tag
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: brack-lang/homebrew-tap
           path: homebrew-tap
