@@ -19,11 +19,11 @@ jobs:
           name: brack-lang
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - run: nix build ".#packages.x86_64-linux.default"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: brack-x86_64-linux
           path: result/bin/brack
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: brack-release-x86_64-linux
           path: result/bin/brack-release
@@ -38,11 +38,11 @@ jobs:
           name: brack-lang
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - run: nix build ".#packages.x86_64-darwin.default"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: brack-x86_64-darwin
           path: result/bin/brack
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: brack-release-x86_64-darwin
           path: result/bin/brack-release
@@ -57,11 +57,11 @@ jobs:
           name: brack-lang
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - run: nix build ".#packages.aarch64-darwin.default"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: brack-aarch64-darwin
           path: result/bin/brack
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: brack-release-aarch64-darwin
           path: result/bin/brack-release
